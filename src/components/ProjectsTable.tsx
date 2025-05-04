@@ -5,6 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { ProjectReport } from "@/types/project";
 
+// Define a unified project data structure that handles multiple sources
+type ProjectData = {
+  name: string;
+  client?: string;
+  type?: string;
+  status?: string;
+  pm?: string;
+}
+
 interface ProjectsTableProps {
   projectNames: string[];
   projects: ProjectReport[] | any[];
@@ -12,6 +21,27 @@ interface ProjectsTableProps {
 }
 
 export const ProjectsTable = ({ projectNames, projects, removeProjectName }: ProjectsTableProps) => {
+  // This function safely normalizes project data regardless of source
+  const normalizeProjectData = (projectName: string): ProjectData => {
+    const projectData = projects.find(p => {
+      // Handle data from different sources (Supabase direct or frontend format)
+      const pName = p.projectName || p.project_name;
+      return pName === projectName;
+    });
+    
+    if (!projectData) {
+      return { name: projectName };
+    }
+    
+    return {
+      name: projectName,
+      client: projectData.clientName || projectData.client_name || undefined,
+      type: projectData.projectType || projectData.project_type || undefined,
+      status: projectData.projectStatus || projectData.project_status || undefined,
+      pm: projectData.assignedPM || projectData.assigned_pm || undefined
+    };
+  };
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -27,36 +57,23 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
         </TableHeader>
         <TableBody>
           {projectNames.map(projectName => {
-            // Check if we have a direct match from the Supabase projects data
-            const projectData = projects.find(p => {
-              // Handle both formats: database format and frontend type format
-              const pName = p.projectName || p.project_name;
-              return pName === projectName;
-            });
+            const project = normalizeProjectData(projectName);
             
             return (
               <TableRow key={projectName}>
-                <TableCell className="font-medium">{projectName}</TableCell>
+                <TableCell className="font-medium">{project.name}</TableCell>
+                <TableCell>{project.client || "—"}</TableCell>
                 <TableCell>
-                  {projectData?.clientName || projectData?.client_name || "—"}
-                </TableCell>
-                <TableCell>
-                  {(projectData?.projectType || projectData?.project_type) ? (
-                    <Badge variant="outline">
-                      {projectData?.projectType || projectData?.project_type}
-                    </Badge>
+                  {project.type ? (
+                    <Badge variant="outline">{project.type}</Badge>
                   ) : "—"}
                 </TableCell>
                 <TableCell>
-                  {(projectData?.projectStatus || projectData?.project_status) ? (
-                    <Badge variant="secondary">
-                      {projectData?.projectStatus || projectData?.project_status}
-                    </Badge>
+                  {project.status ? (
+                    <Badge variant="secondary">{project.status}</Badge>
                   ) : "—"}
                 </TableCell>
-                <TableCell>
-                  {projectData?.assignedPM || projectData?.assigned_pm || "—"}
-                </TableCell>
+                <TableCell>{project.pm || "—"}</TableCell>
                 <TableCell className="text-right">
                   <Button 
                     variant="ghost" 
