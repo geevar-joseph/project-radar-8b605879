@@ -61,7 +61,7 @@ export const sampleProjects: ProjectReport[] = [
     designQuality: "Fair",
     submissionDate: "2025-04-25",
     clientName: "Global Industries",
-    projectType: "Integration",
+    projectType: "Maintenance",
     projectStatus: "On Hold",
     assignedPM: "Alice Johnson"
   },
