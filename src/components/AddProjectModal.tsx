@@ -33,9 +33,22 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
       projectName,
       clientName,
       assignedPM: projectManager,
-      startDate: new Date().toISOString(),
       projectType: projectType as ProjectType, // Cast here to ensure type safety
       jiraCode: jiraCode || `PROJ-${Math.floor(Math.random() * 10000)}`, // Use entered or generate random
+      submittedBy: "",
+      reportingPeriod: "",
+      overallProjectScore: "N.A.",
+      riskLevel: "N.A.",
+      financialHealth: "N.A.",
+      completionOfPlannedWork: "N.A.",
+      teamMorale: "N.A.",
+      projectManagerEvaluation: "N.A.",
+      frontEndQuality: "N.A.",
+      backEndQuality: "N.A.",
+      testingQuality: "N.A.",
+      designQuality: "N.A.",
+      submissionDate: new Date().toISOString(),
+      projectStatus: "Not Started" // Default status for new projects
     });
 
     // Reset form and close modal
