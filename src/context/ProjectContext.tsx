@@ -39,6 +39,31 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     fetchTeamMembers();
   }, []);
 
+  // Helper function to map Supabase format to our application format
+  const mapToProjectReport = (dbReport: any): ProjectReport => {
+    return {
+      id: dbReport.id,
+      projectName: dbReport.project_name || "",
+      submittedBy: dbReport.submitted_by || "",
+      reportingPeriod: dbReport.reporting_period || "",
+      overallProjectScore: dbReport.overall_project_score || "N.A.",
+      riskLevel: dbReport.risk_level || "N.A.",
+      financialHealth: dbReport.financial_health || "N.A.",
+      completionOfPlannedWork: dbReport.completion_of_planned_work || "N.A.",
+      teamMorale: dbReport.team_morale || "N.A.",
+      projectManagerEvaluation: dbReport.project_manager_evaluation || "N.A.",
+      frontEndQuality: dbReport.front_end_quality || "N.A.",
+      backEndQuality: dbReport.back_end_quality || "N.A.",
+      testingQuality: dbReport.testing_quality || "N.A.",
+      designQuality: dbReport.design_quality || "N.A.",
+      submissionDate: dbReport.submission_date || new Date().toISOString(),
+      clientName: dbReport.client_name || "",
+      projectType: dbReport.project_type || undefined,
+      projectStatus: dbReport.project_status || undefined,
+      assignedPM: dbReport.assigned_pm || ""
+    };
+  };
+
   const fetchProjects = async () => {
     try {
       const { data: projectsData, error: projectsError } = await supabase
@@ -56,7 +81,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       // Fetch project reports
       const { data: reportsData, error: reportsError } = await supabase
         .from('project_reports')
-        .select('*');
+        .select('*, projects(*)');
 
       if (reportsError) {
         throw reportsError;
@@ -66,7 +91,19 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       if (reportsData.length === 0) {
         setProjects(sampleProjects);
       } else {
-        setProjects(reportsData);
+        // Convert the report data to our application format
+        const formattedReports = reportsData.map(report => {
+          const project = report.projects;
+          return mapToProjectReport({
+            ...report,
+            project_name: project?.project_name,
+            client_name: project?.client_name,
+            project_type: project?.project_type,
+            project_status: project?.project_status,
+            assigned_pm: project?.assigned_pm
+          });
+        });
+        setProjects(formattedReports);
       }
       
     } catch (error) {

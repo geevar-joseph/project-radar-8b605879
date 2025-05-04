@@ -28,9 +28,11 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
         <TableBody>
           {projectNames.map(projectName => {
             // Check if we have a direct match from the Supabase projects data
-            const projectData = projects.find(p => 
-              p.project_name === projectName || p.projectName === projectName
-            );
+            const projectData = projects.find(p => {
+              // Handle both formats: database format and frontend type format
+              const pName = p.project_name || p.projectName;
+              return pName === projectName;
+            });
             
             return (
               <TableRow key={projectName}>
@@ -41,14 +43,14 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
                 <TableCell>
                   {(projectData?.project_type || projectData?.projectType) ? (
                     <Badge variant="outline">
-                      {projectData.project_type || projectData.projectType}
+                      {projectData?.project_type || projectData?.projectType}
                     </Badge>
                   ) : "—"}
                 </TableCell>
                 <TableCell>
                   {(projectData?.project_status || projectData?.projectStatus) ? (
                     <Badge variant="secondary">
-                      {projectData.project_status || projectData.projectStatus}
+                      {projectData?.project_status || projectData?.projectStatus}
                     </Badge>
                   ) : "—"}
                 </TableCell>
