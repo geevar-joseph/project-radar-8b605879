@@ -41,20 +41,19 @@ export function DashboardCharts() {
   const { getFilteredProjects, selectedPeriod } = useProjectContext();
   const filteredProjects = getFilteredProjects(selectedPeriod);
   
-  // Calculate low-performing KPIs
-  const calculateLowPerformingKPIs = (): KPIData[] => {
+  // Calculate low-performing KPIs - Updated to show only the specified metrics
+  const calculateProjectHealthIndicators = (): KPIData[] => {
     const kpiFields = [
-      { field: "frontEndQuality", name: "Front-End", color: "#60a5fa" },
-      { field: "backEndQuality", name: "Back-End", color: "#8b5cf6" },
-      { field: "testingQuality", name: "Testing", color: "#f97316" },
-      { field: "designQuality", name: "Design", color: "#ec4899" },
-      { field: "projectManagerEvaluation", name: "PM Performance", color: "#14b8a6" }
+      { field: "overallProjectScore", name: "Overall Score", color: "#60a5fa", poorValues: ["Fair", "Poor"] },
+      { field: "riskLevel", name: "Risk Level", color: "#ef4444", poorValues: ["Medium", "High"] },
+      { field: "financialHealth", name: "Financial Health", color: "#8b5cf6", poorValues: ["On Watch", "At Risk"] },
+      { field: "completionOfPlannedWork", name: "Work Completion", color: "#f97316", poorValues: ["Partially", "Not completed"] },
+      { field: "teamMorale", name: "Team Morale", color: "#14b8a6", poorValues: ["Low"] }
     ];
     
     return kpiFields.map(kpi => {
       const lowPerforming = filteredProjects.filter(project => 
-        project[kpi.field as keyof ProjectReport] === "Poor" || 
-        project[kpi.field as keyof ProjectReport] === "Fair"
+        kpi.poorValues.includes(project[kpi.field as keyof ProjectReport] as string)
       ).length;
       
       return {
@@ -62,16 +61,17 @@ export function DashboardCharts() {
         value: lowPerforming,
         color: kpi.color
       };
-    }).filter(kpi => kpi.value > 0);  // Only keep KPIs with low-performing projects
+    }).filter(kpi => kpi.value > 0);  // Only keep KPIs with issues
   };
   
-  // Calculate department performance
+  // Calculate department performance - Added PM evaluation
   const calculateDepartmentPerformance = (): DepartmentData[] => {
     const departments = [
       { field: "frontEndQuality", name: "Front-End" },
       { field: "backEndQuality", name: "Back-End" },
       { field: "testingQuality", name: "Testing" },
-      { field: "designQuality", name: "Design" }
+      { field: "designQuality", name: "Design" },
+      { field: "projectManagerEvaluation", name: "PM Performance" } // Added PM evaluation
     ];
     
     return departments.map(dept => {
@@ -103,7 +103,7 @@ export function DashboardCharts() {
     });
   };
   
-  const kpiData = calculateLowPerformingKPIs();
+  const kpiData = calculateProjectHealthIndicators();
   const departmentData = calculateDepartmentPerformance();
   
   // Handle empty data
@@ -133,10 +133,10 @@ export function DashboardCharts() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      {/* Left Column: KPI Risk Distribution */}
+      {/* Left Column: Project Health Indicators */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Low-Performing KPIs This Month</CardTitle>
+          <CardTitle className="text-lg font-medium">Project Health Indicators</CardTitle>
         </CardHeader>
         <CardContent>
           {hasKpiData ? (
@@ -164,8 +164,8 @@ export function DashboardCharts() {
             </div>
           ) : (
             <div className="h-[300px] flex justify-center items-center flex-col">
-              <p className="text-muted-foreground">No low-performing KPIs for this period</p>
-              <p className="text-sm text-muted-foreground">All KPIs are performing well</p>
+              <p className="text-muted-foreground">No health indicators with issues for this period</p>
+              <p className="text-sm text-muted-foreground">All project health metrics are positive</p>
             </div>
           )}
         </CardContent>
