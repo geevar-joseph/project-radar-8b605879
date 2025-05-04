@@ -9,7 +9,12 @@ import {
   Tooltip, 
   Legend, 
   ResponsiveContainer,
-  LabelList
+  LabelList,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis
 } from 'recharts';
 import { 
   ProjectReport, 
@@ -25,6 +30,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useProjectContext } from "@/context/ProjectContext";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ChartBar, ChartLine, Radar as RadarIcon } from "lucide-react";
+import { ProjectKPITrendChart } from './ProjectKPITrendChart';
 
 interface ProjectKPIChartProps {
   project: ProjectReport;
@@ -35,9 +43,12 @@ const ratingToNumeric = (rating: RatingValue) => {
   return ratingToValueMap[rating] || 0;
 };
 
+type ChartViewType = 'bar' | 'radar' | 'line';
+
 export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => {
   const { projects } = useProjectContext();
   const [selectedPeriod, setSelectedPeriod] = useState<string>(project.reportingPeriod);
+  const [chartView, setChartView] = useState<ChartViewType>('bar');
   
   // Get all reports for the current project
   const projectReports = projects.filter(p => p.projectName === project.projectName);
@@ -185,9 +196,49 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
     }
   ];
 
+  // Render line chart view (trends over time)
+  if (chartView === 'line') {
+    return (
+      <div className="w-full">
+        <div className="flex flex-col gap-4 sm:flex-row justify-between mb-4">
+          <ToggleGroup type="single" value={chartView} onValueChange={(value) => value && setChartView(value as ChartViewType)}>
+            <ToggleGroupItem value="bar" aria-label="Bar Chart">
+              <ChartBar className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Bar</span>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="radar" aria-label="Radar Chart">
+              <RadarIcon className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Radar</span>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="line" aria-label="Line Chart">
+              <ChartLine className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Trend</span>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        <ProjectKPITrendChart projectName={project.projectName} />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
-      <div className="flex justify-end mb-4">
+      <div className="flex flex-col gap-4 sm:flex-row justify-between mb-4">
+        <ToggleGroup type="single" value={chartView} onValueChange={(value) => value && setChartView(value as ChartViewType)}>
+          <ToggleGroupItem value="bar" aria-label="Bar Chart">
+            <ChartBar className="h-4 w-4 mr-1" />
+            <span className="hidden sm:inline">Bar</span>
+          </ToggleGroupItem>
+          <ToggleGroupItem value="radar" aria-label="Radar Chart">
+            <RadarIcon className="h-4 w-4 mr-1" />
+            <span className="hidden sm:inline">Radar</span>
+          </ToggleGroupItem>
+          <ToggleGroupItem value="line" aria-label="Line Chart">
+            <ChartLine className="h-4 w-4 mr-1" />
+            <span className="hidden sm:inline">Trend</span>
+          </ToggleGroupItem>
+        </ToggleGroup>
+        
         <Select 
           value={selectedPeriod} 
           onValueChange={setSelectedPeriod}
@@ -208,16 +259,27 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
       <div className="h-[400px] overflow-hidden">
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} />
-              <Tooltip content={<ChartTooltipContent />} />
-              <Legend />
-              <Bar dataKey="value" fill="#8884d8">
-                <LabelList dataKey="label" position="top" fill="#333" />
-              </Bar>
-            </BarChart>
+            {chartView === 'bar' ? (
+              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} />
+                <Tooltip content={<ChartTooltipContent />} />
+                <Legend />
+                <Bar dataKey="value" fill="#8884d8">
+                  <LabelList dataKey="label" position="top" fill="#333" />
+                </Bar>
+              </BarChart>
+            ) : (
+              <RadarChart data={chartData} outerRadius={90}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="name" />
+                <PolarRadiusAxis domain={[0, 4]} tickCount={5} />
+                <Radar name="KPI Rating" dataKey="value" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                <Tooltip content={<ChartTooltipContent />} />
+                <Legend />
+              </RadarChart>
+            )}
           </ResponsiveContainer>
         </ChartContainer>
       </div>
