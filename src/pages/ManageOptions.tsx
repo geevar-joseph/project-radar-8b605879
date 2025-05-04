@@ -6,27 +6,29 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { X, Search, Edit, UserMinus, Filter } from "lucide-react";
+import { X, Search, Edit, UserMinus, Filter, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
+import { AddProjectModal } from "@/components/AddProjectModal";
+import { AddTeamMemberModal } from "@/components/AddTeamMemberModal";
 
 const ManageOptions = () => {
   const { 
     projectNames, 
     teamMembers, 
-    addProjectName, 
     removeProjectName, 
-    addTeamMember, 
     removeTeamMember,
     projects
   } = useProjectContext();
   
-  const [newProject, setNewProject] = useState("");
-  const [newTeamMember, setNewTeamMember] = useState("");
   const [searchTeam, setSearchTeam] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [sortColumn, setSortColumn] = useState("name");
   const [sortDirection, setSortDirection] = useState("asc");
+  
+  // Modal state
+  const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
+  const [isAddTeamMemberModalOpen, setIsAddTeamMemberModalOpen] = useState(false);
 
   // Mock data for extended team member information
   const teamMembersData = teamMembers.map((name, index) => ({
@@ -42,20 +44,6 @@ const ManageOptions = () => {
       )
     ),
   }));
-
-  const handleAddProject = () => {
-    if (newProject.trim()) {
-      addProjectName(newProject.trim());
-      setNewProject("");
-    }
-  };
-
-  const handleAddTeamMember = () => {
-    if (newTeamMember.trim()) {
-      addTeamMember(newTeamMember.trim());
-      setNewTeamMember("");
-    }
-  };
 
   // Filtering and sorting for team members
   const filteredTeamMembers = teamMembersData
@@ -104,19 +92,14 @@ const ManageOptions = () => {
         <TabsContent value="projects">
           <Card>
             <CardHeader>
-              <CardTitle>Manage Projects</CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle>Manage Projects</CardTitle>
+                <Button onClick={() => setIsAddProjectModalOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" /> Add Project
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-2 mb-6">
-                <Input 
-                  placeholder="Enter new project name" 
-                  value={newProject} 
-                  onChange={(e) => setNewProject(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddProject()}
-                />
-                <Button onClick={handleAddProject}>Add</Button>
-              </div>
-              
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -145,25 +128,25 @@ const ManageOptions = () => {
               </div>
             </CardContent>
           </Card>
+          
+          {/* Project Modal */}
+          <AddProjectModal 
+            open={isAddProjectModalOpen} 
+            onOpenChange={setIsAddProjectModalOpen}
+          />
         </TabsContent>
         
         <TabsContent value="team">
           <Card>
             <CardHeader>
-              <CardTitle>Manage Team Members</CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle>Manage Team Members</CardTitle>
+                <Button onClick={() => setIsAddTeamMemberModalOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" /> Add Team Member
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col sm:flex-row gap-2 mb-6">
-                <Input 
-                  placeholder="Enter new team member name" 
-                  value={newTeamMember} 
-                  onChange={(e) => setNewTeamMember(e.target.value)} 
-                  onKeyDown={(e) => e.key === "Enter" && handleAddTeamMember()}
-                  className="flex-1"
-                />
-                <Button onClick={handleAddTeamMember}>Add</Button>
-              </div>
-              
               <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
                 <div className="relative flex-1">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -287,6 +270,12 @@ const ManageOptions = () => {
               </div>
             </CardContent>
           </Card>
+          
+          {/* Team Member Modal */}
+          <AddTeamMemberModal 
+            open={isAddTeamMemberModalOpen} 
+            onOpenChange={setIsAddTeamMemberModalOpen}
+          />
         </TabsContent>
       </Tabs>
     </div>
