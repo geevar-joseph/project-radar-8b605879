@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { ScoreIndicator } from "./ScoreIndicator";
 import { Save } from "lucide-react";
+import { RatingValue, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale } from "@/types/project";
 
 const formSchema = z.object({
   projectName: z.string().min(2, "Project name must be at least 2 characters"),
@@ -102,7 +102,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
     }
   }
 
-  // Score-based form field renderer with visual indicators
+  // Render a field with a ScoreIndicator for any rating-type field
   const renderScoreField = (name: keyof FormValues, label: string) => {
     if (!['overallProjectScore', 'projectManagerEvaluation', 'frontEndQuality', 'backEndQuality', 'testingQuality', 'designQuality'].includes(name)) {
       return null;
@@ -119,7 +119,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select rating">
-                    {field.value && <ScoreIndicator value={field.value} />}
+                    {field.value && <ScoreIndicator value={field.value as RatingValue} />}
                   </SelectValue>
                 </SelectTrigger>
               </FormControl>
@@ -147,6 +147,154 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
       />
     );
   };
+
+  // Now add visual indicators for other status fields
+  const renderRiskLevelField = () => (
+    <FormField
+      control={form.control}
+      name="riskLevel"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Risk Level</FormLabel>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select risk level">
+                  {field.value && <ScoreIndicator value={field.value as RiskLevel} />}
+                </SelectValue>
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              <SelectItem value="Low">
+                <ScoreIndicator value="Low" />
+              </SelectItem>
+              <SelectItem value="Medium">
+                <ScoreIndicator value="Medium" />
+              </SelectItem>
+              <SelectItem value="High">
+                <ScoreIndicator value="High" />
+              </SelectItem>
+              <SelectItem value="N.A.">
+                <ScoreIndicator value="N.A." />
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+
+  const renderFinancialHealthField = () => (
+    <FormField
+      control={form.control}
+      name="financialHealth"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Financial Health</FormLabel>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select financial status">
+                  {field.value && <ScoreIndicator value={field.value as FinancialHealth} />}
+                </SelectValue>
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              <SelectItem value="Healthy">
+                <ScoreIndicator value="Healthy" />
+              </SelectItem>
+              <SelectItem value="On Watch">
+                <ScoreIndicator value="On Watch" />
+              </SelectItem>
+              <SelectItem value="At Risk">
+                <ScoreIndicator value="At Risk" />
+              </SelectItem>
+              <SelectItem value="N.A.">
+                <ScoreIndicator value="N.A." />
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+
+  const renderCompletionStatusField = () => (
+    <FormField
+      control={form.control}
+      name="completionOfPlannedWork"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Completion of Planned Work</FormLabel>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select completion status">
+                  {field.value && <ScoreIndicator value={field.value as CompletionStatus} />}
+                </SelectValue>
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              <SelectItem value="All completed">
+                <ScoreIndicator value="All completed" />
+              </SelectItem>
+              <SelectItem value="Mostly">
+                <ScoreIndicator value="Mostly" />
+              </SelectItem>
+              <SelectItem value="Partially">
+                <ScoreIndicator value="Partially" />
+              </SelectItem>
+              <SelectItem value="Not completed">
+                <ScoreIndicator value="Not completed" />
+              </SelectItem>
+              <SelectItem value="N.A.">
+                <ScoreIndicator value="N.A." />
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+
+  const renderTeamMoraleField = () => (
+    <FormField
+      control={form.control}
+      name="teamMorale"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Team Morale and Motivation</FormLabel>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select morale level">
+                  {field.value && <ScoreIndicator value={field.value as TeamMorale} />}
+                </SelectValue>
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              <SelectItem value="High">
+                <ScoreIndicator value="High" />
+              </SelectItem>
+              <SelectItem value="Moderate">
+                <ScoreIndicator value="Moderate" />
+              </SelectItem>
+              <SelectItem value="Low">
+                <ScoreIndicator value="Low" />
+              </SelectItem>
+              <SelectItem value="N.A.">
+                <ScoreIndicator value="N.A." />
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
 
   return (
     <Form {...form}>
@@ -232,79 +380,9 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {renderScoreField('overallProjectScore', 'Overall Project Score')}
-              
-              <FormField
-                control={form.control}
-                name="riskLevel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Risk Level</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select risk level" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Low">Low</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="High">High</SelectItem>
-                        <SelectItem value="N.A.">N.A.</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="financialHealth"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Financial Health</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select financial status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Healthy">Healthy</SelectItem>
-                        <SelectItem value="On Watch">On Watch</SelectItem>
-                        <SelectItem value="At Risk">At Risk</SelectItem>
-                        <SelectItem value="N.A.">N.A.</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="completionOfPlannedWork"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Completion of Planned Work</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select completion status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="All completed">All completed</SelectItem>
-                        <SelectItem value="Mostly">Mostly</SelectItem>
-                        <SelectItem value="Partially">Partially</SelectItem>
-                        <SelectItem value="Not completed">Not completed</SelectItem>
-                        <SelectItem value="N.A.">N.A.</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {renderRiskLevelField()}
+              {renderFinancialHealthField()}
+              {renderCompletionStatusField()}
             </div>
           </CardContent>
         </Card>
@@ -315,30 +393,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="teamMorale"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Team Morale and Motivation</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select morale level" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="High">High</SelectItem>
-                        <SelectItem value="Moderate">Moderate</SelectItem>
-                        <SelectItem value="Low">Low</SelectItem>
-                        <SelectItem value="N.A.">N.A.</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
+              {renderTeamMoraleField()}
               {renderScoreField('projectManagerEvaluation', 'Project Manager Self-Evaluation')}
             </div>
           </CardContent>

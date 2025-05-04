@@ -1,9 +1,9 @@
 
 import { cn } from "@/lib/utils";
-import { RatingValue } from "@/types/project";
+import { RatingValue, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale } from "@/types/project";
 
 interface ScoreIndicatorProps {
-  value: RatingValue;
+  value: RatingValue | RiskLevel | FinancialHealth | CompletionStatus | TeamMorale;
   className?: string;
 }
 
@@ -11,24 +11,36 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
   const getDotsConfig = () => {
     switch (value) {
       case 'Excellent':
+      case 'Healthy':
+      case 'All completed':
+      case 'High':
         return {
           count: 4,
           activeCount: 4,
           color: 'bg-status-excellent'
         };
       case 'Good':
+      case 'On Watch':
+      case 'Mostly':
+      case 'Moderate':
+      case 'Low': // For risk level, "Low" is positive
         return {
           count: 4,
           activeCount: 3,
           color: 'bg-status-good'
         };
       case 'Fair':
+      case 'Partially':
+      case 'Medium': // For risk level
         return {
           count: 4,
           activeCount: 2,
           color: 'bg-status-fair'
         };
       case 'Poor':
+      case 'At Risk':
+      case 'Not completed':
+      case 'High': // For risk level, "High" is negative
         return {
           count: 4,
           activeCount: 1,
