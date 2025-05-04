@@ -79,11 +79,14 @@ const ManageOptions = () => {
     }
   };
 
+  // Get project information including all fields
+  const projectsData = projects.filter(p => projectNames.includes(p.projectName));
+
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-8">Manage Options</h1>
       
-      <Tabs defaultValue="team" className="w-full">
+      <Tabs defaultValue="projects" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="projects">Projects</TabsTrigger>
           <TabsTrigger value="team">Team Members</TabsTrigger>
@@ -105,24 +108,47 @@ const ManageOptions = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Project Name</TableHead>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Project Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Assigned PM</TableHead>
                       <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {projectNames.map(project => (
-                      <TableRow key={project}>
-                        <TableCell className="font-medium">{project}</TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => removeProjectName(project)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {projectNames.map(projectName => {
+                      const projectData = projects.find(p => p.projectName === projectName);
+                      return (
+                        <TableRow key={projectName}>
+                          <TableCell className="font-medium">{projectName}</TableCell>
+                          <TableCell>{projectData?.clientName || "—"}</TableCell>
+                          <TableCell>
+                            {projectData?.projectType ? (
+                              <Badge variant="outline">
+                                {projectData.projectType}
+                              </Badge>
+                            ) : "—"}
+                          </TableCell>
+                          <TableCell>
+                            {projectData?.projectStatus ? (
+                              <Badge variant="secondary">
+                                {projectData.projectStatus}
+                              </Badge>
+                            ) : "—"}
+                          </TableCell>
+                          <TableCell>{projectData?.assignedPM || "—"}</TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => removeProjectName(projectName)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
