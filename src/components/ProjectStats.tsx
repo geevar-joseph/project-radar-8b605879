@@ -1,0 +1,130 @@
+
+import { useProjectContext } from "@/context/ProjectContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProjectReport, ratingToValueMap } from "@/types/project";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
+
+export function ProjectStats() {
+  const { getFilteredProjects, selectedPeriod } = useProjectContext();
+  const filteredProjects = getFilteredProjects(selectedPeriod);
+  
+  // Calculate stats
+  const totalProjects = filteredProjects.length;
+  const projectsByScore = {
+    Excellent: filteredProjects.filter(p => p.overallProjectScore === "Excellent").length,
+    Good: filteredProjects.filter(p => p.overallProjectScore === "Good").length,
+    Fair: filteredProjects.filter(p => p.overallProjectScore === "Fair").length,
+    Poor: filteredProjects.filter(p => p.overallProjectScore === "Poor").length,
+  };
+  
+  const healthData = [
+    { name: "Low Risk", value: filteredProjects.filter(p => p.riskLevel === "Low").length },
+    { name: "Medium Risk", value: filteredProjects.filter(p => p.riskLevel === "Medium").length },
+    { name: "High Risk", value: filteredProjects.filter(p => p.riskLevel === "High").length }
+  ];
+  
+  const COLORS = ["#10b981", "#fbbf24", "#ef4444"];
+  
+  // Calculate average scores for departments
+  const calcAverage = (projects: ProjectReport[], field: keyof ProjectReport) => {
+    const validProjects = projects.filter(p => p[field] !== "N.A");
+    if (validProjects.length === 0) return 0;
+    
+    const sum = validProjects.reduce((acc, project) => {
+      const value = ratingToValueMap[project[field] as keyof typeof ratingToValueMap] || 0;
+      return acc + value;
+    }, 0);
+    
+    return parseFloat((sum / validProjects.length).toFixed(2));
+  };
+  
+  const departmentData = [
+    { name: "Front-End", score: calcAverage(filteredProjects, "frontEndQuality") },
+    { name: "Back-End", score: calcAverage(filteredProjects, "backEndQuality") },
+    { name: "Testing", score: calcAverage(filteredProjects, "testingQuality") },
+    { name: "Design", score: calcAverage(filteredProjects, "designQuality") }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">{totalProjects}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {selectedPeriod ? `For period ${selectedPeriod}` : "Across all periods"}
+          </p>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Projects by Score</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Excellent:</span>
+            <span className="text-sm font-medium">{projectsByScore.Excellent}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Good:</span>
+            <span className="text-sm font-medium">{projectsByScore.Good}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Fair:</span>
+            <span className="text-sm font-medium">{projectsByScore.Fair}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Poor:</span>
+            <span className="text-sm font-medium">{projectsByScore.Poor}</span>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Risk Distribution</CardTitle>
+        </CardHeader>
+        <CardContent className="flex justify-center">
+          <ResponsiveContainer width="100%" height={100}>
+            <PieChart>
+              <Pie
+                data={healthData}
+                cx="50%"
+                cy="50%"
+                innerRadius={25}
+                outerRadius={40}
+                paddingAngle={5}
+                dataKey="value"
+              >
+                {healthData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Team Performance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={100}>
+            <BarChart data={departmentData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+              <YAxis domain={[0, 4]} tick={{ fontSize: 10 }} />
+              <Tooltip />
+              <Bar dataKey="score" fill="#60a5fa" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

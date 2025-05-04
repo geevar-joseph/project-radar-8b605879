@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom colors for project status
+				status: {
+					excellent: '#10b981', // Green
+					good: '#60a5fa', // Blue
+					fair: '#fbbf24', // Yellow
+					poor: '#ef4444', // Red
+					na: '#9ca3af', // Gray
+				},
+				risk: {
+					low: '#10b981', // Green
+					medium: '#fbbf24', // Yellow
+					high: '#ef4444', // Red
 				}
 			},
 			borderRadius: {
