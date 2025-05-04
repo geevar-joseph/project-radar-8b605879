@@ -32,7 +32,6 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
       id: `P${Math.floor(Math.random() * 10000)}`, // Random ID for demo
       projectName,
       clientName,
-      status: "Active",
       assignedPM: projectManager,
       startDate: new Date().toISOString(),
       projectType: projectType as ProjectType, // Cast here to ensure type safety
