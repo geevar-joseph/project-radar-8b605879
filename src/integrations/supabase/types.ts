@@ -16,9 +16,14 @@ export type Database = {
           created_at: string
           design_quality: string
           financial_health: string
+          follow_up_actions: string | null
           front_end_quality: string
           id: string
+          key_achievements: string | null
+          next_steps: string | null
+          notes: string | null
           overall_project_score: string
+          primary_challenges: string | null
           project_id: string
           project_manager_evaluation: string
           reporting_period: string
@@ -35,9 +40,14 @@ export type Database = {
           created_at?: string
           design_quality: string
           financial_health: string
+          follow_up_actions?: string | null
           front_end_quality: string
           id?: string
+          key_achievements?: string | null
+          next_steps?: string | null
+          notes?: string | null
           overall_project_score: string
+          primary_challenges?: string | null
           project_id: string
           project_manager_evaluation: string
           reporting_period: string
@@ -54,9 +64,14 @@ export type Database = {
           created_at?: string
           design_quality?: string
           financial_health?: string
+          follow_up_actions?: string | null
           front_end_quality?: string
           id?: string
+          key_achievements?: string | null
+          next_steps?: string | null
+          notes?: string | null
           overall_project_score?: string
+          primary_challenges?: string | null
           project_id?: string
           project_manager_evaluation?: string
           reporting_period?: string

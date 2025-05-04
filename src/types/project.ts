@@ -27,6 +27,12 @@ export interface ProjectReport {
   projectType?: ProjectType;
   projectStatus?: ProjectStatus;
   assignedPM?: string;
+  // New fields
+  notes?: string;
+  keyAchievements?: string;
+  primaryChallenges?: string;
+  nextSteps?: string;
+  followUpActions?: string;
 }
 
 // Mapping ratings to numeric values for calculations

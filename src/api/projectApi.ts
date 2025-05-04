@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectReport } from "@/types/project";
 import { v4 as uuidv4 } from "uuid";
@@ -25,7 +26,13 @@ export const mapToProjectReport = (dbReport: any): ProjectReport => {
     clientName: dbReport.client_name || "",
     projectType: dbReport.project_type || undefined,
     projectStatus: dbReport.project_status || undefined,
-    assignedPM: dbReport.assigned_pm || ""
+    assignedPM: dbReport.assigned_pm || "",
+    // Add the new fields
+    notes: dbReport.notes || "",
+    keyAchievements: dbReport.key_achievements || "",
+    primaryChallenges: dbReport.primary_challenges || "",
+    nextSteps: dbReport.next_steps || "",
+    followUpActions: dbReport.follow_up_actions || ""
   };
 };
 
@@ -118,7 +125,13 @@ export const addProjectReport = async (project: ProjectReport) => {
         back_end_quality: project.backEndQuality,
         testing_quality: project.testingQuality,
         design_quality: project.designQuality,
-        submission_date: new Date().toISOString()
+        submission_date: new Date().toISOString(),
+        // Add the new fields
+        notes: project.notes,
+        key_achievements: project.keyAchievements,
+        primary_challenges: project.primaryChallenges,
+        next_steps: project.nextSteps,
+        follow_up_actions: project.followUpActions
       });
 
     if (reportError) throw reportError;

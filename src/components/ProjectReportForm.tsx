@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea"; 
 import { useProjectContext } from "@/context/ProjectContext";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
@@ -27,7 +27,12 @@ const formSchema = z.object({
   frontEndQuality: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."]),
   backEndQuality: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."]),
   testingQuality: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."]),
-  designQuality: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."])
+  designQuality: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."]),
+  notes: z.string().optional(),
+  keyAchievements: z.string().optional(),
+  primaryChallenges: z.string().optional(),
+  nextSteps: z.string().optional(),
+  followUpActions: z.string().optional()
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -56,6 +61,11 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
       backEndQuality: "Good",
       testingQuality: "Good",
       designQuality: "Good",
+      notes: "",
+      keyAchievements: "",
+      primaryChallenges: "",
+      nextSteps: "",
+      followUpActions: ""
     },
   });
   
@@ -78,7 +88,13 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
       frontEndQuality: data.frontEndQuality,
       backEndQuality: data.backEndQuality,
       testingQuality: data.testingQuality,
-      designQuality: data.designQuality
+      designQuality: data.designQuality,
+      // Add the new fields
+      notes: data.notes,
+      keyAchievements: data.keyAchievements,
+      primaryChallenges: data.primaryChallenges,
+      nextSteps: data.nextSteps,
+      followUpActions: data.followUpActions
     };
     
     addProject(newProject);
@@ -412,6 +428,103 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               {renderScoreField('designQuality', 'Design Team Quality')}
               {renderScoreField('projectManagerEvaluation', 'Project Manager Self-Evaluation')}
             </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Additional Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="keyAchievements"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Key Achievements</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="List key milestones and achievements from this reporting period"
+                      className="min-h-24"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="primaryChallenges"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Primary Challenges</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Describe any major challenges or blockers faced during this period"
+                      className="min-h-24"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="nextSteps"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Next Steps</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Outline planned tasks and milestones for the next reporting period"
+                      className="min-h-24"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="followUpActions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Follow-up Actions</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="List any actions needed from management or other teams"
+                      className="min-h-24"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional Notes</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Any other comments or information to include in the report"
+                      className="min-h-24"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </CardContent>
         </Card>
         

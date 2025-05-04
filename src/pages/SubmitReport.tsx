@@ -20,7 +20,10 @@ const SubmitReport = () => {
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Submit Monthly Project Report</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Submit Monthly Project Report</h1>
+          <p className="text-muted-foreground mt-2">Fill out the required fields and add detailed information about the project's status.</p>
+        </div>
         <Button variant="outline" asChild>
           <Link to="/manage-options">Manage Projects & Users</Link>
         </Button>
