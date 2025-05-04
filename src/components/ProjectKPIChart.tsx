@@ -33,6 +33,7 @@ import { useProjectContext } from "@/context/ProjectContext";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ChartBar, ChartLine, Radar as RadarIcon } from "lucide-react";
 import { ProjectKPITrendChart } from './ProjectKPITrendChart';
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
 
 interface ProjectKPIChartProps {
   project: ProjectReport;
@@ -196,6 +197,11 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
     }
   ];
 
+  // Calculate key performance stats for the summary panel
+  const avgScore = chartData.reduce((sum, item) => sum + item.value, 0) / chartData.length;
+  const topPerformers = [...chartData].sort((a, b) => b.value - a.value).slice(0, 3);
+  const improvementAreas = [...chartData].sort((a, b) => a.value - b.value).slice(0, 3);
+
   // Render line chart view (trends over time)
   if (chartView === 'line') {
     return (
@@ -256,42 +262,117 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
         </Select>
       </div>
       
-      <div className="h-[400px] overflow-hidden">
-        <ChartContainer config={chartConfig}>
-          {chartView === 'bar' ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} />
-                <Tooltip content={<ChartTooltipContent />} />
-                <Legend />
-                <Bar dataKey="value" fill="#8884d8">
-                  <LabelList dataKey="label" position="top" fill="#333" />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart outerRadius={90} data={chartData}>
-                <PolarGrid gridType="polygon" />
-                <PolarAngleAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <PolarRadiusAxis domain={[0, 4]} tickCount={5} axisLine={false} tick={{ fontSize: 10 }} />
-                <Radar 
-                  name="KPI Rating" 
-                  dataKey="value" 
-                  stroke="#8884d8" 
-                  fill="#8884d8" 
-                  fillOpacity={0.6} 
-                />
-                <Tooltip content={<ChartTooltipContent />} />
-                <Legend />
-              </RadarChart>
-            </ResponsiveContainer>
-          )}
-        </ChartContainer>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="h-[400px] overflow-hidden">
+          <ChartContainer config={chartConfig}>
+            {chartView === 'bar' ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} />
+                  <Tooltip content={<ChartTooltipContent />} />
+                  <Legend />
+                  <Bar dataKey="value" fill="#8884d8">
+                    <LabelList dataKey="label" position="top" fill="#333" />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+                  <PolarGrid gridType="polygon" />
+                  <PolarAngleAxis dataKey="name" tick={{ fontSize: 12, fill: "#555" }} />
+                  <PolarRadiusAxis 
+                    angle={30} 
+                    domain={[0, 4]} 
+                    tickCount={5} 
+                    tick={{ fontSize: 10 }}
+                    axisLine={false}
+                  />
+                  <Radar 
+                    name="KPI Rating" 
+                    dataKey="value" 
+                    stroke="#8884d8" 
+                    fill="#8884d8" 
+                    fillOpacity={0.6} 
+                  />
+                  <Tooltip content={<ChartTooltipContent />} />
+                  <Legend wrapperStyle={{ paddingTop: 20 }} />
+                </RadarChart>
+              </ResponsiveContainer>
+            )}
+          </ChartContainer>
+        </div>
+
+        {/* Performance Summary Panel */}
+        <div className="flex flex-col gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="font-semibold text-lg mb-2">Performance Summary</h3>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Overall Average</p>
+                  <div className="flex items-center">
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        className="bg-primary h-2.5 rounded-full" 
+                        style={{ width: `${(avgScore / 4) * 100}%` }}
+                      ></div>
+                    </div>
+                    <span className="ml-2 font-medium text-sm">{avgScore.toFixed(1)}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Top Performing Areas</p>
+                  <ul className="space-y-2">
+                    {topPerformers.map((item) => (
+                      <li key={`top-${item.name}`} className="flex justify-between items-center">
+                        <span className="text-sm">{item.name}</span>
+                        <div className="flex items-center">
+                          <div className="w-20 bg-gray-200 rounded-full h-1.5 mr-2">
+                            <div 
+                              className="bg-green-500 h-1.5 rounded-full" 
+                              style={{ width: `${(item.value / 4) * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs font-medium">{item.value}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Areas for Improvement</p>
+                  <ul className="space-y-2">
+                    {improvementAreas.map((item) => (
+                      <li key={`imp-${item.name}`} className="flex justify-between items-center">
+                        <span className="text-sm">{item.name}</span>
+                        <div className="flex items-center">
+                          <div className="w-20 bg-gray-200 rounded-full h-1.5 mr-2">
+                            <div 
+                              className="bg-amber-500 h-1.5 rounded-full" 
+                              style={{ width: `${(item.value / 4) * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs font-medium">{item.value}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Reporting Period</p>
+                  <p className="text-sm font-medium">{formatPeriod(selectedPeriod)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
 };
-

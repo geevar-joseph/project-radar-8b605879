@@ -110,52 +110,84 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
   };
 
   return (
-    <div className="h-[400px] overflow-hidden">
-      <ChartContainer config={chartConfig}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart 
-            data={trendData} 
-            margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis 
-              dataKey="period" 
-              tick={{ fontSize: 12 }}
-              tickMargin={10}
-            />
-            <YAxis 
-              domain={[0, 4]} 
-              ticks={[0, 1, 2, 3, 4]} 
-              tick={{ fontSize: 12 }}
-              tickMargin={10}
-            />
-            <Tooltip content={<ChartTooltipContent />} />
-            <Legend 
-              layout="horizontal" 
-              verticalAlign="bottom"
-              wrapperStyle={{ paddingTop: '10px' }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="overallScore" 
-              name="Overall Score"
-              stroke={chartConfig.overallScore.color} 
-              strokeWidth={2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 8 }} 
-            />
-            <Line type="monotone" dataKey="risk" name="Risk Level" stroke={chartConfig.risk.color} />
-            <Line type="monotone" dataKey="financial" name="Financial Health" stroke={chartConfig.financial.color} />
-            <Line type="monotone" dataKey="completion" name="Completion" stroke={chartConfig.completion.color} />
-            <Line type="monotone" dataKey="morale" name="Team Morale" stroke={chartConfig.morale.color} />
-            <Line type="monotone" dataKey="pm" name="PM Evaluation" stroke={chartConfig.pm.color} />
-            <Line type="monotone" dataKey="frontend" name="Frontend" stroke={chartConfig.frontend.color} />
-            <Line type="monotone" dataKey="backend" name="Backend" stroke={chartConfig.backend.color} />
-            <Line type="monotone" dataKey="testing" name="Testing" stroke={chartConfig.testing.color} />
-            <Line type="monotone" dataKey="design" name="Design" stroke={chartConfig.design.color} />
-          </LineChart>
-        </ResponsiveContainer>
-      </ChartContainer>
+    <div className="grid md:grid-cols-2 gap-6">
+      <div className="h-[400px] overflow-hidden">
+        <ChartContainer config={chartConfig}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart 
+              data={trendData} 
+              margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="period" 
+                tick={{ fontSize: 12 }}
+                tickMargin={10}
+              />
+              <YAxis 
+                domain={[0, 4]} 
+                ticks={[0, 1, 2, 3, 4]} 
+                tick={{ fontSize: 12 }}
+                tickMargin={10}
+              />
+              <Tooltip content={<ChartTooltipContent />} />
+              <Legend 
+                layout="horizontal" 
+                verticalAlign="top"
+                align="center"
+                wrapperStyle={{ paddingBottom: '20px' }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="overallScore" 
+                name="Overall Score"
+                stroke={chartConfig.overallScore.color} 
+                strokeWidth={2.5}
+                dot={{ r: 4 }}
+                activeDot={{ r: 6 }} 
+              />
+              <Line type="monotone" dataKey="risk" name="Risk Level" stroke={chartConfig.risk.color} />
+              <Line type="monotone" dataKey="financial" name="Financial Health" stroke={chartConfig.financial.color} />
+              <Line type="monotone" dataKey="completion" name="Completion" stroke={chartConfig.completion.color} />
+              <Line type="monotone" dataKey="morale" name="Team Morale" stroke={chartConfig.morale.color} />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartContainer>
+      </div>
+
+      {/* Trend Analysis Summary */}
+      <div className="flex flex-col">
+        <div className="border rounded-md p-6 h-full">
+          <h3 className="font-semibold text-lg mb-4">Trend Analysis</h3>
+          
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-sm font-medium mb-2">Performance Over Time</h4>
+              <p className="text-sm text-muted-foreground">
+                This chart shows how key performance indicators have changed over {trendData.length} reporting periods.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium mb-2">KPI Timeline Highlights</h4>
+              <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                <li>Overall score trend shows the project's general direction</li>
+                <li>Financial health indicates budget adherence</li>
+                <li>Risk level tracks potential project obstacles</li>
+                <li>Completion rate shows progress against planned work</li>
+                <li>Team morale reflects the project environment</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium mb-2">Data Points</h4>
+              <p className="text-sm text-muted-foreground">
+                {trendData.length} monthly reports from {formatPeriod(projectReports[0].reportingPeriod)} to {formatPeriod(projectReports[projectReports.length - 1].reportingPeriod)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

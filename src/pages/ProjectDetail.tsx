@@ -44,7 +44,7 @@ const ProjectDetail = () => {
       </div>
       
       {/* Compact Header Section */}
-      <div className="mb-4 bg-white dark:bg-slate-800 rounded-lg shadow p-4">
+      <div className="mb-6 bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
