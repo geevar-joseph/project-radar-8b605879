@@ -2,10 +2,10 @@
 import { useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectCard } from "@/components/ProjectCard";
-import { ProjectStats } from "@/components/ProjectStats";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
+import { Check, AlertTriangle, XOctagon } from "lucide-react";
 
 const Dashboard = () => {
   const { 
@@ -23,6 +23,18 @@ const Dashboard = () => {
       setSelectedPeriod(periods[0]);
     }
   }, [periods, selectedPeriod, setSelectedPeriod]);
+
+  // Calculate project statistics based on scores
+  const totalProjects = projects.length;
+  const projectsDoingWell = projects.filter(p => 
+    p.overallProjectScore === "Excellent" || p.overallProjectScore === "Good"
+  ).length;
+  const projectsNeedingAttention = projects.filter(p => 
+    p.overallProjectScore === "Fair"
+  ).length;
+  const projectsAtRisk = projects.filter(p => 
+    p.overallProjectScore === "Poor"
+  ).length;
 
   return (
     <div className="container mx-auto py-10">
@@ -59,7 +71,56 @@ const Dashboard = () => {
         </div>
       </div>
       
-      <ProjectStats />
+      {/* Block 1: Summary Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {/* Total Projects Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
+          <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-3 mr-4">
+            <span className="text-blue-600 dark:text-blue-400 text-lg">
+              {totalProjects}
+            </span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">Total Projects</h3>
+            <p className="text-sm text-muted-foreground">
+              {selectedPeriod ? `For ${selectedPeriod}` : "All periods"}
+            </p>
+          </div>
+        </div>
+        
+        {/* Projects Doing Well Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
+          <div className="rounded-full bg-green-100 dark:bg-green-900/30 p-3 mr-4">
+            <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">{projectsDoingWell}</h3>
+            <p className="text-sm text-muted-foreground">Doing Well</p>
+          </div>
+        </div>
+        
+        {/* Projects Needing Attention Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
+          <div className="rounded-full bg-amber-100 dark:bg-amber-900/30 p-3 mr-4">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">{projectsNeedingAttention}</h3>
+            <p className="text-sm text-muted-foreground">Needing Attention</p>
+          </div>
+        </div>
+        
+        {/* Projects At Risk Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
+          <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3 mr-4">
+            <XOctagon className="h-5 w-5 text-red-600 dark:text-red-400" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">{projectsAtRisk}</h3>
+            <p className="text-sm text-muted-foreground">At Risk</p>
+          </div>
+        </div>
+      </div>
       
       <h2 className="text-xl font-semibold mb-4">Project Reports</h2>
       
