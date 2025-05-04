@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { ProjectReport } from "@/types/project";
+import { ProjectReport, ProjectType, ProjectStatus } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import { sampleProjects } from "@/data/mockData";
 import {
@@ -163,19 +164,21 @@ export const useProjects = () => {
       if (!success) throw error;
 
       // Update local state - find and update the project in projects array
-      setProjects(projects.map(project => {
+      const updatedProjects = projects.map(project => {
         if (project.projectName === originalName) {
           return {
             ...project,
             projectName: updateData.projectName,
             clientName: updateData.clientName || project.clientName,
-            projectType: updateData.projectType || project.projectType,
-            projectStatus: updateData.projectStatus || project.projectStatus,
+            projectType: (updateData.projectType as ProjectType) || project.projectType,
+            projectStatus: (updateData.projectStatus as ProjectStatus) || project.projectStatus,
             assignedPM: updateData.assignedPM || project.assignedPM
           };
         }
         return project;
-      }));
+      });
+      
+      setProjects(updatedProjects);
 
       // If project name changed, update projectNames array
       if (originalName !== updateData.projectName) {

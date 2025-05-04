@@ -44,18 +44,16 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Find the current project data
-  const currentProject = projects.find(p => 
-    p.projectName === projectName || p.project_name === projectName
-  );
+  const currentProject = projects.find(p => p.projectName === projectName);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       projectName: projectName,
-      clientName: currentProject?.clientName || currentProject?.client_name || "",
-      projectType: currentProject?.projectType || currentProject?.project_type || "",
-      projectStatus: currentProject?.projectStatus || currentProject?.project_status || "",
-      assignedPM: currentProject?.assignedPM || currentProject?.assigned_pm || "",
+      clientName: currentProject?.clientName || "",
+      projectType: currentProject?.projectType || "",
+      projectStatus: currentProject?.projectStatus || "",
+      assignedPM: currentProject?.assignedPM || "",
     },
   });
 
@@ -64,10 +62,10 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
     if (currentProject) {
       form.reset({
         projectName: projectName,
-        clientName: currentProject?.clientName || currentProject?.client_name || "",
-        projectType: currentProject?.projectType || currentProject?.project_type || "",
-        projectStatus: currentProject?.projectStatus || currentProject?.project_status || "",
-        assignedPM: currentProject?.assignedPM || currentProject?.assigned_pm || "",
+        clientName: currentProject?.clientName || "",
+        projectType: currentProject?.projectType || "",
+        projectStatus: currentProject?.projectStatus || "",
+        assignedPM: currentProject?.assignedPM || "",
       });
     }
   }, [currentProject, form, projectName]);

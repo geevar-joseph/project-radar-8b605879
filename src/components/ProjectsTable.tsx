@@ -29,8 +29,12 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
   const normalizeProjectData = (projectName: string): ProjectData => {
     const projectData = projects.find(p => {
       // Handle data from different sources (Supabase direct or frontend format)
-      const pName = p.projectName || p.project_name;
-      return pName === projectName;
+      if ('projectName' in p) {
+        return p.projectName === projectName;
+      } else if ('project_name' in p) {
+        return p.project_name === projectName;
+      }
+      return false;
     });
     
     if (!projectData) {
@@ -39,10 +43,18 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
     
     return {
       name: projectName,
-      client: projectData.clientName || projectData.client_name || undefined,
-      type: projectData.projectType || projectData.project_type || undefined,
-      status: projectData.projectStatus || projectData.project_status || undefined,
-      pm: projectData.assignedPM || projectData.assigned_pm || undefined
+      client: 'clientName' in projectData ? projectData.clientName : 
+             'client_name' in projectData ? projectData.client_name : 
+             undefined,
+      type: 'projectType' in projectData ? projectData.projectType : 
+            'project_type' in projectData ? projectData.project_type : 
+            undefined,
+      status: 'projectStatus' in projectData ? projectData.projectStatus : 
+              'project_status' in projectData ? projectData.project_status : 
+              undefined,
+      pm: 'assignedPM' in projectData ? projectData.assignedPM : 
+          'assigned_pm' in projectData ? projectData.assigned_pm : 
+          undefined
     };
   };
 
