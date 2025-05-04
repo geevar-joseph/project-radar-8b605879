@@ -18,6 +18,14 @@ interface ProjectContextType {
   removeProjectName: (name: string) => void;
   addTeamMember: (name: string, email: string, role: string) => Promise<void>;
   removeTeamMember: (name: string) => void;
+  updateProjectDetails: (originalName: string, updateData: {
+    projectName: string;
+    clientName?: string;
+    projectType?: string;
+    projectStatus?: string;
+    assignedPM?: string;
+  }) => Promise<boolean>;
+  updateTeamMember: (originalName: string, name: string, email: string, role: string) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -35,13 +43,15 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     getUniqueReportingPeriods,
     getFilteredProjects,
     addProjectName,
-    removeProjectName
+    removeProjectName,
+    updateProjectDetails
   } = useProjects();
 
   const {
     teamMembers,
     addTeamMember,
-    removeTeamMember
+    removeTeamMember,
+    updateTeamMember
   } = useTeamMembers();
 
   return (
@@ -59,6 +69,8 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       removeProjectName,
       addTeamMember,
       removeTeamMember,
+      updateProjectDetails,
+      updateTeamMember,
       isLoading
     }}>
       {children}

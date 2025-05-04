@@ -1,7 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { fetchTeamMembers, addTeamMember as apiAddTeamMember, removeTeamMember as apiRemoveTeamMember } from "@/api/projectApi";
+import { 
+  fetchTeamMembers, 
+  addTeamMember as apiAddTeamMember, 
+  removeTeamMember as apiRemoveTeamMember,
+  updateTeamMember as apiUpdateTeamMember
+} from "@/api/projectApi";
 
 export const useTeamMembers = () => {
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
@@ -71,10 +76,41 @@ export const useTeamMembers = () => {
     }
   };
 
+  const updateTeamMember = async (originalName: string, name: string, email: string, role: string) => {
+    try {
+      const { success, error } = await apiUpdateTeamMember(originalName, name, email, role);
+      
+      if (!success) throw error;
+
+      // If name has changed, update the list
+      if (originalName !== name) {
+        setTeamMembers(teamMembers.map(member => 
+          member === originalName ? name : member
+        ));
+      }
+      
+      toast({
+        title: "Team Member Updated",
+        description: `"${name}" has been updated successfully.`,
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating team member:', error);
+      toast({
+        title: "Error",
+        description: "There was an error updating the team member. Please try again.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   return {
     teamMembers,
     addTeamMember,
     removeTeamMember,
+    updateTeamMember,
     loadTeamMembers
   };
 };

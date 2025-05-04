@@ -1,9 +1,11 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Edit } from "lucide-react";
 import { ProjectReport } from "@/types/project";
+import { EditProjectModal } from "./EditProjectModal";
 
 // Define a unified project data structure that handles multiple sources
 type ProjectData = {
@@ -21,6 +23,8 @@ interface ProjectsTableProps {
 }
 
 export const ProjectsTable = ({ projectNames, projects, removeProjectName }: ProjectsTableProps) => {
+  const [editingProject, setEditingProject] = useState<string | null>(null);
+  
   // This function safely normalizes project data regardless of source
   const normalizeProjectData = (projectName: string): ProjectData => {
     const projectData = projects.find(p => {
@@ -52,7 +56,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
             <TableHead>Project Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Assigned PM</TableHead>
-            <TableHead className="text-right">Action</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -74,7 +78,14 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
                   ) : "—"}
                 </TableCell>
                 <TableCell>{project.pm || "—"}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right space-x-2 flex justify-end">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setEditingProject(projectName)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
                   <Button 
                     variant="ghost" 
                     size="icon"
@@ -88,6 +99,15 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
           })}
         </TableBody>
       </Table>
+
+      {/* Edit Project Modal */}
+      {editingProject && (
+        <EditProjectModal 
+          open={!!editingProject}
+          onOpenChange={() => setEditingProject(null)}
+          projectName={editingProject}
+        />
+      )}
     </div>
   );
 };

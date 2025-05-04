@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectReport } from "@/types/project";
 import { v4 as uuidv4 } from "uuid";
@@ -253,6 +252,86 @@ export const removeProjectName = async (name: string) => {
     return { success: true, error: null };
   } catch (error) {
     console.error('Error removing project name:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Updates project details in Supabase
+ */
+export const updateProjectDetails = async (originalName: string, updateData: {
+  projectName: string;
+  clientName?: string;
+  projectType?: string;
+  projectStatus?: string;
+  assignedPM?: string;
+}) => {
+  try {
+    // Find the project by name
+    const { data: existingProject } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('project_name', originalName)
+      .single();
+    
+    if (!existingProject) {
+      throw new Error('Project not found');
+    }
+
+    // Update the project
+    const { error } = await supabase
+      .from('projects')
+      .update({
+        project_name: updateData.projectName,
+        client_name: updateData.clientName,
+        project_type: updateData.projectType,
+        project_status: updateData.projectStatus,
+        assigned_pm: updateData.assignedPM,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existingProject.id);
+
+    if (error) throw error;
+    
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error updating project details:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Updates team member details in Supabase
+ */
+export const updateTeamMember = async (originalName: string, name: string, email: string, role: string) => {
+  try {
+    // Find the team member by name
+    const { data } = await supabase
+      .from('team_members')
+      .select('id')
+      .eq('name', originalName)
+      .single();
+    
+    if (!data) {
+      throw new Error('Team member not found');
+    }
+
+    // Update the team member
+    const { error } = await supabase
+      .from('team_members')
+      .update({
+        name,
+        email,
+        role,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', data.id);
+
+    if (error) throw error;
+    
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error updating team member:', error);
     return { success: false, error };
   }
 };

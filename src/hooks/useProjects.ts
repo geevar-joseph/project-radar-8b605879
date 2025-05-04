@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
@@ -9,7 +8,8 @@ import {
   mapToProjectReport,
   addProjectReport as apiAddProjectReport,
   addProjectName as apiAddProjectName,
-  removeProjectName as apiRemoveProjectName
+  removeProjectName as apiRemoveProjectName,
+  updateProjectDetails as apiUpdateProjectDetails
 } from "@/api/projectApi";
 
 export const useProjects = () => {
@@ -150,6 +150,57 @@ export const useProjects = () => {
     }
   };
 
+  const updateProjectDetails = async (originalName: string, updateData: {
+    projectName: string;
+    clientName?: string;
+    projectType?: string;
+    projectStatus?: string;
+    assignedPM?: string;
+  }) => {
+    try {
+      const { success, error } = await apiUpdateProjectDetails(originalName, updateData);
+      
+      if (!success) throw error;
+
+      // Update local state - find and update the project in projects array
+      setProjects(projects.map(project => {
+        if (project.projectName === originalName) {
+          return {
+            ...project,
+            projectName: updateData.projectName,
+            clientName: updateData.clientName || project.clientName,
+            projectType: updateData.projectType || project.projectType,
+            projectStatus: updateData.projectStatus || project.projectStatus,
+            assignedPM: updateData.assignedPM || project.assignedPM
+          };
+        }
+        return project;
+      }));
+
+      // If project name changed, update projectNames array
+      if (originalName !== updateData.projectName) {
+        setProjectNames(projectNames.map(name => 
+          name === originalName ? updateData.projectName : name
+        ));
+      }
+      
+      toast({
+        title: "Project Updated",
+        description: `"${updateData.projectName}" has been updated successfully.`,
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating project details:', error);
+      toast({
+        title: "Error",
+        description: "There was an error updating the project. Please try again.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   return {
     projects,
     projectNames,
@@ -162,6 +213,7 @@ export const useProjects = () => {
     getFilteredProjects,
     addProjectName,
     removeProjectName,
+    updateProjectDetails,
     loadProjects
   };
 };
