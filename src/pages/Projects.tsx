@@ -5,6 +5,9 @@ import { ProjectReport } from "@/types/project";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { AddProjectModal } from "@/components/AddProjectModal";
+import { FileText, User, Type, Code } from "lucide-react";
 
 const Projects = () => {
   const { projects } = useProjectContext();
@@ -15,6 +18,7 @@ const Projects = () => {
     key: null,
     direction: 'ascending'
   });
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   const handleSort = (key: keyof ProjectReport) => {
     let direction: 'ascending' | 'descending' = 'ascending';
@@ -55,11 +59,14 @@ const Projects = () => {
 
   return (
     <div className="container mx-auto py-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Projects</h1>
-        <p className="text-muted-foreground mt-2">
-          View and manage all projects in one place
-        </p>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Projects</h1>
+          <p className="text-muted-foreground mt-2">
+            View and manage all projects in one place
+          </p>
+        </div>
+        <Button onClick={() => setAddModalOpen(true)}>Add New Project</Button>
       </div>
 
       <div className="rounded-md border">
@@ -73,10 +80,18 @@ const Projects = () => {
               <TableHead className="cursor-pointer" onClick={() => handleSort('projectName')}>
                 Project Name {getSortIndicator('projectName')}
               </TableHead>
-              <TableHead>Client Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Assigned PM</TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort('clientName')}>
+                Client Name {getSortIndicator('clientName')}
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort('projectType')}>
+                Type {getSortIndicator('projectType')}
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort('projectStatus')}>
+                Status {getSortIndicator('projectStatus')}
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort('assignedPM')}>
+                Assigned PM {getSortIndicator('assignedPM')}
+              </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('submissionDate')}>
                 Last Updated {getSortIndicator('submissionDate')}
               </TableHead>
@@ -100,14 +115,22 @@ const Projects = () => {
                     {project.projectName}
                   </a>
                 </TableCell>
-                <TableCell>{project.submittedBy}</TableCell>
+                <TableCell>{project.clientName}</TableCell>
                 <TableCell>
-                  <Badge variant="outline">Development</Badge>
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Type className="h-3.5 w-3.5" />
+                    {project.projectType || "N/A"}
+                  </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary">Ongoing</Badge>
+                  <Badge variant="secondary">
+                    {project.projectStatus || "N/A"}
+                  </Badge>
                 </TableCell>
-                <TableCell>{project.submittedBy}</TableCell>
+                <TableCell className="flex items-center gap-1">
+                  <User className="h-3.5 w-3.5" /> 
+                  {project.assignedPM || "N/A"}
+                </TableCell>
                 <TableCell>{formatDate(project.submissionDate)}</TableCell>
                 <TableCell>
                   <StatusBadge value={project.overallProjectScore} type="rating" />
@@ -123,6 +146,8 @@ const Projects = () => {
           </TableBody>
         </Table>
       </div>
+      
+      <AddProjectModal open={addModalOpen} onOpenChange={setAddModalOpen} />
     </div>
   );
 };

@@ -3,14 +3,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "./StatusBadge";
 import { ProjectReport } from "@/types/project";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { FileText, User, Type, Code } from "lucide-react";
 
 interface ProjectCardProps {
   project: ProjectReport;
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
-  const dateParts = project.submissionDate.split('-');
-  const formattedDate = `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`;
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+    }).format(date);
+  };
   
   return (
     <Card className="transition-all hover:shadow-md">
@@ -19,8 +27,37 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <CardTitle className="text-lg font-bold">{project.projectName}</CardTitle>
           <StatusBadge value={project.overallProjectScore} type="rating" />
         </div>
-        <div className="text-sm text-muted-foreground">
-          Submitted by {project.submittedBy} on {formattedDate}
+        <div className="text-sm text-muted-foreground flex flex-wrap gap-2 mt-1">
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Code className="h-3.5 w-3.5" />
+            {project.id}
+          </Badge>
+          {project.clientName && (
+            <Badge variant="outline" className="flex items-center gap-1">
+              <FileText className="h-3.5 w-3.5" />
+              {project.clientName}
+            </Badge>
+          )}
+          {project.projectType && (
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Type className="h-3.5 w-3.5" />
+              {project.projectType}
+            </Badge>
+          )}
+          {project.projectStatus && (
+            <Badge variant="secondary">
+              {project.projectStatus}
+            </Badge>
+          )}
+          {project.assignedPM && (
+            <Badge variant="outline" className="flex items-center gap-1">
+              <User className="h-3.5 w-3.5" />
+              {project.assignedPM}
+            </Badge>
+          )}
+        </div>
+        <div className="text-xs text-muted-foreground mt-1">
+          Updated: {formatDate(project.submissionDate)}
         </div>
       </CardHeader>
       <CardContent>
