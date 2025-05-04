@@ -55,10 +55,23 @@ export function ProjectReportForm() {
   function onSubmit(data: FormValues) {
     const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     
+    // Ensure all required fields are present
     const newProject = {
-      ...data,
       id: uuidv4(),
-      submissionDate: currentDate
+      submissionDate: currentDate,
+      projectName: data.projectName,
+      submittedBy: data.submittedBy,
+      reportingPeriod: data.reportingPeriod,
+      overallProjectScore: data.overallProjectScore,
+      riskLevel: data.riskLevel,
+      financialHealth: data.financialHealth,
+      completionOfPlannedWork: data.completionOfPlannedWork,
+      teamMorale: data.teamMorale,
+      projectManagerEvaluation: data.projectManagerEvaluation,
+      frontEndQuality: data.frontEndQuality,
+      backEndQuality: data.backEndQuality,
+      testingQuality: data.testingQuality,
+      designQuality: data.designQuality
     };
     
     addProject(newProject);
