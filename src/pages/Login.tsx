@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn, UserPlus, Google } from "lucide-react";
+import { LogIn, UserPlus, Mail } from "lucide-react";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -92,7 +92,7 @@ const Login = () => {
           </div>
           
           <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
-            <Google className="mr-2 h-4 w-4" />
+            <Mail className="mr-2 h-4 w-4" />
             Google
           </Button>
         </CardContent>
