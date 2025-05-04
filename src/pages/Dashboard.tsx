@@ -28,13 +28,13 @@ const Dashboard = () => {
   const totalProjects = projects.length;
   const projectsDoingWell = projects.filter(p => 
     p.overallProjectScore === "Excellent" || p.overallProjectScore === "Good"
-  ).length;
+  );
   const projectsNeedingAttention = projects.filter(p => 
     p.overallProjectScore === "Fair"
-  ).length;
+  );
   const projectsAtRisk = projects.filter(p => 
     p.overallProjectScore === "Poor"
-  ).length;
+  );
 
   return (
     <div className="container mx-auto py-10">
@@ -94,7 +94,7 @@ const Dashboard = () => {
             <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <h3 className="font-semibold text-lg">{projectsDoingWell}</h3>
+            <h3 className="font-semibold text-lg">{projectsDoingWell.length}</h3>
             <p className="text-sm text-muted-foreground">Doing Well</p>
           </div>
         </div>
@@ -105,7 +105,7 @@ const Dashboard = () => {
             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <h3 className="font-semibold text-lg">{projectsNeedingAttention}</h3>
+            <h3 className="font-semibold text-lg">{projectsNeedingAttention.length}</h3>
             <p className="text-sm text-muted-foreground">Needing Attention</p>
           </div>
         </div>
@@ -116,15 +116,106 @@ const Dashboard = () => {
             <XOctagon className="h-5 w-5 text-red-600 dark:text-red-400" />
           </div>
           <div>
-            <h3 className="font-semibold text-lg">{projectsAtRisk}</h3>
+            <h3 className="font-semibold text-lg">{projectsAtRisk.length}</h3>
             <p className="text-sm text-muted-foreground">At Risk</p>
           </div>
         </div>
       </div>
       
-      <h2 className="text-xl font-semibold mb-4">Project Reports</h2>
+      {/* Block 2: Categorized Project List */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        {/* Column 1: Projects Doing Well */}
+        <div className="border-t-4 border-green-500 bg-green-50 dark:bg-green-900/10 rounded-lg p-4">
+          <h2 className="font-semibold text-lg mb-4 flex items-center">
+            <Check className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
+            Projects Doing Well ({projectsDoingWell.length})
+          </h2>
+          
+          <div className="space-y-4">
+            {projectsDoingWell.length === 0 ? (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                <p>No projects in this category</p>
+              </div>
+            ) : (
+              projectsDoingWell.map(project => (
+                <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow">
+                  <Link to={`/project/${project.id}`} className="font-medium text-lg hover:underline">
+                    {project.projectName}
+                  </Link>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    PM: {project.assignedPM || 'Unassigned'}
+                  </p>
+                  <div className="flex mt-2">
+                    <StatusBadge value={project.overallProjectScore} type="rating" />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+        
+        {/* Column 2: Projects Needing Attention */}
+        <div className="border-t-4 border-amber-500 bg-amber-50 dark:bg-amber-900/10 rounded-lg p-4">
+          <h2 className="font-semibold text-lg mb-4 flex items-center">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-2" />
+            Projects Needing Attention ({projectsNeedingAttention.length})
+          </h2>
+          
+          <div className="space-y-4">
+            {projectsNeedingAttention.length === 0 ? (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                <p>No projects in this category</p>
+              </div>
+            ) : (
+              projectsNeedingAttention.map(project => (
+                <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow">
+                  <Link to={`/project/${project.id}`} className="font-medium text-lg hover:underline">
+                    {project.projectName}
+                  </Link>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    PM: {project.assignedPM || 'Unassigned'}
+                  </p>
+                  <div className="flex mt-2">
+                    <StatusBadge value={project.overallProjectScore} type="rating" />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+        
+        {/* Column 3: Projects At Risk */}
+        <div className="border-t-4 border-red-500 bg-red-50 dark:bg-red-900/10 rounded-lg p-4">
+          <h2 className="font-semibold text-lg mb-4 flex items-center">
+            <XOctagon className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
+            Projects At Risk ({projectsAtRisk.length})
+          </h2>
+          
+          <div className="space-y-4">
+            {projectsAtRisk.length === 0 ? (
+              <div className="text-center py-8 text-sm text-muted-foreground">
+                <p>No projects in this category</p>
+              </div>
+            ) : (
+              projectsAtRisk.map(project => (
+                <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow">
+                  <Link to={`/project/${project.id}`} className="font-medium text-lg hover:underline">
+                    {project.projectName}
+                  </Link>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    PM: {project.assignedPM || 'Unassigned'}
+                  </p>
+                  <div className="flex mt-2">
+                    <StatusBadge value={project.overallProjectScore} type="rating" />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
       
-      {projects.length === 0 ? (
+      {projects.length === 0 && (
         <div className="text-center py-10">
           <p className="text-muted-foreground mb-4">No project reports found for this period.</p>
           <Button asChild>
@@ -132,12 +223,6 @@ const Dashboard = () => {
               Submit Your First Report
             </Link>
           </Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
         </div>
       )}
     </div>
