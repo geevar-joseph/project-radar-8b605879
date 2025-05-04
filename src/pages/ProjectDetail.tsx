@@ -4,11 +4,14 @@ import { useProjectContext } from "@/context/ProjectContext";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
+import { ProjectKPIChart } from "@/components/ProjectKPIChart";
+import { MonthlyReportsTable } from "@/components/MonthlyReportsTable";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { getProject } = useProjectContext();
+  const { getProject, projects } = useProjectContext();
   const navigate = useNavigate();
   
   const project = getProject(id || "");
@@ -26,26 +29,69 @@ const ProjectDetail = () => {
     );
   }
   
+  // Get project reports for the same project name (in a real app, this would filter by project ID)
+  const projectReports = projects.filter(p => p.projectName === project.projectName);
+  
   const dateParts = project.submissionDate.split('-');
   const formattedDate = `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`;
   
   return (
     <div className="container mx-auto py-10">
       <div className="mb-6">
-        <Button variant="outline" onClick={() => navigate('/dashboard')}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+        <Button variant="outline" onClick={() => navigate('/projects')}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
         </Button>
       </div>
       
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{project.projectName}</h1>
-          <p className="text-muted-foreground">Submitted by {project.submittedBy} on {formattedDate}</p>
+      {/* 1. Header Section */}
+      <div className="mb-6 bg-white dark:bg-slate-800 rounded-lg shadow p-6">
+        <div className="flex flex-col md:flex-row justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">{project.projectName}</h1>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Client Name</p>
+                <p className="font-medium">{project.clientName || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Project Type</p>
+                <Badge variant="outline" className="mt-1">{project.projectType || 'N/A'}</Badge>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Project Status</p>
+                <Badge variant="secondary" className="mt-1">{project.projectStatus || 'N/A'}</Badge>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Assigned PM</p>
+                <p className="font-medium">{project.assignedPM || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Last Updated</p>
+                <p className="font-medium">{formattedDate}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Overall Health</p>
+                <div className="mt-1">
+                  <StatusBadge value={project.overallProjectScore} type="rating" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <StatusBadge value={project.overallProjectScore} type="rating" className="text-base px-4 py-2" />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      {/* 2. KPI Chart Section */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Project KPI Performance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ProjectKPIChart project={project} />
+        </CardContent>
+      </Card>
+      
+      {/* 3. Project Health Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Card>
           <CardHeader>
             <CardTitle>Project Health</CardTitle>
@@ -101,6 +147,12 @@ const ProjectDetail = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+      
+      {/* 4. Monthly Reports Table Section */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Monthly Reports History</h2>
+        <MonthlyReportsTable reports={projectReports} />
       </div>
     </div>
   );

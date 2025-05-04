@@ -106,5 +106,48 @@ export const sampleProjects: ProjectReport[] = [
     projectType: "Consulting",
     projectStatus: "Ongoing",
     assignedPM: "Sarah Williams"
+  },
+  // Adding previous month reports for E-commerce Redesign project
+  {
+    id: "6",
+    projectName: "E-commerce Redesign",
+    submittedBy: "Jane Smith",
+    reportingPeriod: "2025-03",
+    overallProjectScore: "Fair",
+    riskLevel: "Medium",
+    financialHealth: "On Watch",
+    completionOfPlannedWork: "Partially",
+    teamMorale: "Moderate",
+    projectManagerEvaluation: "Fair",
+    frontEndQuality: "Good",
+    backEndQuality: "Fair",
+    testingQuality: "Fair",
+    designQuality: "Good",
+    submissionDate: "2025-03-31",
+    clientName: "Acme Corp",
+    projectType: "Development",
+    projectStatus: "Ongoing",
+    assignedPM: "Jane Smith"
+  },
+  {
+    id: "7",
+    projectName: "E-commerce Redesign",
+    submittedBy: "Jane Smith",
+    reportingPeriod: "2025-02",
+    overallProjectScore: "Poor",
+    riskLevel: "High",
+    financialHealth: "At Risk",
+    completionOfPlannedWork: "Not completed",
+    teamMorale: "Low",
+    projectManagerEvaluation: "Poor",
+    frontEndQuality: "Fair",
+    backEndQuality: "Poor",
+    testingQuality: "Fair",
+    designQuality: "Good",
+    submissionDate: "2025-02-28",
+    clientName: "Acme Corp",
+    projectType: "Development",
+    projectStatus: "Ongoing",
+    assignedPM: "Jane Smith"
   }
 ];
