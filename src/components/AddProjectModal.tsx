@@ -34,7 +34,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
       clientName,
       assignedPM: projectManager,
       projectType: projectType as ProjectType, // Cast here to ensure type safety
-      jiraCode: jiraCode || `PROJ-${Math.floor(Math.random() * 10000)}`, // Use entered or generate random
+      // Using the proper property names from the ProjectReport interface
       submittedBy: "",
       reportingPeriod: "",
       overallProjectScore: "N.A.",
