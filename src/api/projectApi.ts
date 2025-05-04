@@ -1,0 +1,258 @@
+
+import { supabase } from "@/integrations/supabase/client";
+import { ProjectReport } from "@/types/project";
+import { v4 as uuidv4 } from "uuid";
+
+/**
+ * Maps data from Supabase format to our application format
+ */
+export const mapToProjectReport = (dbReport: any): ProjectReport => {
+  return {
+    id: dbReport.id,
+    projectName: dbReport.project_name || "",
+    submittedBy: dbReport.submitted_by || "",
+    reportingPeriod: dbReport.reporting_period || "",
+    overallProjectScore: dbReport.overall_project_score || "N.A.",
+    riskLevel: dbReport.risk_level || "N.A.",
+    financialHealth: dbReport.financial_health || "N.A.",
+    completionOfPlannedWork: dbReport.completion_of_planned_work || "N.A.",
+    teamMorale: dbReport.team_morale || "N.A.",
+    projectManagerEvaluation: dbReport.project_manager_evaluation || "N.A.",
+    frontEndQuality: dbReport.front_end_quality || "N.A.",
+    backEndQuality: dbReport.back_end_quality || "N.A.",
+    testingQuality: dbReport.testing_quality || "N.A.",
+    designQuality: dbReport.design_quality || "N.A.",
+    submissionDate: dbReport.submission_date || new Date().toISOString(),
+    clientName: dbReport.client_name || "",
+    projectType: dbReport.project_type || undefined,
+    projectStatus: dbReport.project_status || undefined,
+    assignedPM: dbReport.assigned_pm || ""
+  };
+};
+
+/**
+ * Fetches all projects from Supabase
+ */
+export const fetchProjects = async () => {
+  try {
+    const { data: projectsData, error: projectsError } = await supabase
+      .from('projects')
+      .select('*');
+
+    if (projectsError) {
+      throw projectsError;
+    }
+    
+    return { projectsData, error: null };
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    return { projectsData: [], error };
+  }
+};
+
+/**
+ * Fetches all project reports from Supabase
+ */
+export const fetchProjectReports = async () => {
+  try {
+    const { data: reportsData, error: reportsError } = await supabase
+      .from('project_reports')
+      .select('*, projects(*)');
+
+    if (reportsError) {
+      throw reportsError;
+    }
+    
+    return { reportsData, error: null };
+  } catch (error) {
+    console.error('Error fetching project reports:', error);
+    return { reportsData: [], error };
+  }
+};
+
+/**
+ * Adds a project and report to Supabase
+ */
+export const addProjectReport = async (project: ProjectReport) => {
+  try {
+    // Check if project exists in database
+    let projectId = '';
+    const { data: existingProject } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('project_name', project.projectName)
+      .single();
+    
+    if (!existingProject) {
+      // Create new project if it doesn't exist
+      const { data: newProject, error: projectError } = await supabase
+        .from('projects')
+        .insert({
+          project_name: project.projectName,
+          client_name: project.clientName,
+          project_type: project.projectType,
+          project_status: project.projectStatus
+        })
+        .select('id')
+        .single();
+        
+      if (projectError) throw projectError;
+      projectId = newProject.id;
+    } else {
+      projectId = existingProject.id;
+    }
+
+    // Add the project report
+    const { error: reportError } = await supabase
+      .from('project_reports')
+      .insert({
+        project_id: projectId,
+        submitted_by: project.submittedBy,
+        reporting_period: project.reportingPeriod,
+        overall_project_score: project.overallProjectScore,
+        risk_level: project.riskLevel,
+        financial_health: project.financialHealth,
+        completion_of_planned_work: project.completionOfPlannedWork,
+        team_morale: project.teamMorale,
+        project_manager_evaluation: project.projectManagerEvaluation,
+        front_end_quality: project.frontEndQuality,
+        back_end_quality: project.backEndQuality,
+        testing_quality: project.testingQuality,
+        design_quality: project.designQuality,
+        submission_date: new Date().toISOString()
+      });
+
+    if (reportError) throw reportError;
+    
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error adding project:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Fetches team members from Supabase
+ */
+export const fetchTeamMembers = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('team_members')
+      .select('name');
+
+    if (error) {
+      throw error;
+    }
+
+    const names = data.map(member => member.name);
+    return { names, error: null };
+  } catch (error) {
+    console.error('Error fetching team members:', error);
+    return { 
+      names: [
+        "John Smith", 
+        "Sarah Johnson", 
+        "Michael Davis", 
+        "Emily Wilson", 
+        "David Martinez"
+      ],
+      error
+    };
+  }
+};
+
+/**
+ * Adds a team member to Supabase
+ */
+export const addTeamMember = async (name: string, email: string, role: string) => {
+  try {
+    const { error } = await supabase
+      .from('team_members')
+      .insert({
+        name,
+        email,
+        role
+      });
+
+    if (error) throw error;
+    
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error adding team member:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Removes a team member from Supabase
+ */
+export const removeTeamMember = async (name: string) => {
+  try {
+    const { data } = await supabase
+      .from('team_members')
+      .select('id')
+      .eq('name', name)
+      .single();
+    
+    if (data) {
+      const { error } = await supabase
+        .from('team_members')
+        .delete()
+        .eq('id', data.id);
+
+      if (error) throw error;
+    }
+
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error removing team member:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Adds a project name to Supabase
+ */
+export const addProjectName = async (name: string) => {
+  try {
+    const { error } = await supabase
+      .from('projects')
+      .insert({
+        project_name: name
+      });
+
+    if (error) throw error;
+    
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error adding project name:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Removes a project name from Supabase
+ */
+export const removeProjectName = async (name: string) => {
+  try {
+    const { data } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('project_name', name)
+      .single();
+    
+    if (data) {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', data.id);
+
+      if (error) throw error;
+    }
+
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error removing project name:', error);
+    return { success: false, error };
+  }
+};
