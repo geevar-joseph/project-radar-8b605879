@@ -1,20 +1,28 @@
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Menu } from "lucide-react";
+import { Menu, LogIn } from "lucide-react";
 
 export function Navigation() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // In a real implementation, this would clear auth tokens
+    console.log("Logging out");
+    navigate("/login");
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link to="/" className="font-bold text-xl">Project Radar</Link>
         <nav className="flex gap-4 items-center">
           <Button variant="ghost" asChild>
-            <Link to="/">Home</Link>
+            <Link to="/dashboard">Dashboard</Link>
           </Button>
           <Button variant="ghost" asChild>
-            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/submit-report">Submit Report</Link>
           </Button>
           <Button variant="default" asChild>
             <Link to="/submit-report">Submit Report</Link>
@@ -29,6 +37,9 @@ export function Navigation() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link to="/manage-options">Manage Projects & Users</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
+                Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
