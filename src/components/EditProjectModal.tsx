@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
@@ -73,7 +72,14 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      await updateProjectDetails(projectName, values);
+      // Ensure projectName is provided and not optional
+      await updateProjectDetails(projectName, {
+        projectName: values.projectName, // This is now explicitly defined
+        clientName: values.clientName,
+        projectType: values.projectType,
+        projectStatus: values.projectStatus,
+        assignedPM: values.assignedPM,
+      });
       toast({
         title: "Project Updated",
         description: `${values.projectName} has been updated successfully.`,

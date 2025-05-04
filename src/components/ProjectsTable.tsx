@@ -41,6 +41,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
       return { name: projectName };
     }
     
+    // Safely access properties using hasOwnProperty or optional chaining
     return {
       name: projectName,
       client: 'clientName' in projectData ? projectData.clientName : 
