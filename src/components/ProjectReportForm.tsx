@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,14 +29,14 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function ProjectReportForm() {
-  const { addProject } = useProjectContext();
+  const { addProject, projectNames, teamMembers } = useProjectContext();
   const navigate = useNavigate();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      projectName: "",
-      submittedBy: "",
+      projectName: projectNames[0] || "",
+      submittedBy: teamMembers[0] || "",
       reportingPeriod: new Date().toISOString().substring(0, 7), // YYYY-MM
       overallProjectScore: "Good",
       riskLevel: "Low",
@@ -92,9 +91,20 @@ export function ProjectReportForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Project Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter project name" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a project" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {projectNames.map(name => (
+                        <SelectItem key={name} value={name}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -106,9 +116,20 @@ export function ProjectReportForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Submitted By</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Your name" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select team member" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {teamMembers.map(name => (
+                        <SelectItem key={name} value={name}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
