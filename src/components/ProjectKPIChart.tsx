@@ -258,8 +258,8 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
       
       <div className="h-[400px] overflow-hidden">
         <ChartContainer config={chartConfig}>
-          <ResponsiveContainer width="100%" height="100%">
-            {chartView === 'bar' ? (
+          {chartView === 'bar' ? (
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -270,19 +270,28 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
                   <LabelList dataKey="label" position="top" fill="#333" />
                 </Bar>
               </BarChart>
-            ) : (
-              <RadarChart data={chartData} outerRadius={90}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="name" />
-                <PolarRadiusAxis domain={[0, 4]} tickCount={5} />
-                <Radar name="KPI Rating" dataKey="value" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+            </ResponsiveContainer>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart outerRadius={90} data={chartData}>
+                <PolarGrid gridType="polygon" />
+                <PolarAngleAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <PolarRadiusAxis domain={[0, 4]} tickCount={5} axisLine={false} tick={{ fontSize: 10 }} />
+                <Radar 
+                  name="KPI Rating" 
+                  dataKey="value" 
+                  stroke="#8884d8" 
+                  fill="#8884d8" 
+                  fillOpacity={0.6} 
+                />
                 <Tooltip content={<ChartTooltipContent />} />
                 <Legend />
               </RadarChart>
-            )}
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          )}
         </ChartContainer>
       </div>
     </div>
   );
 };
+

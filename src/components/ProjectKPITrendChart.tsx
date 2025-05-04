@@ -113,22 +113,46 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
     <div className="h-[400px] overflow-hidden">
       <ChartContainer config={chartConfig}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={trendData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="period" />
-            <YAxis domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} />
+          <LineChart 
+            data={trendData} 
+            margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis 
+              dataKey="period" 
+              tick={{ fontSize: 12 }}
+              tickMargin={10}
+            />
+            <YAxis 
+              domain={[0, 4]} 
+              ticks={[0, 1, 2, 3, 4]} 
+              tick={{ fontSize: 12 }}
+              tickMargin={10}
+            />
             <Tooltip content={<ChartTooltipContent />} />
-            <Legend />
-            <Line type="monotone" dataKey="overallScore" stroke={chartConfig.overallScore.color} activeDot={{ r: 8 }} />
-            <Line type="monotone" dataKey="risk" stroke={chartConfig.risk.color} />
-            <Line type="monotone" dataKey="financial" stroke={chartConfig.financial.color} />
-            <Line type="monotone" dataKey="completion" stroke={chartConfig.completion.color} />
-            <Line type="monotone" dataKey="morale" stroke={chartConfig.morale.color} />
-            <Line type="monotone" dataKey="pm" stroke={chartConfig.pm.color} />
-            <Line type="monotone" dataKey="frontend" stroke={chartConfig.frontend.color} />
-            <Line type="monotone" dataKey="backend" stroke={chartConfig.backend.color} />
-            <Line type="monotone" dataKey="testing" stroke={chartConfig.testing.color} />
-            <Line type="monotone" dataKey="design" stroke={chartConfig.design.color} />
+            <Legend 
+              layout="horizontal" 
+              verticalAlign="bottom"
+              wrapperStyle={{ paddingTop: '10px' }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="overallScore" 
+              name="Overall Score"
+              stroke={chartConfig.overallScore.color} 
+              strokeWidth={2}
+              dot={{ r: 4 }}
+              activeDot={{ r: 8 }} 
+            />
+            <Line type="monotone" dataKey="risk" name="Risk Level" stroke={chartConfig.risk.color} />
+            <Line type="monotone" dataKey="financial" name="Financial Health" stroke={chartConfig.financial.color} />
+            <Line type="monotone" dataKey="completion" name="Completion" stroke={chartConfig.completion.color} />
+            <Line type="monotone" dataKey="morale" name="Team Morale" stroke={chartConfig.morale.color} />
+            <Line type="monotone" dataKey="pm" name="PM Evaluation" stroke={chartConfig.pm.color} />
+            <Line type="monotone" dataKey="frontend" name="Frontend" stroke={chartConfig.frontend.color} />
+            <Line type="monotone" dataKey="backend" name="Backend" stroke={chartConfig.backend.color} />
+            <Line type="monotone" dataKey="testing" name="Testing" stroke={chartConfig.testing.color} />
+            <Line type="monotone" dataKey="design" name="Design" stroke={chartConfig.design.color} />
           </LineChart>
         </ResponsiveContainer>
       </ChartContainer>
