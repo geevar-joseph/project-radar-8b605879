@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectCard } from "@/components/ProjectCard";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { Check, AlertTriangle, XOctagon } from "lucide-react";
+import { StatusBadge } from "@/components/StatusBadge";
 
 const Dashboard = () => {
   const { 
