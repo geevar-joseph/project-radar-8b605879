@@ -9,6 +9,8 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { DashboardCharts } from "@/components/DashboardCharts";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { MissingReportsBlock } from "@/components/MissingReportsBlock";
+import { ComplianceTable } from "@/components/ComplianceTable";
 
 const Dashboard = () => {
   const { 
@@ -125,7 +127,7 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Block 2: Categorized Project List - Optimized for better space utilization */}
+      {/* Block 2: Categorized Project List */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         {/* Column 1: Projects Doing Well */}
         <div className="border-t-4 border-green-500 bg-green-50 dark:bg-green-900/10 rounded-lg p-3 flex flex-col">
@@ -230,6 +232,14 @@ const Dashboard = () => {
       {/* Block 3: KPI and Department Charts */}
       <DashboardCharts />
       
+      {/* Block 4: New Reporting Accountability Section */}
+      <h2 className="text-2xl font-semibold mt-10 mb-4">Reporting Accountability</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+        <MissingReportsBlock selectedPeriod={selectedPeriod} />
+        <ComplianceTable />
+      </div>
+      
+      {/* Fallback for no projects */}
       {projects.length === 0 && (
         <div className="text-center py-10">
           <p className="text-muted-foreground mb-4">No project reports found for this period.</p>
