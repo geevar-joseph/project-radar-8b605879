@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProjectContext } from "@/context/ProjectContext";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { ScoreIndicator } from "./ScoreIndicator";
+import { Save } from "lucide-react";
 
 const formSchema = z.object({
   projectName: z.string().min(2, "Project name must be at least 2 characters"),
@@ -28,7 +31,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function ProjectReportForm() {
+interface ProjectReportFormProps {
+  onDraftSaved?: () => void;
+}
+
+export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
   const { addProject, projectNames, teamMembers } = useProjectContext();
   const navigate = useNavigate();
   
@@ -76,6 +83,70 @@ export function ProjectReportForm() {
     addProject(newProject);
     navigate('/dashboard');
   }
+
+  function saveDraft() {
+    // Get current form values, even if incomplete
+    const formData = form.getValues();
+    
+    // Save to localStorage with timestamp
+    const draft = {
+      data: formData,
+      savedAt: new Date().toISOString()
+    };
+    
+    localStorage.setItem('projectReport_draft', JSON.stringify(draft));
+    
+    // Notify parent component
+    if (onDraftSaved) {
+      onDraftSaved();
+    }
+  }
+
+  // Score-based form field renderer with visual indicators
+  const renderScoreField = (name: keyof FormValues, label: string) => {
+    if (!['overallProjectScore', 'projectManagerEvaluation', 'frontEndQuality', 'backEndQuality', 'testingQuality', 'designQuality'].includes(name)) {
+      return null;
+    }
+    
+    return (
+      <FormField
+        control={form.control}
+        name={name}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{label}</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select rating">
+                    {field.value && <ScoreIndicator value={field.value} />}
+                  </SelectValue>
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="Excellent">
+                  <ScoreIndicator value="Excellent" />
+                </SelectItem>
+                <SelectItem value="Good">
+                  <ScoreIndicator value="Good" />
+                </SelectItem>
+                <SelectItem value="Fair">
+                  <ScoreIndicator value="Fair" />
+                </SelectItem>
+                <SelectItem value="Poor">
+                  <ScoreIndicator value="Poor" />
+                </SelectItem>
+                <SelectItem value="N.A.">
+                  <ScoreIndicator value="N.A." />
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
+  };
 
   return (
     <Form {...form}>
@@ -160,30 +231,7 @@ export function ProjectReportForm() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="overallProjectScore"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Overall Project Score</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select rating" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Excellent">Excellent</SelectItem>
-                        <SelectItem value="Good">Good</SelectItem>
-                        <SelectItem value="Fair">Fair</SelectItem>
-                        <SelectItem value="Poor">Poor</SelectItem>
-                        <SelectItem value="N.A.">N.A.</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {renderScoreField('overallProjectScore', 'Overall Project Score')}
               
               <FormField
                 control={form.control}
@@ -291,30 +339,7 @@ export function ProjectReportForm() {
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="projectManagerEvaluation"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project Manager Self-Evaluation</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select rating" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Excellent">Excellent</SelectItem>
-                        <SelectItem value="Good">Good</SelectItem>
-                        <SelectItem value="Fair">Fair</SelectItem>
-                        <SelectItem value="Poor">Poor</SelectItem>
-                        <SelectItem value="N.A.">N.A.</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {renderScoreField('projectManagerEvaluation', 'Project Manager Self-Evaluation')}
             </div>
           </CardContent>
         </Card>
@@ -325,111 +350,30 @@ export function ProjectReportForm() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="frontEndQuality"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Front-End Team Quality</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select rating" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Excellent">Excellent</SelectItem>
-                        <SelectItem value="Good">Good</SelectItem>
-                        <SelectItem value="Fair">Fair</SelectItem>
-                        <SelectItem value="Poor">Poor</SelectItem>
-                        <SelectItem value="N.A.">N.A.</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="backEndQuality"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Back-End Team Quality</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select rating" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Excellent">Excellent</SelectItem>
-                        <SelectItem value="Good">Good</SelectItem>
-                        <SelectItem value="Fair">Fair</SelectItem>
-                        <SelectItem value="Poor">Poor</SelectItem>
-                        <SelectItem value="N.A.">N.A.</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="testingQuality"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Testing Team Quality</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select rating" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Excellent">Excellent</SelectItem>
-                        <SelectItem value="Good">Good</SelectItem>
-                        <SelectItem value="Fair">Fair</SelectItem>
-                        <SelectItem value="Poor">Poor</SelectItem>
-                        <SelectItem value="N.A.">N.A.</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="designQuality"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Design Team Quality</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select rating" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Excellent">Excellent</SelectItem>
-                        <SelectItem value="Good">Good</SelectItem>
-                        <SelectItem value="Fair">Fair</SelectItem>
-                        <SelectItem value="Poor">Poor</SelectItem>
-                        <SelectItem value="N.A.">N.A.</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {renderScoreField('frontEndQuality', 'Front-End Team Quality')}
+              {renderScoreField('backEndQuality', 'Back-End Team Quality')}
+              {renderScoreField('testingQuality', 'Testing Team Quality')}
+              {renderScoreField('designQuality', 'Design Team Quality')}
             </div>
           </CardContent>
         </Card>
         
         <div className="flex justify-end gap-2">
-          <Button variant="outline" type="button" onClick={() => navigate('/')}>Cancel</Button>
+          <Button 
+            variant="outline" 
+            type="button" 
+            onClick={() => navigate('/')}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="secondary" 
+            type="button" 
+            onClick={saveDraft}
+          >
+            <Save className="mr-1 h-4 w-4" />
+            Save Draft
+          </Button>
           <Button type="submit">Submit Report</Button>
         </div>
       </form>
