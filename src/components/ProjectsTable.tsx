@@ -7,7 +7,7 @@ import { ProjectReport } from "@/types/project";
 
 interface ProjectsTableProps {
   projectNames: string[];
-  projects: ProjectReport[];
+  projects: ProjectReport[] | any[];
   removeProjectName: (name: string) => void;
 }
 
@@ -27,26 +27,34 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
         </TableHeader>
         <TableBody>
           {projectNames.map(projectName => {
-            const projectData = projects.find(p => p.projectName === projectName);
+            // Check if we have a direct match from the Supabase projects data
+            const projectData = projects.find(p => 
+              p.project_name === projectName || p.projectName === projectName
+            );
+            
             return (
               <TableRow key={projectName}>
                 <TableCell className="font-medium">{projectName}</TableCell>
-                <TableCell>{projectData?.clientName || "—"}</TableCell>
                 <TableCell>
-                  {projectData?.projectType ? (
+                  {projectData?.client_name || projectData?.clientName || "—"}
+                </TableCell>
+                <TableCell>
+                  {(projectData?.project_type || projectData?.projectType) ? (
                     <Badge variant="outline">
-                      {projectData.projectType}
+                      {projectData.project_type || projectData.projectType}
                     </Badge>
                   ) : "—"}
                 </TableCell>
                 <TableCell>
-                  {projectData?.projectStatus ? (
+                  {(projectData?.project_status || projectData?.projectStatus) ? (
                     <Badge variant="secondary">
-                      {projectData.projectStatus}
+                      {projectData.project_status || projectData.projectStatus}
                     </Badge>
                   ) : "—"}
                 </TableCell>
-                <TableCell>{projectData?.assignedPM || "—"}</TableCell>
+                <TableCell>
+                  {projectData?.assigned_pm || projectData?.assignedPM || "—"}
+                </TableCell>
                 <TableCell className="text-right">
                   <Button 
                     variant="ghost" 

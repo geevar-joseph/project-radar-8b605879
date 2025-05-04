@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,57 +7,96 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ProjectType } from "@/types/project";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AddProjectModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+interface TeamMember {
+  id: string;
+  name: string;
+}
+
 export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) => {
-  const { addProject, teamMembers } = useProjectContext();
+  const { addProject, addProjectName } = useProjectContext();
   const [jiraCode, setJiraCode] = useState("");
   const [projectName, setProjectName] = useState("");
   const [clientName, setClientName] = useState("");
   const [projectManager, setProjectManager] = useState("");
   const [projectType, setProjectType] = useState<ProjectType | "">("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (open) {
+      fetchTeamMembers();
+    }
+  }, [open]);
+
+  const fetchTeamMembers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('id, name');
+      
+      if (error) throw error;
+      
+      if (data) {
+        setTeamMembers(data);
+      }
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!projectName || !clientName || !projectManager || !projectType) {
+    if (!projectName || !clientName || !projectType) {
       return; // Don't submit if required fields are missing
     }
 
-    addProject({
-      id: `P${Math.floor(Math.random() * 10000)}`, // Random ID for demo
-      projectName,
-      clientName,
-      assignedPM: projectManager,
-      projectType: projectType as ProjectType, // Cast here to ensure type safety
-      // Using the proper property names from the ProjectReport interface
-      submittedBy: "",
-      reportingPeriod: "",
-      overallProjectScore: "N.A.",
-      riskLevel: "N.A.",
-      financialHealth: "N.A.",
-      completionOfPlannedWork: "N.A.",
-      teamMorale: "N.A.",
-      projectManagerEvaluation: "N.A.",
-      frontEndQuality: "N.A.",
-      backEndQuality: "N.A.",
-      testingQuality: "N.A.",
-      designQuality: "N.A.",
-      submissionDate: new Date().toISOString(),
-      projectStatus: "Not Started" // Default status for new projects
-    });
-
-    // Reset form and close modal
-    setJiraCode("");
-    setProjectName("");
-    setClientName("");
-    setProjectManager("");
-    setProjectType("");
-    onOpenChange(false);
+    setIsSubmitting(true);
+    
+    try {
+      // Find the project manager's ID if one is selected
+      let pmId = null;
+      if (projectManager) {
+        const selectedPM = teamMembers.find(member => member.name === projectManager);
+        pmId = selectedPM?.id;
+      }
+      
+      // Insert the project into the database
+      const { data, error } = await supabase
+        .from('projects')
+        .insert({
+          project_name: projectName,
+          client_name: clientName,
+          assigned_pm: pmId,
+          project_type: projectType,
+          project_status: "Not Started" // Default status for new projects
+        })
+        .select();
+      
+      if (error) throw error;
+      
+      // Add to context
+      addProjectName(projectName);
+      
+      // Reset form and close modal
+      setJiraCode("");
+      setProjectName("");
+      setClientName("");
+      setProjectManager("");
+      setProjectType("");
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error adding project:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -111,20 +150,19 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="projectManager" className="text-right">
-                Project Manager*
+                Project Manager
               </Label>
               <Select
                 value={projectManager}
                 onValueChange={setProjectManager}
-                required
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a project manager" />
                 </SelectTrigger>
                 <SelectContent>
                   {teamMembers.map((member) => (
-                    <SelectItem key={member} value={member}>
-                      {member}
+                    <SelectItem key={member.id} value={member.name}>
+                      {member.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -153,10 +191,12 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit">Add Project</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Adding..." : "Add Project"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

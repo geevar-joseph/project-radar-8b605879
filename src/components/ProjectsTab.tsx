@@ -5,7 +5,8 @@ import { Plus } from "lucide-react";
 import { ProjectReport } from "@/types/project";
 import { ProjectsTable } from "./ProjectsTable";
 import { AddProjectModal } from "./AddProjectModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProjectsTabProps {
   projectNames: string[];
@@ -15,6 +16,31 @@ interface ProjectsTabProps {
 
 export const ProjectsTab = ({ projectNames, projects, removeProjectName }: ProjectsTabProps) => {
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [projectsData, setProjectsData] = useState<any[]>([]);
+  
+  useEffect(() => {
+    fetchProjectsData();
+  }, [projectNames]);
+  
+  const fetchProjectsData = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*');
+      
+      if (error) {
+        throw error;
+      }
+      
+      setProjectsData(data);
+    } catch (error) {
+      console.error('Error fetching projects data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Card>
@@ -27,11 +53,15 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
         </div>
       </CardHeader>
       <CardContent>
-        <ProjectsTable 
-          projectNames={projectNames}
-          projects={projects}
-          removeProjectName={removeProjectName}
-        />
+        {isLoading ? (
+          <div className="flex justify-center py-4">Loading projects...</div>
+        ) : (
+          <ProjectsTable 
+            projectNames={projectNames}
+            projects={projectsData.length > 0 ? projectsData : projects}
+            removeProjectName={removeProjectName}
+          />
+        )}
       </CardContent>
 
       {/* Project Modal */}

@@ -22,6 +22,7 @@ export const AddTeamMemberModal = ({ open, onOpenChange }: AddTeamMemberModalPro
   const [assignedProjects, setAssignedProjects] = useState<string[]>([]);
   const [projectSearch, setProjectSearch] = useState("");
   const [showProjectDropdown, setShowProjectDropdown] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filteredProjects = projectNames.filter(
     (project) => 
@@ -29,23 +30,29 @@ export const AddTeamMemberModal = ({ open, onOpenChange }: AddTeamMemberModalPro
       project.toLowerCase().includes(projectSearch.toLowerCase())
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!fullName || !email || !role) {
       return; // Don't submit if required fields are missing
     }
 
-    // In a real app, you'd save the email and assigned projects to the user record
-    // For this demo, we'll just add the team member's name
-    addTeamMember(fullName);
-
-    // Reset form and close modal
-    setFullName("");
-    setEmail("");
-    setRole("");
-    setAssignedProjects([]);
-    onOpenChange(false);
+    setIsSubmitting(true);
+    
+    try {
+      await addTeamMember(fullName, email, role);
+      
+      // Reset form and close modal
+      setFullName("");
+      setEmail("");
+      setRole("");
+      setAssignedProjects([]);
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error adding team member:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const addProject = (project: string) => {
@@ -162,10 +169,12 @@ export const AddTeamMemberModal = ({ open, onOpenChange }: AddTeamMemberModalPro
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit">Add Team Member</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Adding..." : "Add Team Member"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
