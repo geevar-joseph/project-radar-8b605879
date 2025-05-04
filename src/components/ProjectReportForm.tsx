@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -394,7 +395,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {renderTeamMoraleField()}
-              {renderScoreField('projectManagerEvaluation', 'Project Manager Self-Evaluation')}
+              {/* Project Manager Self-Evaluation moved to Departmental Performance section */}
             </div>
           </CardContent>
         </Card>
@@ -409,6 +410,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               {renderScoreField('backEndQuality', 'Back-End Team Quality')}
               {renderScoreField('testingQuality', 'Testing Team Quality')}
               {renderScoreField('designQuality', 'Design Team Quality')}
+              {renderScoreField('projectManagerEvaluation', 'Project Manager Self-Evaluation')}
             </div>
           </CardContent>
         </Card>
