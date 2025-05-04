@@ -24,44 +24,18 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
-            {/* Protected routes with Navigation */}
-            <Route path="/" element={<Navigate to="/login" />} />
-            <Route
-              path="/dashboard"
-              element={
-                <>
-                  <Navigation />
-                  <Dashboard />
-                </>
-              }
-            />
-            <Route
-              path="/submit-report"
-              element={
-                <>
-                  <Navigation />
-                  <SubmitReport />
-                </>
-              }
-            />
-            <Route
-              path="/project/:id"
-              element={
-                <>
-                  <Navigation />
-                  <ProjectDetail />
-                </>
-              }
-            />
-            <Route
-              path="/manage-options"
-              element={
-                <>
-                  <Navigation />
-                  <Index />
-                </>
-              }
-            />
+            
+            {/* Redirect root to dashboard */}
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            
+            {/* Layout with sidebar navigation */}
+            <Route path="/" element={<Navigation />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="submit-report" element={<SubmitReport />} />
+              <Route path="project/:id" element={<ProjectDetail />} />
+              <Route path="manage-options" element={<Index />} />
+            </Route>
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
