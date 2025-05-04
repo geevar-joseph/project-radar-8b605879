@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ProjectType } from "@/types/project";
 
 interface AddProjectModalProps {
   open: boolean;
@@ -18,7 +19,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
   const [projectName, setProjectName] = useState("");
   const [clientName, setClientName] = useState("");
   const [projectManager, setProjectManager] = useState("");
-  const [projectType, setProjectType] = useState("");
+  const [projectType, setProjectType] = useState<ProjectType | "">("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +35,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
       status: "Active",
       assignedPM: projectManager,
       startDate: new Date().toISOString(),
-      projectType,
+      projectType: projectType as ProjectType, // Cast here to ensure type safety
       jiraCode: jiraCode || `PROJ-${Math.floor(Math.random() * 10000)}`, // Use entered or generate random
     });
 
@@ -123,15 +124,18 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
               </Label>
               <Select
                 value={projectType}
-                onValueChange={setProjectType}
+                onValueChange={(value) => setProjectType(value as ProjectType)}
                 required
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select project type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Service">Service</SelectItem>
-                  <SelectItem value="Product">Product</SelectItem>
+                  <SelectItem value="Development">Development</SelectItem>
+                  <SelectItem value="Design">Design</SelectItem>
+                  <SelectItem value="Research">Research</SelectItem>
+                  <SelectItem value="Maintenance">Maintenance</SelectItem>
+                  <SelectItem value="Consulting">Consulting</SelectItem>
                 </SelectContent>
               </Select>
             </div>
