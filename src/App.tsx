@@ -13,6 +13,7 @@ import ProjectDetail from "./pages/ProjectDetail";
 import Projects from "./pages/Projects";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import ManageOptions from "./pages/ManageOptions";
 
 const queryClient = new QueryClient();
 
@@ -35,7 +36,7 @@ const App = () => (
               <Route path="projects" element={<Projects />} />
               <Route path="submit-report" element={<SubmitReport />} />
               <Route path="project/:id" element={<ProjectDetail />} />
-              <Route path="manage-options" element={<Index />} />
+              <Route path="manage-options" element={<ManageOptions />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />
