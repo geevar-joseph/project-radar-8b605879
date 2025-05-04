@@ -15,7 +15,7 @@ import {
   SidebarGroupLabel,
   SidebarInset
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, FileText, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, Settings, LogOut, FolderOpen } from "lucide-react";
 
 export function Navigation() {
   const navigate = useNavigate();
@@ -45,6 +45,14 @@ export function Navigation() {
                       <Link to="/dashboard">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         <span>Dashboard</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip="Projects">
+                      <Link to="/projects">
+                        <FolderOpen className="mr-2 h-4 w-4" />
+                        <span>Projects</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

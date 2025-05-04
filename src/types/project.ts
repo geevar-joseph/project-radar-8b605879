@@ -4,6 +4,8 @@ export type RiskLevel = 'Low' | 'Medium' | 'High' | 'N.A.';
 export type FinancialHealth = 'Healthy' | 'On Watch' | 'At Risk' | 'N.A.';
 export type CompletionStatus = 'All completed' | 'Mostly' | 'Partially' | 'Not completed' | 'N.A.';
 export type TeamMorale = 'High' | 'Moderate' | 'Low' | 'N.A.';
+export type ProjectType = 'Development' | 'Design' | 'Research' | 'Maintenance' | 'Consulting';
+export type ProjectStatus = 'Ongoing' | 'On Hold' | 'Completed' | 'Not Started';
 
 export interface ProjectReport {
   id: string;
@@ -21,6 +23,10 @@ export interface ProjectReport {
   testingQuality: RatingValue;
   designQuality: RatingValue;
   submissionDate: string;
+  clientName?: string;
+  projectType?: ProjectType;
+  projectStatus?: ProjectStatus;
+  assignedPM?: string;
 }
 
 // Mapping ratings to numeric values for calculations

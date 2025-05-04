@@ -1,5 +1,5 @@
 
-import { ProjectReport } from "../types/project";
+import { ProjectReport, ProjectStatus, ProjectType } from "../types/project";
 
 export const sampleProjects: ProjectReport[] = [
   {
@@ -17,7 +17,11 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Good",
     testingQuality: "Good",
     designQuality: "Excellent",
-    submissionDate: "2025-04-30"
+    submissionDate: "2025-04-30",
+    clientName: "Acme Corp",
+    projectType: "Development",
+    projectStatus: "Ongoing",
+    assignedPM: "Jane Smith"
   },
   {
     id: "2",
@@ -34,7 +38,11 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Fair",
     testingQuality: "Fair",
     designQuality: "Good",
-    submissionDate: "2025-04-28"
+    submissionDate: "2025-04-28",
+    clientName: "TechStart Inc.",
+    projectType: "Development",
+    projectStatus: "Ongoing",
+    assignedPM: "John Davis"
   },
   {
     id: "3",
@@ -51,7 +59,11 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Poor",
     testingQuality: "Poor",
     designQuality: "Fair",
-    submissionDate: "2025-04-25"
+    submissionDate: "2025-04-25",
+    clientName: "Global Industries",
+    projectType: "Integration",
+    projectStatus: "On Hold",
+    assignedPM: "Alice Johnson"
   },
   {
     id: "4",
@@ -68,7 +80,11 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Excellent", 
     testingQuality: "Good",
     designQuality: "Excellent",
-    submissionDate: "2025-03-31"
+    submissionDate: "2025-03-31",
+    clientName: "DataViz Corp",
+    projectType: "Development",
+    projectStatus: "Completed",
+    assignedPM: "Michael Brown"
   },
   {
     id: "5",
@@ -85,6 +101,10 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Excellent",
     testingQuality: "Excellent",
     designQuality: "N.A.",
-    submissionDate: "2025-03-29"
+    submissionDate: "2025-03-29",
+    clientName: "SecureBank",
+    projectType: "Consulting",
+    projectStatus: "Ongoing",
+    assignedPM: "Sarah Williams"
   }
 ];

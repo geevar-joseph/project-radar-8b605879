@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import SubmitReport from "./pages/SubmitReport";
 import ProjectDetail from "./pages/ProjectDetail";
+import Projects from "./pages/Projects";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 
@@ -31,6 +32,7 @@ const App = () => (
             {/* Layout with sidebar navigation */}
             <Route path="/" element={<Navigation />}>
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="projects" element={<Projects />} />
               <Route path="submit-report" element={<SubmitReport />} />
               <Route path="project/:id" element={<ProjectDetail />} />
               <Route path="manage-options" element={<Index />} />
