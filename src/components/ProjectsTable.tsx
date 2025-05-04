@@ -30,7 +30,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
             // Check if we have a direct match from the Supabase projects data
             const projectData = projects.find(p => {
               // Handle both formats: database format and frontend type format
-              const pName = p.project_name || p.projectName;
+              const pName = p.projectName || p.project_name;
               return pName === projectName;
             });
             
@@ -38,24 +38,24 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
               <TableRow key={projectName}>
                 <TableCell className="font-medium">{projectName}</TableCell>
                 <TableCell>
-                  {projectData?.client_name || projectData?.clientName || "—"}
+                  {projectData?.clientName || projectData?.client_name || "—"}
                 </TableCell>
                 <TableCell>
-                  {(projectData?.project_type || projectData?.projectType) ? (
+                  {(projectData?.projectType || projectData?.project_type) ? (
                     <Badge variant="outline">
-                      {projectData?.project_type || projectData?.projectType}
+                      {projectData?.projectType || projectData?.project_type}
                     </Badge>
                   ) : "—"}
                 </TableCell>
                 <TableCell>
-                  {(projectData?.project_status || projectData?.projectStatus) ? (
+                  {(projectData?.projectStatus || projectData?.project_status) ? (
                     <Badge variant="secondary">
-                      {projectData?.project_status || projectData?.projectStatus}
+                      {projectData?.projectStatus || projectData?.project_status}
                     </Badge>
                   ) : "—"}
                 </TableCell>
                 <TableCell>
-                  {projectData?.assigned_pm || projectData?.assignedPM || "—"}
+                  {projectData?.assignedPM || projectData?.assigned_pm || "—"}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button 
