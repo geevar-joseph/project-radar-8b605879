@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Link } from "react-router-dom";
 import { Check, AlertTriangle, XOctagon } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { DashboardCharts } from "@/components/DashboardCharts";
 
 const Dashboard = () => {
   const { 
@@ -214,6 +215,9 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      
+      {/* Block 3: KPI and Department Charts */}
+      <DashboardCharts />
       
       {projects.length === 0 && (
         <div className="text-center py-10">
