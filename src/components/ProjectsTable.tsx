@@ -39,7 +39,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
           if ('projectName' in project) {
             projectName = project.projectName;
           } else if ('project_name' in project) {
-            projectName = project.project_name;
+            projectName = project.project_name as string;
           }
         }
         
@@ -60,18 +60,28 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
               projectMap.set(projectName, project);
             }
           } else if ('updated_at' in existingProject && 'updated_at' in project) {
-            existingDate = new Date(existingProject.updated_at);
-            currentDate = new Date(project.updated_at);
+            const existingDateValue = existingProject.updated_at;
+            const currentDateValue = project.updated_at;
             
-            if (currentDate > existingDate) {
-              projectMap.set(projectName, project);
+            if (existingDateValue && currentDateValue) {
+              existingDate = new Date(existingDateValue);
+              currentDate = new Date(currentDateValue);
+              
+              if (currentDate > existingDate) {
+                projectMap.set(projectName, project);
+              }
             }
           } else if ('submission_date' in existingProject && 'submission_date' in project) {
-            existingDate = new Date(existingProject.submission_date);
-            currentDate = new Date(project.submission_date);
+            const existingDateValue = existingProject.submission_date;
+            const currentDateValue = project.submission_date;
             
-            if (currentDate > existingDate) {
-              projectMap.set(projectName, project);
+            if (existingDateValue && currentDateValue) {
+              existingDate = new Date(existingDateValue);
+              currentDate = new Date(currentDateValue);
+              
+              if (currentDate > existingDate) {
+                projectMap.set(projectName, project);
+              }
             }
           }
         }
