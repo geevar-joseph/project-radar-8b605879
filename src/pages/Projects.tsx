@@ -2,11 +2,11 @@
 import { useState, useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectsHeader } from "@/components/ProjectsHeader";
-import { ProjectsFiltering } from "@/components/ProjectsFiltering";
 import { ProjectsTable } from "@/components/ProjectsTable";
 import { ProjectPagination } from "@/components/ProjectPagination";
 import { ProjectSearchBar } from "@/components/ProjectSearchBar";
 import { ProjectReport } from "@/types/project";
+import { FilterDrawer } from "@/components/FilterDrawer";
 
 const Projects = () => {
   // Initialize sorting by client name
@@ -96,8 +96,8 @@ const Projects = () => {
   // Change page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
   };
 
   const handleFilterChange = (filters: any) => {
@@ -120,16 +120,23 @@ const Projects = () => {
     return sortDirection === 'asc' ? '↑' : '↓';
   };
 
+  const handleAddProject = () => {
+    console.log("Add new project functionality not implemented yet");
+  };
+
   return (
     <div className="container mx-auto py-10 space-y-6">
       <ProjectsHeader 
-        title="Project Reports" 
-        totalProjects={filteredProjects.length} 
+        onAddProject={handleAddProject}
+        showAddButton={false}
       />
       
       <div className="flex flex-col md:flex-row gap-4 justify-between">
-        <ProjectSearchBar onSearch={handleSearch} />
-        <ProjectsFiltering onChange={handleFilterChange} />
+        <ProjectSearchBar 
+          searchTerm={searchTerm} 
+          onSearchChange={handleSearch} 
+        />
+        <FilterDrawer onChange={handleFilterChange} />
       </div>
       
       <ProjectsTable 
@@ -140,9 +147,8 @@ const Projects = () => {
       
       <ProjectPagination 
         currentPage={currentPage}
-        totalProjects={filteredProjects.length}
-        projectsPerPage={projectsPerPage}
-        paginate={paginate}
+        pageCount={Math.ceil(filteredProjects.length / projectsPerPage)}
+        onPageChange={paginate}
       />
     </div>
   );
