@@ -29,6 +29,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useProjectContext } from "@/context/ProjectContext";
 import { useToast } from "@/components/ui/use-toast";
+import { ProjectType, ProjectStatus } from "@/types/project";
 
 interface EditProjectModalProps {
   open: boolean;
@@ -93,8 +94,8 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
         projectName: values.projectName,
         clientName: values.clientName || "",
         jiraId: values.jiraId || "",
-        projectType: values.projectType || "",
-        projectStatus: values.projectStatus || "",
+        projectType: values.projectType || "Service",
+        projectStatus: values.projectStatus || "Active",
         assignedPM: values.assignedPM || "",
       };
       

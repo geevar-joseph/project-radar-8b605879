@@ -1,5 +1,5 @@
 
-import { ProjectReport } from "@/types/project";
+import { ProjectReport, ProjectType, ProjectStatus } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import {
   addProjectName as apiAddProjectName,
@@ -185,10 +185,11 @@ export const useProjectMutations = (
             projectName: updateData.projectName,
             clientName: updateData.clientName || project.clientName || "",
             jiraId: updateData.jiraId || project.jiraId || "",
-            projectType: updateData.projectType || project.projectType || "Service",
-            projectStatus: updateData.projectStatus || project.projectStatus || "Active",
+            // Ensure proper type casting for enum values
+            projectType: (updateData.projectType as ProjectType) || project.projectType || "Service" as ProjectType,
+            projectStatus: (updateData.projectStatus as ProjectStatus) || project.projectStatus || "Active" as ProjectStatus,
             assignedPM: updateData.assignedPM || project.assignedPM || ""
-          };
+          } as ProjectReport; // Explicitly cast to ProjectReport
         }
         return project;
       });
