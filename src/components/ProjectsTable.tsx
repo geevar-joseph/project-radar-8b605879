@@ -33,6 +33,12 @@ export function ProjectsTable({
     setEditingProject(null);
   };
 
+  const handleRemove = (projectName: string) => {
+    if (onRemove) {
+      onRemove(projectName);
+    }
+  };
+
   return (
     <div className="rounded-md border w-full overflow-x-auto">
       <Table>
@@ -99,7 +105,7 @@ export function ProjectsTable({
                     submissionDate: project.submissionDate || project.updated_at
                   }}
                   onEdit={() => handleEdit(projectName)}
-                  onRemove={() => onRemove && onRemove(projectName)} // Pass the removal function with project name
+                  onRemove={() => handleRemove(projectName)} // Use the handleRemove wrapper
                   isManageView={isManageView}
                 />
               );
