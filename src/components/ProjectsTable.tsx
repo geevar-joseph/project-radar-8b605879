@@ -137,15 +137,13 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
     };
   };
 
-  // Filter project names based on search
+  // Filter project names based on search - restricted to only project name and JIRA ID
   const filteredProjectNames = useMemo(() => {
     return projectNames.filter(name => {
       const projectData = normalizeProjectData(name);
       return (
         name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (projectData.client && projectData.client.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (projectData.jiraId && projectData.jiraId.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (projectData.type && projectData.type.toLowerCase().includes(searchTerm.toLowerCase()))
+        (projectData.jiraId && projectData.jiraId.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     });
   }, [projectNames, searchTerm]);
@@ -163,7 +161,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search projects by name, client, JIRA ID or type..."
+            placeholder="Search projects by name or JIRA ID..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -181,9 +179,9 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
               <TableHead>JIRA ID</TableHead>
               <TableHead>Project Name</TableHead>
               <TableHead>Client</TableHead>
+              <TableHead>Assigned PM</TableHead>
               <TableHead>Project Type</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Assigned PM</TableHead>
               <TableHead>Overall Score</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -198,6 +196,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
                     <TableCell>{project.jiraId || "—"}</TableCell>
                     <TableCell className="font-medium">{project.name}</TableCell>
                     <TableCell>{project.client || "—"}</TableCell>
+                    <TableCell>{project.pm || "—"}</TableCell>
                     <TableCell>
                       {project.type ? (
                         <Badge variant="outline">{project.type}</Badge>
@@ -207,10 +206,6 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
                       {project.status ? (
                         <Badge variant="secondary">{project.status}</Badge>
                       ) : "—"}
-                    </TableCell>
-                    <TableCell className="flex items-center gap-1">
-                      <User className="h-3.5 w-3.5" />
-                      {project.pm || "—"}
                     </TableCell>
                     <TableCell>{project.overallScore || "—"}</TableCell>
                     <TableCell className="text-right space-x-2 flex justify-end">

@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectReport } from "@/types/project";
@@ -57,14 +58,12 @@ const Projects = () => {
     });
   }, [projects]);
 
-  // Filter projects based on search term
+  // Filter projects based on search term - restricted to project name and JIRA ID only
   const filteredProjects = useMemo(() => {
     return latestProjectReports.filter((project) => {
       return (
         project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (project.clientName && project.clientName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (project.jiraId && project.jiraId.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (project.projectType && project.projectType.toLowerCase().includes(searchTerm.toLowerCase()))
+        (project.jiraId && project.jiraId.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     });
   }, [latestProjectReports, searchTerm]);
@@ -128,7 +127,7 @@ const Projects = () => {
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search projects by name, client, JIRA ID or type..."
+            placeholder="Search projects by name or JIRA ID..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -152,6 +151,9 @@ const Projects = () => {
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('clientName')}>
                 Client {getSortIndicator('clientName')}
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort('assignedPM')}>
+                Assigned PM {getSortIndicator('assignedPM')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('projectType')}>
                 Type {getSortIndicator('projectType')}
@@ -186,6 +188,7 @@ const Projects = () => {
                     </a>
                   </TableCell>
                   <TableCell>{project.clientName || "N/A"}</TableCell>
+                  <TableCell>{project.assignedPM || "N/A"}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
                       {project.projectType || "N/A"}
@@ -210,7 +213,7 @@ const Projects = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={9} className="h-24 text-center">
+                <TableCell colSpan={10} className="h-24 text-center">
                   No projects found
                 </TableCell>
               </TableRow>
