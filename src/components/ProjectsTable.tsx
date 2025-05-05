@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { X, Edit } from "lucide-react";
+import { X, Edit, User } from "lucide-react";
 import { ProjectReport } from "@/types/project";
 import { EditProjectModal } from "./EditProjectModal";
 
@@ -14,6 +14,8 @@ type ProjectData = {
   type?: string;
   status?: string;
   pm?: string;
+  jiraId?: string;
+  overallScore?: string;
 }
 
 interface ProjectsTableProps {
@@ -115,7 +117,13 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
               undefined,
       pm: 'assignedPM' in latestProjectData ? latestProjectData.assignedPM : 
           'assigned_pm' in latestProjectData ? latestProjectData.assigned_pm : 
-          undefined
+          undefined,
+      jiraId: 'jiraId' in latestProjectData ? latestProjectData.jiraId : 
+              'jira_id' in latestProjectData ? latestProjectData.jira_id : 
+              undefined,
+      overallScore: 'overallProjectScore' in latestProjectData ? latestProjectData.overallProjectScore : 
+                    'overall_project_score' in latestProjectData ? latestProjectData.overall_project_score : 
+                    undefined
     };
   };
 
@@ -126,9 +134,11 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
           <TableRow>
             <TableHead>Project Name</TableHead>
             <TableHead>Client</TableHead>
+            <TableHead>JIRA ID</TableHead>
             <TableHead>Project Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Assigned PM</TableHead>
+            <TableHead>Overall Score</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -140,6 +150,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
               <TableRow key={projectName}>
                 <TableCell className="font-medium">{project.name}</TableCell>
                 <TableCell>{project.client || "—"}</TableCell>
+                <TableCell>{project.jiraId || "—"}</TableCell>
                 <TableCell>
                   {project.type ? (
                     <Badge variant="outline">{project.type}</Badge>
@@ -150,7 +161,11 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
                     <Badge variant="secondary">{project.status}</Badge>
                   ) : "—"}
                 </TableCell>
-                <TableCell>{project.pm || "—"}</TableCell>
+                <TableCell className="flex items-center gap-1">
+                  <User className="h-3.5 w-3.5" />
+                  {project.pm || "—"}
+                </TableCell>
+                <TableCell>{project.overallScore || "—"}</TableCell>
                 <TableCell className="text-right space-x-2 flex justify-end">
                   <Button 
                     variant="ghost" 

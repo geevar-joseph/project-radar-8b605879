@@ -7,7 +7,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AddProjectModal } from "@/components/AddProjectModal";
-import { FileText, User, Type, Code } from "lucide-react";
+import { User } from "lucide-react";
 
 const Projects = () => {
   const { projects } = useProjectContext();
@@ -105,6 +105,9 @@ const Projects = () => {
               <TableHead className="cursor-pointer" onClick={() => handleSort('clientName')}>
                 Client Name {getSortIndicator('clientName')}
               </TableHead>
+              <TableHead className="cursor-pointer">
+                JIRA ID
+              </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('projectType')}>
                 Type {getSortIndicator('projectType')}
               </TableHead>
@@ -120,8 +123,8 @@ const Projects = () => {
               <TableHead className="cursor-pointer" onClick={() => handleSort('submissionDate')}>
                 Last Updated {getSortIndicator('submissionDate')}
               </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort('riskLevel')}>
-                Project Health {getSortIndicator('riskLevel')}
+              <TableHead className="cursor-pointer" onClick={() => handleSort('overallProjectScore')}>
+                Overall Score {getSortIndicator('overallProjectScore')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('riskLevel')}>
                 Risk Level {getSortIndicator('riskLevel')}
@@ -141,8 +144,10 @@ const Projects = () => {
                 </TableCell>
                 <TableCell>{project.clientName}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <Type className="h-3.5 w-3.5" />
+                  {project.jiraId || "N/A"}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">
                     {project.projectType || "N/A"}
                   </Badge>
                 </TableCell>
@@ -158,7 +163,7 @@ const Projects = () => {
                 <TableCell>{project.reportingPeriod}</TableCell>
                 <TableCell>{formatDate(project.submissionDate)}</TableCell>
                 <TableCell>
-                  <StatusBadge value={project.riskLevel} type="risk" />
+                  {project.overallProjectScore || "N/A"}
                 </TableCell>
                 <TableCell>
                   <StatusBadge value={project.riskLevel} type="risk" />
