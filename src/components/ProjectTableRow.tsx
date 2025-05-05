@@ -62,7 +62,9 @@ export const ProjectTableRow: React.FC<ProjectTableRowProps> = ({
       {!isManageView && (
         <>
           <TableCell>{formatDate(project.submissionDate) || "—"}</TableCell>
-          <TableCell>{project.overallScore || "—"}</TableCell>
+          <TableCell>
+            <StatusBadge value={project.overallScore || "0.0"} type="score" />
+          </TableCell>
           <TableCell>
             <StatusBadge value={(project.riskLevel || 'N.A.') as RiskLevel} type="risk" />
           </TableCell>

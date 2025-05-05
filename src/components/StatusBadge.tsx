@@ -11,7 +11,7 @@ interface StatusBadgeProps {
 
 export function StatusBadge({ value, type, className }: StatusBadgeProps) {
   return (
-    <Badge variant="outline" className={`flex items-center gap-1 border-0 ${className || ''}`}>
+    <Badge variant="outline" className={`flex items-center gap-1 border-0 px-1 py-0.5 ${className || ''}`}>
       <ScoreIndicator value={value} type={type} />
     </Badge>
   );

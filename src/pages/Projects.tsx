@@ -20,14 +20,17 @@ const Projects = () => {
   // Calculate overall project score for each project
   const projectsWithScores = useMemo(() => {
     return projects.map(project => {
-      // Return early if project already has a score
-      if (project.overallProjectScore && project.overallProjectScore !== "N/A") {
-        return project;
-      }
-      
-      // Calculate score based on all KPIs
+      // Improved score calculation that's consistent with the detail page
       const calculateScore = (project: ProjectReport) => {
         try {
+          // Check if there's already a valid score (checking both N/A formats)
+          if (project.overallProjectScore && 
+              project.overallProjectScore !== "N/A" && 
+              project.overallProjectScore !== "N.A." &&
+              !isNaN(Number(project.overallProjectScore))) {
+            return project.overallProjectScore;
+          }
+          
           // Get all rating values
           const ratings = [
             project.projectManagerEvaluation ? ratingToValueMap[project.projectManagerEvaluation] : null,
