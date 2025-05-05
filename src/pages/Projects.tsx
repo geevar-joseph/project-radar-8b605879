@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectReport } from "@/types/project";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -20,6 +20,31 @@ const Projects = () => {
   });
   const [addModalOpen, setAddModalOpen] = useState(false);
 
+  // Group projects by project name and get the latest report for each project
+  const latestProjectReports = useMemo(() => {
+    const projectGroups: Record<string, ProjectReport[]> = {};
+    
+    // Group projects by projectName
+    projects.forEach(project => {
+      if (!projectGroups[project.projectName]) {
+        projectGroups[project.projectName] = [];
+      }
+      projectGroups[project.projectName].push(project);
+    });
+    
+    // For each group, get the latest report based on reporting period or submission date
+    return Object.values(projectGroups).map(group => {
+      return group.sort((a, b) => {
+        // First try to compare by reporting period (assuming format YYYY-MM)
+        if (a.reportingPeriod !== b.reportingPeriod) {
+          return b.reportingPeriod.localeCompare(a.reportingPeriod);
+        }
+        // If reporting periods are the same, compare by submission date
+        return new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime();
+      })[0]; // Take the first one which is now the latest
+    });
+  }, [projects]);
+
   const handleSort = (key: keyof ProjectReport) => {
     let direction: 'ascending' | 'descending' = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -28,7 +53,7 @@ const Projects = () => {
     setSortConfig({ key, direction });
   };
 
-  const sortedProjects = [...projects].sort((a, b) => {
+  const sortedProjects = [...latestProjectReports].sort((a, b) => {
     if (!sortConfig.key) return 0;
     
     const aValue = a[sortConfig.key];
@@ -71,13 +96,10 @@ const Projects = () => {
 
       <div className="rounded-md border">
         <Table>
-          <TableCaption>A list of all projects</TableCaption>
+          <TableCaption>A list of all projects (latest reports only)</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[80px] cursor-pointer" onClick={() => handleSort('id')}>
-                ID {getSortIndicator('id')}
-              </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort('projectName')}>
+              <TableHead className="w-[150px] cursor-pointer" onClick={() => handleSort('projectName')}>
                 Project Name {getSortIndicator('projectName')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('clientName')}>
@@ -91,6 +113,9 @@ const Projects = () => {
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('assignedPM')}>
                 Assigned PM {getSortIndicator('assignedPM')}
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort('reportingPeriod')}>
+                Reporting Period {getSortIndicator('reportingPeriod')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('submissionDate')}>
                 Last Updated {getSortIndicator('submissionDate')}
@@ -108,8 +133,7 @@ const Projects = () => {
           </TableHeader>
           <TableBody>
             {sortedProjects.map((project) => (
-              <TableRow key={project.id} className="hover:bg-muted/50">
-                <TableCell className="font-medium">{project.id}</TableCell>
+              <TableRow key={`${project.projectName}-${project.reportingPeriod}`} className="hover:bg-muted/50">
                 <TableCell className="font-medium">
                   <a href={`/project/${project.id}`} className="hover:underline text-primary">
                     {project.projectName}
@@ -131,6 +155,7 @@ const Projects = () => {
                   <User className="h-3.5 w-3.5" /> 
                   {project.assignedPM || "N/A"}
                 </TableCell>
+                <TableCell>{project.reportingPeriod}</TableCell>
                 <TableCell>{formatDate(project.submissionDate)}</TableCell>
                 <TableCell>
                   <StatusBadge value={project.riskLevel} type="risk" />
