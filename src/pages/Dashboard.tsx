@@ -28,14 +28,21 @@ const Dashboard = () => {
   
   useEffect(() => {
     // Select the latest period by default if no period is selected
-    if (periods.length > 0 && !selectedPeriod) {
+    if (periods.length > 0 && (!selectedPeriod || selectedPeriod === "N/A")) {
       // Sort periods in descending order to get the latest one
-      const sortedPeriods = [...periods].sort((a, b) => {
+      const sortedPeriods = [...periods].filter(p => p !== "N/A").sort((a, b) => {
         const [yearA, monthA] = a.split('-').map(Number);
         const [yearB, monthB] = b.split('-').map(Number);
-        return yearB - yearA || monthB - monthA;
+        // Only compare if both are valid format
+        if (!isNaN(yearA) && !isNaN(monthA) && !isNaN(yearB) && !isNaN(monthB)) {
+          return yearB - yearA || monthB - monthA;
+        }
+        return 0;
       });
-      setSelectedPeriod(sortedPeriods[0]);
+      
+      if (sortedPeriods.length > 0) {
+        setSelectedPeriod(sortedPeriods[0]);
+      }
     }
   }, [periods, selectedPeriod, setSelectedPeriod]);
 
@@ -77,7 +84,7 @@ const Dashboard = () => {
                 <SelectValue placeholder="Select Period" />
               </SelectTrigger>
               <SelectContent>
-                {periods.map((period) => (
+                {periods.filter(period => period !== "N/A").map((period) => (
                   <SelectItem key={period} value={period}>{formatPeriod(period)}</SelectItem>
                 ))}
               </SelectContent>
