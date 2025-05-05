@@ -52,10 +52,11 @@ export const useProjectMutations = (
   ) => {
     if (!projectNames.includes(name)) {
       try {
+        // Ensure jiraId is handled correctly
         const { success, error } = await apiAddProjectName(
           name,
           clientName,
-          jiraId,
+          jiraId,  // This will be null if empty
           projectType,
           projectStatus,
           assignedPM

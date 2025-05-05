@@ -33,9 +33,17 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const { toast } = useToast();
 
+  // Reset form when modal is opened
   useEffect(() => {
     if (open) {
       fetchTeamMembers();
+      // Clear form fields
+      setJiraCode("");
+      setProjectName("");
+      setClientName("");
+      setProjectManager("");
+      setProjectType("Service");
+      setProjectStatus("Active");
     }
   }, [open]);
 
@@ -86,7 +94,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
       const result = await addProjectName(
         projectName,
         clientName,
-        jiraCode || null,  // Ensure jiraCode is null if empty
+        jiraCode || null,  // Pass jiraCode as null if empty
         projectType,
         projectStatus,
         pmId

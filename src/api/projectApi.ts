@@ -261,7 +261,7 @@ export const addProjectName = async (name: string, clientName?: string, jiraId?:
       .insert({
         project_name: name,
         client_name: clientName || null,
-        jira_id: jiraId || null,
+        jira_id: jiraId || null,  // Ensuring we use correct column name: jira_id not jiraId
         project_type: projectType || 'Service',
         project_status: projectStatus || 'Active',
         assigned_pm: assignedPM || null
