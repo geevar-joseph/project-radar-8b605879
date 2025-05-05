@@ -49,6 +49,7 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
   const { updateProjectDetails, projects, teamMembers } = useProjectContext();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   // Find the current project data
   const currentProject = projects.find(p => p.projectName === projectName);
@@ -56,18 +57,18 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      projectName: projectName,
-      clientName: currentProject?.clientName || "",
-      jiraId: currentProject?.jiraId || "",
-      projectType: currentProject?.projectType || "",
-      projectStatus: currentProject?.projectStatus || "",
-      assignedPM: currentProject?.assignedPM || "",
+      projectName: "",
+      clientName: "",
+      jiraId: "",
+      projectType: "",
+      projectStatus: "",
+      assignedPM: "",
     },
   });
 
-  // Update form values when project changes
+  // Only initialize form values when modal opens or project changes
   useEffect(() => {
-    if (currentProject) {
+    if (open && currentProject && !initialized) {
       form.reset({
         projectName: projectName,
         clientName: currentProject?.clientName || "",
@@ -76,8 +77,12 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
         projectStatus: currentProject?.projectStatus || "",
         assignedPM: currentProject?.assignedPM || "",
       });
+      setInitialized(true);
+    } else if (!open) {
+      // Reset initialization flag when modal closes
+      setInitialized(false);
     }
-  }, [currentProject, form, projectName]);
+  }, [open, currentProject, form, projectName, initialized]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -261,3 +266,4 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
     </Dialog>
   );
 };
+
