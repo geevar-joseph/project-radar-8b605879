@@ -1,11 +1,12 @@
+
 export type RatingValue = 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'N.A.';
 export type RiskLevel = 'Low' | 'Medium' | 'High' | 'Critical' | 'N.A.';
 export type FinancialHealth = 'Healthy' | 'On Watch' | 'At Risk' | 'Critical' | 'N.A.';
 export type CompletionStatus = 'All completed' | 'Mostly' | 'Partially' | 'Not completed' | 'N.A.';
 export type TeamMorale = 'High' | 'Moderate' | 'Low' | 'Burnt Out' | 'N.A.';
 export type CustomerSatisfaction = 'Very Satisfied' | 'Satisfied' | 'Neutral / Unclear' | 'Dissatisfied' | 'N.A.';
-export type ProjectType = 'Development' | 'Design' | 'Research' | 'Maintenance' | 'Consulting';
-export type ProjectStatus = 'Ongoing' | 'On Hold' | 'Completed' | 'Not Started';
+export type ProjectType = 'Service' | 'Product';
+export type ProjectStatus = 'Active' | 'Inactive' | 'Support';
 
 export interface ProjectReport {
   id: string;

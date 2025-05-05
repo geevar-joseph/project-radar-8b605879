@@ -41,15 +41,9 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
         throw error;
       }
       
-      // Map the data to include the PM's name
-      const mappedData = data.map(project => {
-        return {
-          ...project,
-          assigned_pm: project.team_members ? project.team_members.name : project.assigned_pm
-        };
-      });
-      
-      setProjectsData(mappedData);
+      if (data) {
+        setProjectsData(data);
+      }
     } catch (error) {
       console.error('Error fetching projects data:', error);
     } finally {

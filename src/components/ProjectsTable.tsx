@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -116,6 +117,16 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
       return { name: projectName };
     }
     
+    // For PM, check if it's a team_members object with a name property
+    let pmName;
+    if (latestProjectData.team_members && typeof latestProjectData.team_members === 'object') {
+      pmName = latestProjectData.team_members.name;
+    } else if ('assignedPM' in latestProjectData) {
+      pmName = latestProjectData.assignedPM;
+    } else if ('assigned_pm' in latestProjectData) {
+      pmName = latestProjectData.assigned_pm;
+    }
+    
     // Safely access properties using optional chaining
     return {
       name: projectName,
@@ -128,9 +139,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
       status: 'projectStatus' in latestProjectData ? latestProjectData.projectStatus : 
               'project_status' in latestProjectData ? latestProjectData.project_status : 
               undefined,
-      pm: 'assignedPM' in latestProjectData ? latestProjectData.assignedPM : 
-          'assigned_pm' in latestProjectData ? latestProjectData.assigned_pm : 
-          undefined,
+      pm: pmName || undefined,
       jiraId: 'jiraId' in latestProjectData ? latestProjectData.jiraId : 
               'jira_id' in latestProjectData ? latestProjectData.jira_id : 
               undefined,

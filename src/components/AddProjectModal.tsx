@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ProjectType } from "@/types/project";
 import { supabase } from "@/integrations/supabase/client";
 
 interface AddProjectModalProps {
@@ -25,7 +24,8 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
   const [projectName, setProjectName] = useState("");
   const [clientName, setClientName] = useState("");
   const [projectManager, setProjectManager] = useState("");
-  const [projectType, setProjectType] = useState<ProjectType | "">("");
+  const [projectType, setProjectType] = useState<string>("");
+  const [projectStatus, setProjectStatus] = useState<string>("Active"); // Default to Active
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
@@ -76,7 +76,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
           client_name: clientName,
           assigned_pm: pmId,
           project_type: projectType,
-          project_status: "Not Started" // Default status for new projects
+          project_status: projectStatus || "Active" // Default to Active
         })
         .select();
       
@@ -91,6 +91,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
       setClientName("");
       setProjectManager("");
       setProjectType("");
+      setProjectStatus("Active");
       onOpenChange(false);
     } catch (error) {
       console.error('Error adding project:', error);
@@ -174,18 +175,34 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
               </Label>
               <Select
                 value={projectType}
-                onValueChange={(value) => setProjectType(value as ProjectType)}
+                onValueChange={setProjectType}
                 required
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select project type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Development">Development</SelectItem>
-                  <SelectItem value="Design">Design</SelectItem>
-                  <SelectItem value="Research">Research</SelectItem>
-                  <SelectItem value="Maintenance">Maintenance</SelectItem>
-                  <SelectItem value="Consulting">Consulting</SelectItem>
+                  <SelectItem value="Service">Service</SelectItem>
+                  <SelectItem value="Product">Product</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="projectStatus" className="text-right">
+                Project Status*
+              </Label>
+              <Select
+                value={projectStatus}
+                onValueChange={setProjectStatus}
+                required
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select project status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                  <SelectItem value="Support">Support</SelectItem>
                 </SelectContent>
               </Select>
             </div>
