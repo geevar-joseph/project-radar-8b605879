@@ -1,5 +1,5 @@
 
-import { Circle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface KPIScoreMeterProps {
   score: number | null;
@@ -18,27 +18,41 @@ export function KPIScoreMeter({ score, label, maxScore = 4 }: KPIScoreMeterProps
     );
   }
 
-  // Calculate percentage for visual meter
-  const percentage = (score / maxScore) * 100;
+  // Calculate the number of pills to fill
+  const filledPills = Math.round(score);
   
-  // Determine color based on score
-  const getColor = () => {
-    if (score >= 3.5) return "text-emerald-500";
-    if (score >= 2.5) return "text-green-500";
-    if (score >= 1.5) return "text-amber-500";
-    return "text-red-500";
+  // Determine color based on score for filled pills
+  const getColor = (value: number) => {
+    if (value <= 1) return "bg-red-500";
+    if (value <= 2) return "bg-amber-400";
+    if (value <= 3) return "bg-blue-400";
+    return "bg-emerald-500";
   };
+
+  // Generate the pill elements
+  const pills = Array.from({ length: maxScore }, (_, i) => {
+    const shouldFill = i < filledPills;
+    return (
+      <div
+        key={i}
+        className={cn(
+          "h-2 w-8 rounded-full mx-0.5 transition-colors",
+          shouldFill ? getColor(filledPills) : "bg-transparent border border-gray-300"
+        )}
+        aria-hidden="true"
+      />
+    );
+  });
 
   return (
     <div className="flex flex-col items-center">
       <div className="text-sm font-medium mb-1">{label}</div>
-      <div className="relative flex items-center">
-        <Circle className={`h-12 w-12 ${getColor()}`} />
-        <span className={`absolute inset-0 flex items-center justify-center font-bold ${getColor()}`}>
-          {score.toFixed(2)}
-        </span>
+      <div className="flex items-center justify-center mb-1">
+        {pills}
       </div>
-      <div className="text-xs text-gray-500 mt-1">out of {maxScore}</div>
+      <div className={`text-xs ${getColor(filledPills).replace('bg-', 'text-')}`}>
+        {score.toFixed(2)} / {maxScore}
+      </div>
     </div>
   );
 }
