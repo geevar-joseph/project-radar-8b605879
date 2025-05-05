@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
@@ -22,6 +23,7 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
   const [projectsData, setProjectsData] = useState<any[]>([]);
   const { loadProjects } = useProjectContext();
   const initialLoadDone = useRef(false);
+  const loadingRef = useRef(false);
   const { toast } = useToast();
   
   // Initial data fetch only once when component mounts
@@ -35,12 +37,22 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
   // Only refetch when modal closes (indicating a possible data change)
   useEffect(() => {
     if (!isAddProjectModalOpen && initialLoadDone.current) {
-      fetchProjectsData();
+      // Wait a bit before fetching to avoid UI flashing
+      setTimeout(() => {
+        fetchProjectsData();
+      }, 300);
     }
   }, [isAddProjectModalOpen]);
   
   const fetchProjectsData = async () => {
+    // Prevent multiple simultaneous fetch operations
+    if (loadingRef.current) {
+      return;
+    }
+    
     setIsLoading(true);
+    loadingRef.current = true;
+    
     try {
       // Join with team_members table to get the PM's name instead of ID
       const { data, error } = await supabase
@@ -67,26 +79,38 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
         
         setProjectsData(processedData);
         console.log("Processed projects data:", processedData);
-        
-        // Also refresh the context data
-        if (loadProjects) {
-          await loadProjects();
-        }
       }
     } catch (error) {
       console.error('Error fetching projects data:', error);
-      toast({
-        title: "Error fetching projects",
-        description: "Could not load project data. Please try again.",
-        variant: "destructive"
-      });
+      // Use the projects from context as fallback
+      if (projects && projects.length > 0) {
+        setProjectsData(projects);
+      } else {
+        toast({
+          title: "Error fetching projects",
+          description: "Could not load project data. Please try again.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsLoading(false);
+      loadingRef.current = false;
     }
   };
 
   const handleAddProject = (open: boolean) => {
     setIsAddProjectModalOpen(open);
+    
+    // If modal is being closed, refresh the data after a short delay
+    if (!open && initialLoadDone.current) {
+      setTimeout(() => {
+        if (loadProjects) {
+          loadProjects().catch(error => {
+            console.error("Error loading projects:", error);
+          });
+        }
+      }, 300);
+    }
   };
 
   const handleRemoveProject = async (name: string) => {

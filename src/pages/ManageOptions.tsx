@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProjectsTab } from "@/components/ProjectsTab";
@@ -13,15 +13,37 @@ const ManageOptions = () => {
     removeProjectName, 
     removeTeamMember,
     projects,
-    loadProjects
+    loadProjects,
+    isError
   } = useProjectContext();
+  const initialLoadDone = useRef(false);
+  const loadingInProgress = useRef(false);
 
-  // Refresh data when switching tabs
+  // Load data only once when component mounts
   useEffect(() => {
-    if (loadProjects) {
-      loadProjects();
+    if (!initialLoadDone.current && loadProjects && !loadingInProgress.current) {
+      loadingInProgress.current = true;
+      loadProjects()
+        .finally(() => {
+          initialLoadDone.current = true;
+          loadingInProgress.current = false;
+        });
     }
-  }, [activeTab, loadProjects]);
+  }, [loadProjects]);
+
+  // Refresh data when switching tabs, but only if we haven't loaded already
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    
+    // Only reload if there was an error previously or we're switching tabs
+    if (isError && !loadingInProgress.current) {
+      loadingInProgress.current = true;
+      loadProjects()
+        .finally(() => {
+          loadingInProgress.current = false;
+        });
+    }
+  };
 
   return (
     <div className="container mx-auto py-10">
@@ -31,7 +53,7 @@ const ManageOptions = () => {
         defaultValue="projects" 
         className="w-full"
         value={activeTab}
-        onValueChange={setActiveTab}
+        onValueChange={handleTabChange}
       >
         <TabsList className="mb-4">
           <TabsTrigger value="projects">Projects</TabsTrigger>

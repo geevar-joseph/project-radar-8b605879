@@ -35,6 +35,7 @@ interface ProjectContextType {
   }) => Promise<boolean>;
   updateTeamMember: (originalName: string, name: string, email: string, role: string) => Promise<boolean>;
   isLoading: boolean;
+  isError: boolean;
   loadProjects: () => Promise<void>;
 }
 
@@ -47,6 +48,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     selectedPeriod,
     setSelectedPeriod,
     isLoading,
+    isError,
     addProject,
     getProject,
     getUniqueReportingPeriods,
@@ -82,6 +84,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       updateProjectDetails,
       updateTeamMember,
       isLoading,
+      isError,
       loadProjects
     }}>
       {children}

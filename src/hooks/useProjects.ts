@@ -15,6 +15,7 @@ export const useProjects = () => {
     selectedPeriod,
     setSelectedPeriod,
     isLoading,
+    isError,
     loadProjects,
     getProject,
     getUniqueReportingPeriods,
@@ -41,6 +42,7 @@ export const useProjects = () => {
     selectedPeriod,
     setSelectedPeriod,
     isLoading,
+    isError,
     
     // Project operations
     addProject,

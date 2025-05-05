@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import { sampleProjects } from "@/data/mockData";
@@ -13,6 +13,9 @@ export const useProjectData = () => {
   const [projectNames, setProjectNames] = useState<string[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isError, setIsError] = useState<boolean>(false);
+  const loadingRef = useRef<boolean>(false);
+  const toastShownRef = useRef<boolean>(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -20,7 +23,16 @@ export const useProjectData = () => {
   }, []);
 
   const loadProjects = async () => {
+    // Prevent multiple simultaneous loading attempts
+    if (loadingRef.current) {
+      console.log('Already loading projects, skipping duplicate request');
+      return;
+    }
+
     setIsLoading(true);
+    loadingRef.current = true;
+    toastShownRef.current = false;
+    
     try {
       // Fetch projects
       const { projectsData, error: projectsError } = await fetchProjects();
@@ -82,18 +94,26 @@ export const useProjectData = () => {
       
       console.log('Combined Formatted Data:', formattedReports);
       setProjects(formattedReports);
+      setIsError(false);
     } catch (error) {
       console.error('Error loading projects data:', error);
+      // Only show the error toast once, not repeatedly
+      if (!toastShownRef.current && !isError) {
+        toast({
+          title: "Error",
+          description: "Failed to load project data. Using sample data instead.",
+          variant: "destructive"
+        });
+        toastShownRef.current = true;
+      }
+      
       // Fallback to sample data
       setProjects(sampleProjects);
       setProjectNames(sampleProjects.map(p => p.projectName).filter((value, index, self) => self.indexOf(value) === index));
-      toast({
-        title: "Error",
-        description: "Failed to load project data. Using sample data instead.",
-        variant: "destructive"
-      });
+      setIsError(true);
     } finally {
       setIsLoading(false);
+      loadingRef.current = false;
     }
   };
 
@@ -119,6 +139,7 @@ export const useProjectData = () => {
     selectedPeriod,
     setSelectedPeriod,
     isLoading,
+    isError,
     loadProjects,
     getProject,
     getUniqueReportingPeriods,

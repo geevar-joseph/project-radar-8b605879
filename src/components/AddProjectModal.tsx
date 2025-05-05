@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
       setProjectManager("");
       setProjectType("Service");
       setProjectStatus("Active");
+      setIsSubmitting(false); // Reset submission state
     }
   }, [open]);
 
@@ -69,6 +71,8 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isSubmitting) return; // Prevent multiple submissions
     
     if (!projectName || !clientName || !projectType) {
       toast({
@@ -105,6 +109,9 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
         throw new Error(result?.error?.message || 'Failed to add project');
       }
       
+      // Close modal first, then reset form and reload data
+      onOpenChange(false);
+      
       // Reset form
       setJiraCode("");
       setProjectName("");
@@ -118,11 +125,13 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
         description: `"${projectName}" has been added successfully.`,
       });
       
-      // Ensure data is refreshed
-      await loadProjects();
+      // Load projects with a slight delay to avoid UI freezing
+      setTimeout(() => {
+        loadProjects().catch(error => {
+          console.error("Error reloading projects:", error);
+        });
+      }, 300);
       
-      // Close modal
-      onOpenChange(false);
     } catch (error: any) {
       console.error('Error adding project:', error);
       toast({
@@ -130,13 +139,25 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
         description: error.message || "There was an error adding the project. Please try again.",
         variant: "destructive"
       });
-    } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Reset submission state on error
     }
   };
 
+  // If the modal is closed during submission, reset the submission state
+  useEffect(() => {
+    if (!open && isSubmitting) {
+      setIsSubmitting(false);
+    }
+  }, [open, isSubmitting]);
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      // Only allow closing if not submitting
+      if (isSubmitting && open && !newOpen) {
+        return; // Prevent closing during submission
+      }
+      onOpenChange(newOpen);
+    }}>
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
