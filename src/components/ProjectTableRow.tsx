@@ -4,6 +4,8 @@ import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, X } from "lucide-react";
+import { formatDate, getValidProjectStatus, getValidProjectType } from "@/utils/formatters";
+import { StatusBadge } from "@/components/StatusBadge";
 
 interface ProjectData {
   name: string;
@@ -13,6 +15,10 @@ interface ProjectData {
   pm?: string;
   jiraId?: string;
   overallScore?: string;
+  riskLevel?: string;
+  financialHealth?: string;
+  id?: string;
+  submissionDate?: string;
 }
 
 interface ProjectTableRowProps {
@@ -29,20 +35,35 @@ export const ProjectTableRow: React.FC<ProjectTableRowProps> = ({
   return (
     <TableRow key={project.name}>
       <TableCell>{project.jiraId || "—"}</TableCell>
-      <TableCell className="font-medium">{project.name}</TableCell>
+      <TableCell className="font-medium">
+        {project.id ? (
+          <a href={`/project/${project.id}`} className="hover:underline text-primary">
+            {project.name}
+          </a>
+        ) : (
+          project.name
+        )}
+      </TableCell>
       <TableCell>{project.client || "—"}</TableCell>
       <TableCell>{project.pm || "—"}</TableCell>
       <TableCell>
         {project.type ? (
-          <Badge variant="outline">{project.type}</Badge>
+          <Badge variant="outline">{getValidProjectType(project.type)}</Badge>
         ) : "—"}
       </TableCell>
       <TableCell>
         {project.status ? (
-          <Badge variant="secondary">{project.status}</Badge>
+          <Badge variant="secondary">{getValidProjectStatus(project.status)}</Badge>
         ) : "—"}
       </TableCell>
+      <TableCell>{formatDate(project.submissionDate) || "—"}</TableCell>
       <TableCell>{project.overallScore || "—"}</TableCell>
+      <TableCell>
+        <StatusBadge value={project.riskLevel || 'N.A.'} type="risk" />
+      </TableCell>
+      <TableCell>
+        <StatusBadge value={project.financialHealth || 'N.A.'} type="health" />
+      </TableCell>
       <TableCell className="text-right space-x-2 flex justify-end">
         <Button 
           variant="ghost" 
