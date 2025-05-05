@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   BarChart, 
@@ -30,9 +31,10 @@ import {
 } from "@/components/ui/select";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ChartBar, ChartLine, Radar as RadarIcon } from "lucide-react";
+import { ChartBar, ChartLine, Radar as RadarIcon, Info } from "lucide-react";
 import { ProjectKPITrendChart } from './ProjectKPITrendChart';
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface ProjectKPIChartProps {
   project: ProjectReport;
@@ -70,15 +72,16 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
   };
   
   const chartConfig = {
+    // Updated chart config with consistent naming and colors
     risk: { label: "Risk Level", color: "#F97316" },
     financial: { label: "Financial Health", color: "#0EA5E9" },
-    completion: { label: "Completion", color: "#10B981" },
+    completion: { label: "Completion of Planned Work", color: "#10B981" },
     morale: { label: "Team Morale", color: "#EC4899" },
-    pm: { label: "PM Evaluation", color: "#6366F1" },
-    frontend: { label: "Frontend", color: "#F43F5E" },
-    backend: { label: "Backend", color: "#8B5CF6" },
-    testing: { label: "Testing", color: "#14B8A6" },
-    design: { label: "Design", color: "#F59E0B" },
+    pm: { label: "Project Manager Self-Evaluation", color: "#6366F1" },
+    frontend: { label: "Front-End Team Quality", color: "#F43F5E" },
+    backend: { label: "Back-End Team Quality", color: "#8B5CF6" },
+    testing: { label: "Testing Team Quality", color: "#14B8A6" },
+    design: { label: "Design Team Quality", color: "#F59E0B" },
     customer: { label: "Customer Satisfaction", color: "#84CC16" },
   };
   
@@ -134,81 +137,86 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
     }
   };
 
+  // Updated chart data with consistent labels, full names, and abbreviations
   const chartData = [
     {
-      name: "Risk",
+      name: "RL", // Abbreviated label
+      fullName: "Risk Level", // Full name for tooltips/legends
       category: "risk",
       value: riskToNumeric(selectedReport.riskLevel),
-      fill: chartConfig.risk.color,
-      label: "RL"
+      fill: chartConfig.risk.color
     },
     {
-      name: "Financial",
+      name: "FH",
+      fullName: "Financial Health",
       category: "financial",
       value: financialToNumeric(selectedReport.financialHealth),
-      fill: chartConfig.financial.color,
-      label: "FH"
+      fill: chartConfig.financial.color
     },
     {
-      name: "Completion",
+      name: "CP",
+      fullName: "Completion of Planned Work",
       category: "completion",
       value: completionToNumeric(selectedReport.completionOfPlannedWork),
-      fill: chartConfig.completion.color,
-      label: "CP"
+      fill: chartConfig.completion.color
     },
     {
-      name: "Morale",
+      name: "TM",
+      fullName: "Team Morale",
       category: "morale",
       value: moraleToNumeric(selectedReport.teamMorale),
-      fill: chartConfig.morale.color,
-      label: "TM"
+      fill: chartConfig.morale.color
     },
     {
       name: "PM",
+      fullName: "Project Manager Self-Evaluation",
       category: "pm",
       value: ratingToNumeric(selectedReport.projectManagerEvaluation),
-      fill: chartConfig.pm.color,
-      label: "PM"
+      fill: chartConfig.pm.color
     },
     {
-      name: "Frontend",
+      name: "FE",
+      fullName: "Front-End Team Quality",
       category: "frontend",
       value: ratingToNumeric(selectedReport.frontEndQuality),
-      fill: chartConfig.frontend.color,
-      label: "FE"
+      fill: chartConfig.frontend.color
     },
     {
-      name: "Backend",
+      name: "BE",
+      fullName: "Back-End Team Quality",
       category: "backend",
       value: ratingToNumeric(selectedReport.backEndQuality),
-      fill: chartConfig.backend.color,
-      label: "BE"
+      fill: chartConfig.backend.color
     },
     {
-      name: "Testing",
+      name: "TE",
+      fullName: "Testing Team Quality",
       category: "testing",
       value: ratingToNumeric(selectedReport.testingQuality),
-      fill: chartConfig.testing.color,
-      label: "TE"
+      fill: chartConfig.testing.color
     },
     {
-      name: "Design",
+      name: "DE",
+      fullName: "Design Team Quality",
       category: "design",
       value: ratingToNumeric(selectedReport.designQuality),
-      fill: chartConfig.design.color,
-      label: "DE"
+      fill: chartConfig.design.color
     },
     {
-      name: "Customer",
+      name: "CS",
+      fullName: "Customer Satisfaction",
       category: "customer",
       value: satisfactionToNumeric(selectedReport.customerSatisfaction),
-      fill: chartConfig.customer.color,
-      label: "CS"
+      fill: chartConfig.customer.color
     }
-  ];
+  ].filter(item => item.value > 0); // Only include items with values
 
-  // Calculate key performance stats for the summary panel
-  const avgScore = chartData.reduce((sum, item) => sum + item.value, 0) / chartData.length;
+  // Calculate key performance stats for the summary panel - fix the calculation
+  const validScores = chartData.filter(item => item.value > 0);
+  const avgScore = validScores.length > 0 
+    ? validScores.reduce((sum, item) => sum + item.value, 0) / validScores.length
+    : 0;
+    
   const topPerformers = [...chartData].sort((a, b) => b.value - a.value).slice(0, 3);
   const improvementAreas = [...chartData].sort((a, b) => a.value - b.value).slice(0, 3);
 
@@ -281,10 +289,34 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} />
-                  <Tooltip content={<ChartTooltipContent />} />
-                  <Legend />
+                  <Tooltip 
+                    formatter={(value, name, props) => {
+                      const item = chartData.find(d => d.name === name);
+                      return [
+                        `${value} (${value >= 3.5 ? "Excellent" : value >= 2.5 ? "Good" : value >= 1.5 ? "Fair" : "Poor"})`,
+                        item?.fullName || name
+                      ];
+                    }}
+                  />
+                  <Legend 
+                    formatter={(value, entry, index) => {
+                      const item = chartData.find(d => d.name === value);
+                      return (
+                        <HoverCard>
+                          <HoverCardTrigger className="cursor-help">
+                            <span>{value}</span>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="p-2">
+                            <span className="text-xs">{item?.fullName}</span>
+                          </HoverCardContent>
+                        </HoverCard>
+                      );
+                    }}
+                  />
                   <Bar dataKey="value" fill="#8884d8">
-                    <LabelList dataKey="label" position="top" fill="#333" />
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -292,7 +324,11 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
                   <PolarGrid gridType="polygon" />
-                  <PolarAngleAxis dataKey="name" tick={{ fontSize: 12, fill: "#555" }} />
+                  <PolarAngleAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 12, fill: "#555" }}
+                    tickFormatter={(value) => value}
+                  />
                   <PolarRadiusAxis 
                     angle={30} 
                     domain={[0, 4]} 
@@ -307,19 +343,63 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
                     fill="#8884d8" 
                     fillOpacity={0.6} 
                   />
-                  <Tooltip content={<ChartTooltipContent />} />
-                  <Legend wrapperStyle={{ paddingTop: 20 }} />
+                  <Tooltip
+                    formatter={(value, name, props) => {
+                      const item = chartData.find(d => d.name === name);
+                      return [
+                        `${value} (${value >= 3.5 ? "Excellent" : value >= 2.5 ? "Good" : value >= 1.5 ? "Fair" : "Poor"})`,
+                        item?.fullName || name
+                      ];
+                    }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: 20 }}
+                    formatter={(value, entry, index) => {
+                      const item = chartData.find(d => d.name === value);
+                      return (
+                        <HoverCard>
+                          <HoverCardTrigger className="cursor-help">
+                            <span>{value}</span>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="p-2">
+                            <span className="text-xs">{item?.fullName}</span>
+                          </HoverCardContent>
+                        </HoverCard>
+                      );
+                    }}
+                  />
                 </RadarChart>
               </ResponsiveContainer>
             )}
           </ChartContainer>
         </div>
 
-        {/* Performance Summary Panel */}
+        {/* Performance Summary Panel - Updated with accurate full names */}
         <div className="flex flex-col gap-4">
           <Card>
             <CardContent className="pt-6">
-              <h3 className="font-semibold text-lg mb-2">Performance Summary</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-lg">Performance Summary</h3>
+                <HoverCard>
+                  <HoverCardTrigger>
+                    <Info size={16} className="text-muted-foreground cursor-help" />
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">Abbreviation Legend:</p>
+                      <ul className="text-xs space-y-1">
+                        {chartData.map((item) => (
+                          <li key={item.name} className="flex justify-between">
+                            <span>{item.name}:</span>
+                            <span className="font-medium">{item.fullName}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
+              </div>
+              
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Overall Average</p>
@@ -339,7 +419,10 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
                   <ul className="space-y-2">
                     {topPerformers.map((item) => (
                       <li key={`top-${item.name}`} className="flex justify-between items-center">
-                        <span className="text-sm">{item.name}</span>
+                        <span className="text-sm flex items-center">
+                          <span className="font-medium mr-1">{item.name}</span>
+                          <span className="text-xs text-muted-foreground">({item.fullName})</span>
+                        </span>
                         <div className="flex items-center">
                           <div className="w-20 bg-gray-200 rounded-full h-1.5 mr-2">
                             <div 
@@ -359,7 +442,10 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
                   <ul className="space-y-2">
                     {improvementAreas.map((item) => (
                       <li key={`imp-${item.name}`} className="flex justify-between items-center">
-                        <span className="text-sm">{item.name}</span>
+                        <span className="text-sm flex items-center">
+                          <span className="font-medium mr-1">{item.name}</span>
+                          <span className="text-xs text-muted-foreground">({item.fullName})</span>
+                        </span>
                         <div className="flex items-center">
                           <div className="w-20 bg-gray-200 rounded-full h-1.5 mr-2">
                             <div 

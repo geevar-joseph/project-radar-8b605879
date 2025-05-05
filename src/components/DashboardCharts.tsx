@@ -1,3 +1,4 @@
+
 import { useProjectContext } from "@/context/ProjectContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ratingToValueMap, ProjectReport } from "@/types/project";
@@ -15,18 +16,24 @@ import {
   CartesianGrid 
 } from "recharts";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Info } from "lucide-react";
 
 // Define types for our KPI data
 interface KPIData {
   name: string;
   value: number;
   color: string;
+  fullName: string; // Added full name for consistency
 }
 
 interface DepartmentData {
   name: string;
   score: number;
   color: string;
+  fullName: string; // Added full name for consistency
+  label: string; // Abbreviated label
 }
 
 // Helper function to determine color based on score
@@ -43,11 +50,11 @@ export function DashboardCharts() {
   // Calculate low-performing KPIs - Updated to show only the specified metrics
   const calculateProjectHealthIndicators = (): KPIData[] => {
     const kpiFields = [
-      { field: "overallProjectScore", name: "Overall Score", color: "#60a5fa", poorValues: ["Fair", "Poor"] },
-      { field: "riskLevel", name: "Risk Level", color: "#ef4444", poorValues: ["Medium", "High"] },
-      { field: "financialHealth", name: "Financial Health", color: "#8b5cf6", poorValues: ["On Watch", "At Risk"] },
-      { field: "completionOfPlannedWork", name: "Work Completion", color: "#f97316", poorValues: ["Partially", "Not completed"] },
-      { field: "teamMorale", name: "Team Morale", color: "#14b8a6", poorValues: ["Low"] }
+      { field: "overallProjectScore", name: "Overall Score", color: "#60a5fa", fullName: "Overall Project Score", poorValues: ["Fair", "Poor"] },
+      { field: "riskLevel", name: "Risk Level", color: "#ef4444", fullName: "Risk Level", poorValues: ["Medium", "High"] },
+      { field: "financialHealth", name: "Financial Health", color: "#8b5cf6", fullName: "Financial Health", poorValues: ["On Watch", "At Risk"] },
+      { field: "completionOfPlannedWork", name: "Work Completion", color: "#f97316", fullName: "Completion of Planned Work", poorValues: ["Partially", "Not completed"] },
+      { field: "teamMorale", name: "Team Morale", color: "#14b8a6", fullName: "Team Morale", poorValues: ["Low"] }
     ];
     
     return kpiFields.map(kpi => {
@@ -57,20 +64,24 @@ export function DashboardCharts() {
       
       return {
         name: kpi.name,
+        fullName: kpi.fullName,
         value: lowPerforming,
         color: kpi.color
       };
     }).filter(kpi => kpi.value > 0);  // Only keep KPIs with issues
   };
   
-  // Calculate department performance - Added PM evaluation
+  // Calculate department performance - Updated with full names and abbreviations
   const calculateDepartmentPerformance = (): DepartmentData[] => {
     const departments = [
-      { field: "frontEndQuality", name: "Front-End" },
-      { field: "backEndQuality", name: "Back-End" },
-      { field: "testingQuality", name: "Testing" },
-      { field: "designQuality", name: "Design" },
-      { field: "projectManagerEvaluation", name: "PM Performance" } // Added PM evaluation
+      { field: "frontEndQuality", name: "FE", fullName: "Front-End Team Quality", label: "FE" },
+      { field: "backEndQuality", name: "BE", fullName: "Back-End Team Quality", label: "BE" },
+      { field: "testingQuality", name: "TE", fullName: "Testing Team Quality", label: "TE" },
+      { field: "designQuality", name: "DE", fullName: "Design Team Quality", label: "DE" },
+      { field: "projectManagerEvaluation", name: "PM", fullName: "Project Manager Self-Evaluation", label: "PM" },
+      { field: "completionOfPlannedWork", name: "CP", fullName: "Completion of Planned Work", label: "CP" },
+      { field: "teamMorale", name: "TM", fullName: "Team Morale", label: "TM" },
+      { field: "customerSatisfaction", name: "CS", fullName: "Customer Satisfaction", label: "CS" }
     ];
     
     return departments.map(dept => {
@@ -81,8 +92,10 @@ export function DashboardCharts() {
       if (validProjects.length === 0) {
         return {
           name: dept.name,
+          fullName: dept.fullName,
           score: 0,
-          color: "#d1d5db" // Gray for no data
+          color: "#d1d5db", // Gray for no data
+          label: dept.label
         };
       }
       
@@ -96,8 +109,10 @@ export function DashboardCharts() {
       
       return {
         name: dept.name,
+        fullName: dept.fullName,
         score: avgScore,
-        color
+        color,
+        label: dept.label
       };
     });
   };
@@ -105,10 +120,14 @@ export function DashboardCharts() {
   const kpiData = calculateProjectHealthIndicators();
   const departmentData = calculateDepartmentPerformance();
   
+  // Filter out departmentData with no score (0) for display in the chart
+  const validDepartmentData = departmentData.filter(d => d.score > 0);
+  
   // Handle empty data
   const hasKpiData = kpiData.length > 0;
-  const hasDepartmentData = departmentData.some(d => d.score > 0);
+  const hasDepartmentData = validDepartmentData.length > 0;
 
+  // Helper to get proper rating label based on score
   const getRatingLabel = (score: number): string => {
     if (score >= 3.5) return "Excellent";
     if (score >= 2.5) return "Good";
@@ -116,6 +135,21 @@ export function DashboardCharts() {
     if (score > 0) return "Poor";
     return "No Data";
   };
+
+  // Calculate overall average from all valid department scores
+  const calculateOverallScore = (data: DepartmentData[]): number => {
+    const validScores = data.filter(item => item.score > 0);
+    if (validScores.length === 0) return 0;
+    const sum = validScores.reduce((acc, item) => acc + item.score, 0);
+    return parseFloat((sum / validScores.length).toFixed(1));
+  };
+
+  // Get the overall score for the summary panel
+  const overallScore = calculateOverallScore(validDepartmentData);
+
+  // Get top performers and areas needing improvement
+  const topPerformers = [...validDepartmentData].sort((a, b) => b.score - a.score).slice(0, 3);
+  const improvementAreas = [...validDepartmentData].sort((a, b) => a.score - b.score).slice(0, 3);
 
   const chartConfig = {
     excellent: { color: "#10b981" }, // green
@@ -128,6 +162,21 @@ export function DashboardCharts() {
     testing: { color: "#F97316" },  // Keep original
     design: { color: "#EC4899" },   // Keep original
     pmPerformance: { color: "#14B8A6" } // Keep original
+  };
+
+  // Custom tooltip formatter for department chart
+  const departmentTooltipFormatter = (value: number, name: string, props: any) => {
+    const item = departmentData.find(d => d.name === name);
+    if (item) {
+      return [
+        <div className="flex flex-col">
+          <span>{`${item.fullName}: ${value}`}</span>
+          <span className="text-xs text-muted-foreground">{`Rating: ${getRatingLabel(value)}`}</span>
+        </div>,
+        ''
+      ];
+    }
+    return [value, name];
   };
 
   return (
@@ -156,8 +205,20 @@ export function DashboardCharts() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [`${value} Projects`, 'Count']} />
-                  <Legend />
+                  <Tooltip 
+                    formatter={(value, name, props) => {
+                      const item = kpiData.find(k => k.name === name);
+                      return [`${value} Projects`, item?.fullName || name];
+                    }} 
+                  />
+                  <Legend 
+                    formatter={(value, entry, index) => {
+                      const item = kpiData.find(k => k.name === value);
+                      return (
+                        <span title={item?.fullName || value}>{value}</span>
+                      );
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -173,7 +234,27 @@ export function DashboardCharts() {
       {/* Right Column: Department-wise Performance */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Department-wise Performance</CardTitle>
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            Department-wise Performance
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Info size={16} className="text-muted-foreground cursor-help" />
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Abbreviation Legend:</p>
+                  <ul className="text-xs space-y-1">
+                    {departmentData.map((dept) => (
+                      <li key={dept.name} className="flex justify-between">
+                        <span>{dept.label}:</span>
+                        <span className="font-medium">{dept.fullName}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {hasDepartmentData ? (
@@ -182,7 +263,7 @@ export function DashboardCharts() {
                 className="h-[300px]" 
                 config={chartConfig}
               >
-                <BarChart data={departmentData} layout="vertical">
+                <BarChart data={validDepartmentData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     type="number" 
@@ -193,17 +274,40 @@ export function DashboardCharts() {
                   <YAxis 
                     dataKey="name" 
                     type="category" 
-                    width={80} 
+                    width={30} 
+                    tick={(props) => {
+                      const { x, y, payload } = props;
+                      const item = departmentData.find(d => d.name === payload.value);
+                      return (
+                        <g transform={`translate(${x},${y})`}>
+                          <text 
+                            x={0} 
+                            y={0} 
+                            dy={5} 
+                            textAnchor="end" 
+                            fill="#666"
+                            fontSize={12}
+                            title={item?.fullName || payload.value}
+                          >
+                            {payload.value}
+                          </text>
+                        </g>
+                      );
+                    }}
                   />
                   <Tooltip 
-                    formatter={(value) => [`${value} (${getRatingLabel(Number(value))})`, 'Score']}
-                    labelFormatter={(label) => `Department: ${label}`}
+                    formatter={departmentTooltipFormatter}
+                    labelFormatter={(label) => {
+                      const item = departmentData.find(d => d.name === label);
+                      return item?.fullName || label;
+                    }}
                   />
                   <Bar 
                     dataKey="score" 
+                    name="Score"
                     radius={[0, 4, 4, 0]}
                   >
-                    {departmentData.map((entry, index) => (
+                    {validDepartmentData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Bar>
