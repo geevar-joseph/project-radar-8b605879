@@ -4,19 +4,52 @@ import { RatingValue, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale, 
 
 interface ScoreIndicatorProps {
   value: RatingValue | RiskLevel | FinancialHealth | CompletionStatus | TeamMorale | CustomerSatisfaction;
+  type?: "risk" | "health" | "completion" | "morale" | "satisfaction" | "rating";
   className?: string;
 }
 
-export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
+export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) {
   const getDotsConfig = () => {
+    // First handle cases that depend on both the value AND the type
+    if (type === "risk" && value === "High") {
+      return {
+        count: 4,
+        activeCount: 2,
+        color: 'bg-orange-400'
+      };
+    }
+    
+    if (type === "morale" && value === "Low") {
+      return {
+        count: 4,
+        activeCount: 2,
+        color: 'bg-orange-400'
+      };
+    }
+    
+    if (type === "risk" && value === "Low") {
+      return {
+        count: 4,
+        activeCount: 4,
+        color: 'bg-emerald-500'
+      };
+    }
+    
+    if (type === "morale" && value === "High") {
+      return {
+        count: 4,
+        activeCount: 4,
+        color: 'bg-emerald-500'
+      };
+    }
+    
+    // Now handle the general cases
     switch (value) {
       // Excellent ratings
       case 'Excellent':
       case 'Healthy':
       case 'All completed':
-      case 'High': // For team morale, "High" is positive
       case 'Very Satisfied':
-      case 'Low': // For risk level, "Low" is positive
         return {
           count: 4,
           activeCount: 4,
@@ -74,14 +107,6 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
           color: 'bg-amber-400'
         };
       
-      // High risk (2 dots, orange)
-      case 'High':
-        return {
-          count: 4,
-          activeCount: 2,
-          color: 'bg-orange-400'
-        };
-        
       // At Risk financial health
       case 'At Risk':
         return {
@@ -89,15 +114,7 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
           activeCount: 2,
           color: 'bg-orange-400'
         };
-        
-      // Low team morale
-      case 'Low':
-        return {
-          count: 4,
-          activeCount: 2,
-          color: 'bg-orange-400'
-        };
-      
+
       // Poor/Critical ratings
       case 'Poor':
       case 'Not completed':
@@ -110,6 +127,7 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
           color: 'bg-red-500'
         };
       
+      // Default case
       case 'N.A.':
       default:
         return {
