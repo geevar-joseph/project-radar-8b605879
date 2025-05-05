@@ -45,6 +45,51 @@ export const ratingToValueMap: Record<RatingValue, number | null> = {
   'N.A.': null
 };
 
+// Mapping risk levels to numeric values
+export const riskToValueMap: Record<RiskLevel, number | null> = {
+  'Low': 4,
+  'Medium': 3,
+  'High': 2,
+  'Critical': 1,
+  'N.A.': null
+};
+
+// Mapping financial health to numeric values
+export const financialToValueMap: Record<FinancialHealth, number | null> = {
+  'Healthy': 4,
+  'On Watch': 3,
+  'At Risk': 2,
+  'Critical': 1,
+  'N.A.': null
+};
+
+// Mapping completion status to numeric values
+export const completionToValueMap: Record<CompletionStatus, number | null> = {
+  'All completed': 4,
+  'Mostly': 3,
+  'Partially': 2,
+  'Not completed': 1,
+  'N.A.': null
+};
+
+// Mapping team morale to numeric values
+export const moraleToValueMap: Record<TeamMorale, number | null> = {
+  'High': 4,
+  'Moderate': 3,
+  'Low': 2,
+  'Burnt Out': 1,
+  'N.A.': null
+};
+
+// Mapping customer satisfaction to numeric values
+export const satisfactionToValueMap: Record<CustomerSatisfaction, number | null> = {
+  'Very Satisfied': 4,
+  'Satisfied': 3,
+  'Neutral / Unclear': 2,
+  'Dissatisfied': 1,
+  'N.A.': null
+};
+
 export const riskToColorMap: Record<RiskLevel, string> = {
   'Low': 'bg-status-excellent',
   'Medium': 'bg-status-fair',

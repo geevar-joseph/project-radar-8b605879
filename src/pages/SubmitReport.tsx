@@ -19,7 +19,9 @@ const SubmitReport = () => {
     <div className="container mx-auto py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Submit Monthly Project Report</h1>
-        <p className="text-muted-foreground mt-2">Fill out the required fields and add detailed information about the project's status.</p>
+        <p className="text-muted-foreground mt-2">
+          Fill out the required fields and add detailed information about the project's status. Each section will display a real-time KPI score based on your selections.
+        </p>
       </div>
       
       {isDraftSaved && (

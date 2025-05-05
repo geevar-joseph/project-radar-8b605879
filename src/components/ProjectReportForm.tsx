@@ -12,15 +12,22 @@ import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { ScoreIndicator } from "./ScoreIndicator";
 import { Save } from "lucide-react";
+import { KPIScoreMeter } from "./KPIScoreMeter";
 import { 
   RatingValue, 
   RiskLevel, 
   FinancialHealth, 
   CompletionStatus, 
   TeamMorale,
-  CustomerSatisfaction
+  CustomerSatisfaction,
+  ratingToValueMap,
+  riskToValueMap,
+  financialToValueMap,
+  completionToValueMap,
+  moraleToValueMap,
+  satisfactionToValueMap
 } from "@/types/project";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 const formSchema = z.object({
   projectName: z.string().min(2, "Project name must be at least 2 characters"),
@@ -53,6 +60,11 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
   const { addProject, projectNames, teamMembers } = useProjectContext();
   const navigate = useNavigate();
   
+  // States to track KPI scores
+  const [projectHealthScore, setProjectHealthScore] = useState<number | null>(null);
+  const [teamKPIsScore, setTeamKPIsScore] = useState<number | null>(null);
+  const [departmentalScore, setDepartmentalScore] = useState<number | null>(null);
+
   // Generate the last 3 months options (current month and previous 2 months)
   const reportingPeriodOptions = useMemo(() => {
     const options = [];
@@ -80,16 +92,16 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
       projectName: projectNames[0] || "",
       submittedBy: teamMembers[0] || "",
       reportingPeriod: reportingPeriodOptions[0]?.value || "",
-      riskLevel: "Low",
-      financialHealth: "Healthy",
-      completionOfPlannedWork: "Mostly",
-      teamMorale: "High",
-      customerSatisfaction: "Satisfied",
-      projectManagerEvaluation: "Good",
-      frontEndQuality: "Good",
-      backEndQuality: "Good",
-      testingQuality: "Good",
-      designQuality: "Good",
+      riskLevel: "N.A.",
+      financialHealth: "N.A.",
+      completionOfPlannedWork: "N.A.",
+      teamMorale: "N.A.",
+      customerSatisfaction: "N.A.",
+      projectManagerEvaluation: "N.A.",
+      frontEndQuality: "N.A.",
+      backEndQuality: "N.A.",
+      testingQuality: "N.A.",
+      designQuality: "N.A.",
       notes: "",
       keyAchievements: "",
       primaryChallenges: "",
@@ -97,6 +109,49 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
       followUpActions: ""
     },
   });
+
+  // Calculate scores whenever form values change
+  const formValues = form.watch();
+  
+  useEffect(() => {
+    // Calculate Project Health Score
+    const riskScore = riskToValueMap[formValues.riskLevel];
+    const financialScore = financialToValueMap[formValues.financialHealth];
+    const satisfactionScore = satisfactionToValueMap[formValues.customerSatisfaction];
+    
+    const healthScores = [riskScore, financialScore, satisfactionScore].filter(score => score !== null) as number[];
+    const healthAverage = healthScores.length > 0 
+      ? healthScores.reduce((sum, score) => sum + score, 0) / healthScores.length 
+      : null;
+    
+    setProjectHealthScore(healthAverage);
+    
+    // Calculate Team KPIs Score
+    const moraleScore = moraleToValueMap[formValues.teamMorale];
+    const completionScore = completionToValueMap[formValues.completionOfPlannedWork];
+    
+    const teamScores = [moraleScore, completionScore].filter(score => score !== null) as number[];
+    const teamAverage = teamScores.length > 0 
+      ? teamScores.reduce((sum, score) => sum + score, 0) / teamScores.length 
+      : null;
+    
+    setTeamKPIsScore(teamAverage);
+    
+    // Calculate Departmental Performance Score
+    const pmScore = ratingToValueMap[formValues.projectManagerEvaluation];
+    const frontEndScore = ratingToValueMap[formValues.frontEndQuality];
+    const backEndScore = ratingToValueMap[formValues.backEndQuality];
+    const testingScore = ratingToValueMap[formValues.testingQuality];
+    const designScore = ratingToValueMap[formValues.designQuality];
+    
+    const deptScores = [pmScore, frontEndScore, backEndScore, testingScore, designScore]
+      .filter(score => score !== null) as number[];
+    const deptAverage = deptScores.length > 0 
+      ? deptScores.reduce((sum, score) => sum + score, 0) / deptScores.length 
+      : null;
+    
+    setDepartmentalScore(deptAverage);
+  }, [formValues]);
   
   function onSubmit(data: FormValues) {
     const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
@@ -165,7 +220,8 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select rating">
-                    {field.value && <ScoreIndicator value={field.value as RatingValue} />}
+                    {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as RatingValue} />}
+                    {(!field.value || field.value === "N.A.") && "Select rating"}
                   </SelectValue>
                 </SelectTrigger>
               </FormControl>
@@ -206,7 +262,8 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select satisfaction level">
-                  {field.value && <ScoreIndicator value={field.value as CustomerSatisfaction} />}
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as CustomerSatisfaction} />}
+                  {(!field.value || field.value === "N.A.") && "Select satisfaction level"}
                 </SelectValue>
               </SelectTrigger>
             </FormControl>
@@ -246,7 +303,8 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select risk level">
-                  {field.value && <ScoreIndicator value={field.value as RiskLevel} />}
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as RiskLevel} />}
+                  {(!field.value || field.value === "N.A.") && "Select risk level"}
                 </SelectValue>
               </SelectTrigger>
             </FormControl>
@@ -286,7 +344,8 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select financial status">
-                  {field.value && <ScoreIndicator value={field.value as FinancialHealth} />}
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as FinancialHealth} />}
+                  {(!field.value || field.value === "N.A.") && "Select financial status"}
                 </SelectValue>
               </SelectTrigger>
             </FormControl>
@@ -340,7 +399,8 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select completion status">
-                  {field.value && <ScoreIndicator value={field.value as CompletionStatus} />}
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as CompletionStatus} />}
+                  {(!field.value || field.value === "N.A.") && "Select completion status"}
                 </SelectValue>
               </SelectTrigger>
             </FormControl>
@@ -379,7 +439,8 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select morale level">
-                  {field.value && <ScoreIndicator value={field.value as TeamMorale} />}
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as TeamMorale} />}
+                  {(!field.value || field.value === "N.A.") && "Select morale level"}
                 </SelectValue>
               </SelectTrigger>
             </FormControl>
@@ -496,8 +557,9 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
         </Card>
         
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Overall Project Health</CardTitle>
+            <KPIScoreMeter score={projectHealthScore} label="Project Health Score" />
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -509,21 +571,22 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
         </Card>
         
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Team KPIs</CardTitle>
+            <KPIScoreMeter score={teamKPIsScore} label="Team KPIs Score" />
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {renderTeamMoraleField()}
               {renderCompletionStatusField()} {/* Moved from Project Health to Team KPIs */}
-              {/* Project Manager Self-Evaluation is in Departmental Performance section */}
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Departmental Performance</CardTitle>
+            <KPIScoreMeter score={departmentalScore} label="Departmental Score" />
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
