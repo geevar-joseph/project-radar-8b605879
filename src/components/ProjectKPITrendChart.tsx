@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   LineChart,
@@ -13,6 +12,7 @@ import {
 import { ProjectReport, ratingToValueMap, RatingValue } from '@/types/project';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useProjectContext } from '@/context/ProjectContext';
+import { Star, Smile, Users, Building } from 'lucide-react';
 
 interface ProjectKPITrendChartProps {
   projectName: string;
@@ -54,8 +54,79 @@ const statusToNumeric = (status: string, type: string) => {
       case 'Low': return 1;
       default: return 0;
     }
+  } else if (type === 'satisfaction') {
+    switch (status) {
+      case 'Very Satisfied': return 4;
+      case 'Satisfied': return 3;
+      case 'Neutral / Unclear': return 2;
+      case 'Dissatisfied': return 1;
+      default: return 0;
+    }
   }
   return 0;
+};
+
+// Calculate overall score from a report
+const calculateOverallScore = (report: ProjectReport): number => {
+  // If the report already has an overall score that's not "N.A." or "N/A", convert it to numeric
+  if (report.overallProjectScore && 
+      !["N.A.", "N/A", "", "0.0", "0"].includes(report.overallProjectScore)) {
+    // If it's a numeric string like "3.5", parse it
+    const numericScore = parseFloat(report.overallProjectScore);
+    if (!isNaN(numericScore) && numericScore > 0 && numericScore <= 4) {
+      return numericScore;
+    }
+  }
+  
+  // Otherwise calculate from individual scores
+  const scores = [
+    statusToNumeric(report.completionOfPlannedWork, 'completion'),
+    statusToNumeric(report.teamMorale, 'morale'),
+    statusToNumeric(report.customerSatisfaction, 'satisfaction'),
+    ratingToNumeric(report.projectManagerEvaluation),
+    ratingToNumeric(report.frontEndQuality),
+    ratingToNumeric(report.backEndQuality),
+    ratingToNumeric(report.testingQuality),
+    ratingToNumeric(report.designQuality)
+  ];
+  
+  // Filter out zero values
+  const validScores = scores.filter(score => score > 0);
+  
+  if (validScores.length === 0) return 0;
+  
+  // Calculate the average score
+  return parseFloat((validScores.reduce((a, b) => a + b, 0) / validScores.length).toFixed(2));
+};
+
+// Calculate team KPIs score (aggregate of team-related metrics)
+const calculateTeamKPIsScore = (report: ProjectReport): number => {
+  const teamMetrics = [
+    statusToNumeric(report.teamMorale, 'morale'),
+    ratingToNumeric(report.projectManagerEvaluation)
+  ];
+  
+  const validMetrics = teamMetrics.filter(metric => metric > 0);
+  
+  if (validMetrics.length === 0) return 0;
+  
+  return parseFloat((validMetrics.reduce((a, b) => a + b, 0) / validMetrics.length).toFixed(2));
+};
+
+// Calculate departmental score (aggregate of technical department metrics)
+const calculateDepartmentalScore = (report: ProjectReport): number => {
+  const deptMetrics = [
+    ratingToNumeric(report.frontEndQuality),
+    ratingToNumeric(report.backEndQuality),
+    ratingToNumeric(report.testingQuality),
+    ratingToNumeric(report.designQuality)
+  ];
+  
+  const validMetrics = deptMetrics.filter(metric => metric > 0);
+  
+  if (validMetrics.length === 0) return 0;
+  
+  return parseFloat((validMetrics.reduce((a, b) => a + b, 0) / validMetrics.length).toFixed(2));
 };
 
 export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ projectName }) => {
@@ -88,11 +159,11 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
     financial: statusToNumeric(report.financialHealth, 'financial'),
     completion: statusToNumeric(report.completionOfPlannedWork, 'completion'),
     morale: statusToNumeric(report.teamMorale, 'morale'),
-    pm: ratingToNumeric(report.projectManagerEvaluation),
-    frontend: ratingToNumeric(report.frontEndQuality),
-    backend: ratingToNumeric(report.backEndQuality),
-    testing: ratingToNumeric(report.testingQuality),
-    design: ratingToNumeric(report.designQuality),
+    // New KPIs
+    overall: calculateOverallScore(report),
+    customerSatisfaction: statusToNumeric(report.customerSatisfaction, 'satisfaction'),
+    teamKPIs: calculateTeamKPIsScore(report),
+    departmentalScore: calculateDepartmentalScore(report),
   }));
 
   const chartConfig = {
@@ -100,11 +171,11 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
     financial: { label: "Financial Health", color: "#0EA5E9" },
     completion: { label: "Completion", color: "#10B981" },
     morale: { label: "Team Morale", color: "#EC4899" },
-    pm: { label: "PM Evaluation", color: "#6366F1" },
-    frontend: { label: "Frontend", color: "#F43F5E" },
-    backend: { label: "Backend", color: "#8B5CF6" },
-    testing: { label: "Testing", color: "#14B8A6" },
-    design: { label: "Design", color: "#F59E0B" },
+    // New KPIs
+    overall: { label: "Overall Score", color: "#8B5CF6", icon: Star },
+    customerSatisfaction: { label: "Customer Satisfaction", color: "#84CC16", icon: Smile },
+    teamKPIs: { label: "Team KPIs", color: "#F59E0B", icon: Users },
+    departmentalScore: { label: "Departmental Score", color: "#6366F1", icon: Building },
   };
 
   return (
@@ -135,10 +206,37 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
                 align="center"
                 wrapperStyle={{ paddingBottom: '20px' }}
               />
+              {/* Original KPIs */}
               <Line type="monotone" dataKey="risk" name="Risk Level" stroke={chartConfig.risk.color} />
               <Line type="monotone" dataKey="financial" name="Financial Health" stroke={chartConfig.financial.color} />
-              <Line type="monotone" dataKey="completion" name="Completion" stroke={chartConfig.completion.color} />
-              <Line type="monotone" dataKey="morale" name="Team Morale" stroke={chartConfig.morale.color} />
+              
+              {/* New KPIs */}
+              <Line 
+                type="monotone" 
+                dataKey="overall" 
+                name="Overall Score" 
+                stroke={chartConfig.overall.color} 
+                strokeWidth={2}
+                activeDot={{ r: 6 }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="customerSatisfaction" 
+                name="Customer Satisfaction" 
+                stroke={chartConfig.customerSatisfaction.color} 
+              />
+              <Line 
+                type="monotone" 
+                dataKey="teamKPIs" 
+                name="Team KPIs" 
+                stroke={chartConfig.teamKPIs.color} 
+              />
+              <Line 
+                type="monotone" 
+                dataKey="departmentalScore" 
+                name="Departmental Score" 
+                stroke={chartConfig.departmentalScore.color} 
+              />
             </LineChart>
           </ResponsiveContainer>
         </ChartContainer>
@@ -160,10 +258,11 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
             <div>
               <h4 className="text-sm font-medium mb-2">KPI Timeline Highlights</h4>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Risk level tracks potential project obstacles</li>
-                <li>Financial health indicates budget adherence</li>
-                <li>Completion rate shows progress against planned work</li>
-                <li>Team morale reflects the project environment</li>
+                <li><span className="font-medium" style={{ color: chartConfig.overall.color }}>Overall Score</span> - Project's aggregate performance</li>
+                <li><span className="font-medium" style={{ color: chartConfig.customerSatisfaction.color }}>Customer Satisfaction</span> - Client feedback trends</li>
+                <li><span className="font-medium" style={{ color: chartConfig.teamKPIs.color }}>Team KPIs</span> - Team morale and PM performance</li>
+                <li><span className="font-medium" style={{ color: chartConfig.departmentalScore.color }}>Departmental Score</span> - Technical quality metrics</li>
+                <li><span className="font-medium" style={{ color: chartConfig.risk.color }}>Risk Level</span> - Project risk assessment</li>
               </ul>
             </div>
             
