@@ -62,7 +62,7 @@ export const ProjectTableRow = ({
       <TableCell>{pm}</TableCell>
       <TableCell>{type}</TableCell>
       <TableCell>
-        <StatusBadge status={status} />
+        <StatusBadge value={status || "Active"} type="rating" />
       </TableCell>
       
       {!isManageView && (
