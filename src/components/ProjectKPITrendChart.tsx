@@ -153,7 +153,9 @@ const calculateKPIChanges = (currentReport: ProjectReport, previousReport: Proje
       name: "Risk Level",
       current: statusToNumeric(currentReport.riskLevel, 'risk'),
       previous: statusToNumeric(previousReport.riskLevel, 'risk'),
-      category: "risk"
+      category: "risk",
+      // Special case for risk: lower values are worse, higher values are better
+      invertedTrend: true
     },
     {
       name: "Financial Health",
@@ -187,8 +189,14 @@ const calculateKPIChanges = (currentReport: ProjectReport, previousReport: Proje
       const change = parseFloat((metric.current - metric.previous).toFixed(1));
       let status: 'improved' | 'declined' | 'no-change' = 'no-change';
       
-      if (change > 0) status = 'improved';
-      else if (change < 0) status = 'declined';
+      // Apply standard logic for most KPIs, but invert for Risk Level
+      const invertedTrend = metric.invertedTrend === true;
+      
+      if (change > 0) {
+        status = invertedTrend ? 'improved' : 'improved';
+      } else if (change < 0) {
+        status = invertedTrend ? 'declined' : 'declined';
+      }
       
       return {
         name: metric.name,
@@ -257,16 +265,17 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
     departmentalScore: calculateDepartmentalScore(report),
   }));
 
+  // Updated color configuration with the specified color codes
   const chartConfig = {
-    risk: { label: "Risk Level", color: "#F97316" },
-    financial: { label: "Financial Health", color: "#0EA5E9" },
+    risk: { label: "Risk Level", color: "#D97706" },         // Updated to #D97706
+    financial: { label: "Financial Health", color: "#0E7490" }, // Updated to #0E7490
     completion: { label: "Completion", color: "#10B981" },
     morale: { label: "Team Morale", color: "#EC4899" },
-    // New KPIs
-    overall: { label: "Overall Score", color: "#8B5CF6", icon: Star },
-    customerSatisfaction: { label: "Customer Satisfaction", color: "#84CC16", icon: Smile },
-    teamKPIs: { label: "Team KPIs", color: "#F59E0B", icon: Users },
-    departmentalScore: { label: "Departmental Score", color: "#6366F1", icon: Building },
+    // Updated New KPIs
+    overall: { label: "Overall Score", color: "#1D4ED8", icon: Star }, // Updated to #1D4ED8
+    customerSatisfaction: { label: "Customer Satisfaction", color: "#047857", icon: Smile }, // Updated to #047857
+    teamKPIs: { label: "Team KPIs", color: "#CA8A04", icon: Users }, // Updated to #CA8A04
+    departmentalScore: { label: "Departmental Score", color: "#7C3AED", icon: Building }, // Updated to #7C3AED
   };
 
   return (
@@ -346,7 +355,7 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
               </p>
             </div>
             
-            {/* KPI Movement Summary Section - Updated */}
+            {/* KPI Movement Summary Section - Updated with specified colors and fixed Risk Level logic */}
             <div>
               <h4 className="text-sm font-medium mb-3">KPI Movement Summary</h4>
               <div className="space-y-4">

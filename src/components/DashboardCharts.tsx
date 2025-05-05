@@ -1,4 +1,3 @@
-
 import { useProjectContext } from "@/context/ProjectContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ratingToValueMap, ProjectReport } from "@/types/project";
@@ -124,11 +123,11 @@ export function DashboardCharts() {
     fair: { color: "#fbbf24" }, // yellow
     poor: { color: "#ef4444" }, // red
     na: { color: "#d1d5db" }, // gray
-    frontEnd: { color: "#60a5fa" },
-    backEnd: { color: "#8b5cf6" },
-    testing: { color: "#f97316" },
-    design: { color: "#ec4899" },
-    pmPerformance: { color: "#14b8a6" }
+    frontEnd: { color: "#F43F5E" }, // Keep original
+    backEnd: { color: "#8B5CF6" },  // Keep original
+    testing: { color: "#F97316" },  // Keep original
+    design: { color: "#EC4899" },   // Keep original
+    pmPerformance: { color: "#14B8A6" } // Keep original
   };
 
   return (
