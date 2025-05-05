@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
@@ -8,6 +9,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectContext } from "@/context/ProjectContext";
 import { useToast } from "@/components/ui/use-toast";
+import { createLatestProjectsDataMap, normalizeProjectData } from "@/utils/projectDataUtils";
 
 interface ProjectsTabProps {
   projectNames: string[];
@@ -57,7 +59,16 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
       }
       
       if (data) {
-        setProjectsData(data);
+        // Process data to ensure it has the right format for display
+        const processedData = data.map(project => ({
+          ...project,
+          // Ensure team_members name is properly accessed
+          assignedPM: project.team_members?.name || 'N/A'
+        }));
+        
+        setProjectsData(processedData);
+        console.log("Processed projects data:", processedData);
+        
         // Also refresh the context data
         if (loadProjects) {
           await loadProjects();

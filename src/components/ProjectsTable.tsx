@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 
 interface ProjectsTableProps {
-  projects: ProjectReport[];
+  projects: ProjectReport[] | any[];
   handleSort: (key: keyof ProjectReport) => void;
   getSortIndicator: (key: keyof ProjectReport) => string | null;
 }
@@ -51,34 +51,34 @@ export function ProjectsTable({ projects, handleSort, getSortIndicator }: Projec
         <TableBody>
           {projects.length > 0 ? (
             projects.map((project) => (
-              <TableRow key={`${project.projectName}-${project.reportingPeriod}`} className="hover:bg-muted/50">
-                <TableCell>{project.jiraId || "N/A"}</TableCell>
+              <TableRow key={`${project.id || project.project_name}`} className="hover:bg-muted/50">
+                <TableCell>{project.jiraId || project.jira_id || "N/A"}</TableCell>
                 <TableCell className="font-medium">
                   <a href={`/project/${project.id}`} className="hover:underline text-primary">
-                    {project.projectName}
+                    {project.projectName || project.project_name}
                   </a>
                 </TableCell>
-                <TableCell>{project.clientName || "N/A"}</TableCell>
-                <TableCell>{project.assignedPM || "N/A"}</TableCell>
+                <TableCell>{project.clientName || project.client_name || "N/A"}</TableCell>
+                <TableCell>{project.assignedPM || (project.team_members && project.team_members.name) || "N/A"}</TableCell>
                 <TableCell>
                   <Badge variant="outline">
-                    {getValidProjectType(project.projectType)}
+                    {getValidProjectType(project.projectType || project.project_type)}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary">
-                    {getValidProjectStatus(project.projectStatus)}
+                    {getValidProjectStatus(project.projectStatus || project.project_status)}
                   </Badge>
                 </TableCell>
-                <TableCell>{formatDate(project.submissionDate) || "N/A"}</TableCell>
+                <TableCell>{formatDate(project.submissionDate || project.updated_at) || "N/A"}</TableCell>
                 <TableCell>
-                  {project.overallProjectScore || "N/A"}
+                  {project.overallProjectScore || project.overall_project_score || "N/A"}
                 </TableCell>
                 <TableCell>
-                  <StatusBadge value={project.riskLevel} type="risk" />
+                  <StatusBadge value={project.riskLevel || 'N.A.'} type="risk" />
                 </TableCell>
                 <TableCell>
-                  <StatusBadge value={project.financialHealth} type="health" />
+                  <StatusBadge value={project.financialHealth || 'N.A.'} type="health" />
                 </TableCell>
               </TableRow>
             ))
