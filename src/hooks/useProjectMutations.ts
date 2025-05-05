@@ -3,9 +3,9 @@ import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import {
   addProjectReport,
-  addProjectName,
-  removeProjectName,
-  updateProjectDetails
+  addProjectName as apiAddProjectName,
+  removeProjectName as apiRemoveProjectName,
+  updateProjectDetails as apiUpdateProjectDetails
 } from "@/api/projectApi";
 
 /**
@@ -53,7 +53,7 @@ export const useProjectMutations = (
     if (!projectNames.includes(name)) {
       try {
         // Ensure jiraId is handled correctly
-        const { success, error } = await addProjectName(
+        const { success, error } = await apiAddProjectName(
           name,
           clientName,
           jiraId,  // This will be null if empty
@@ -90,7 +90,7 @@ export const useProjectMutations = (
 
   const removeProjectName = async (name: string) => {
     try {
-      const result = await removeProjectName(name);
+      const result = await apiRemoveProjectName(name);
       
       if (!result.success) {
         toast({
@@ -128,7 +128,7 @@ export const useProjectMutations = (
     assignedPM?: string;
   }) => {
     try {
-      const result = await updateProjectDetails(originalName, updateData);
+      const result = await apiUpdateProjectDetails(originalName, updateData);
       
       if (!result.success) throw result.error;
 
