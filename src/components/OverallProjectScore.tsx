@@ -45,7 +45,7 @@ export function OverallProjectScore({ score, doingWell, needsAttention }: Overal
       <Separator />
 
       {/* Row 2 - Score Breakdown Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
         {/* Left Column - Doing Well */}
         <div>
           <h4 className="text-sm font-medium mb-2">Doing Well</h4>
@@ -62,6 +62,9 @@ export function OverallProjectScore({ score, doingWell, needsAttention }: Overal
             <p className="text-sm text-gray-500 italic">No highlighted areas yet</p>
           )}
         </div>
+
+        {/* Vertical Divider - only visible on md screens and above */}
+        <Separator orientation="vertical" className="absolute h-full left-1/2 -translate-x-1/2 hidden md:block" />
 
         {/* Right Column - Pay Attention */}
         <div>
