@@ -2,10 +2,10 @@
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  addProjectReport as apiAddProjectReport,
-  addProjectName as apiAddProjectName,
-  removeProjectName as apiRemoveProjectName,
-  updateProjectDetails as apiUpdateProjectDetails
+  addProjectReport,
+  addProjectName,
+  removeProjectName,
+  updateProjectDetails
 } from "@/api/projectApi";
 
 /**
