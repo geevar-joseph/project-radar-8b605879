@@ -3,13 +3,29 @@ import { ProjectStatus, ProjectType } from "@/types/project";
 
 /**
  * Format a date string to a readable format
+ * Returns 'N/A' for invalid dates
  */
-export const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-  }).format(date);
+export const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) {
+    return 'N/A';
+  }
+  
+  try {
+    const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'N/A';
+    }
+    
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+    }).format(date);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'N/A';
+  }
 };
 
 /**
