@@ -12,6 +12,7 @@ export type ProjectData = {
   pm?: string;
   jiraId?: string;
   overallScore?: string;
+  submissionDate?: string; // Added submission date for better deduplication
 };
 
 /**
@@ -41,6 +42,8 @@ export function createLatestProjectsDataMap(projects: any[]): Map<string, any> {
   
   if (!Array.isArray(projects)) return projectMap;
   
+  console.log(`Creating latest projects map from ${projects.length} projects`);
+  
   projects.forEach(project => {
     // Get project name from different possible structures
     const projectName = extractProjectName(project);
@@ -52,40 +55,65 @@ export function createLatestProjectsDataMap(projects: any[]): Map<string, any> {
     
     if (!existingProject) {
       projectMap.set(projectName, project);
-    } else {
-      // Determine if this project is newer based on reporting_period or updated_at/submission_date
-      if ('reporting_period' in existingProject && 'reporting_period' in project) {
-        if (project.reporting_period > existingProject.reporting_period) {
-          projectMap.set(projectName, project);
+      return;
+    }
+    
+    // Determine if this project is newer based on reporting_period, updated_at, or submission_date
+    
+    // First try reporting_period (YYYY-MM format)
+    if ('reporting_period' in existingProject && 'reporting_period' in project) {
+      if (project.reporting_period > existingProject.reporting_period) {
+        projectMap.set(projectName, project);
+        return;
+      } else if (project.reporting_period < existingProject.reporting_period) {
+        return; // Keep existing
+      }
+      // If equal, fall through to next check
+    }
+    
+    // Then try submission_date
+    if ('submission_date' in existingProject && 'submission_date' in project) {
+      const existingDateValue = existingProject.submission_date;
+      const currentDateValue = project.submission_date;
+      
+      if (existingDateValue && currentDateValue) {
+        try {
+          const existingDate = new Date(String(existingDateValue));
+          const currentDate = new Date(String(currentDateValue));
+          
+          if (currentDate > existingDate) {
+            projectMap.set(projectName, project);
+            return;
+          } else if (currentDate < existingDate) {
+            return; // Keep existing
+          }
+        } catch (e) {
+          console.error("Error parsing dates for comparison:", e);
         }
-      } else if ('updated_at' in existingProject && 'updated_at' in project) {
-        const existingDateValue = existingProject.updated_at;
-        const currentDateValue = project.updated_at;
-        
-        if (existingDateValue && currentDateValue) {
+      }
+    }
+    
+    // Finally try updated_at
+    if ('updated_at' in existingProject && 'updated_at' in project) {
+      const existingDateValue = existingProject.updated_at;
+      const currentDateValue = project.updated_at;
+      
+      if (existingDateValue && currentDateValue) {
+        try {
           const existingDate = new Date(String(existingDateValue));
           const currentDate = new Date(String(currentDateValue));
           
           if (currentDate > existingDate) {
             projectMap.set(projectName, project);
           }
-        }
-      } else if ('submission_date' in existingProject && 'submission_date' in project) {
-        const existingDateValue = existingProject.submission_date;
-        const currentDateValue = project.submission_date;
-        
-        if (existingDateValue && currentDateValue) {
-          const existingDate = new Date(String(existingDateValue));
-          const currentDate = new Date(String(currentDateValue));
-          
-          if (currentDate > existingDate) {
-            projectMap.set(projectName, project);
-          }
+        } catch (e) {
+          console.error("Error parsing updated_at dates for comparison:", e);
         }
       }
     }
   });
   
+  console.log(`Created map with ${projectMap.size} unique projects`);
   return projectMap;
 }
 
@@ -112,6 +140,18 @@ export function normalizeProjectData(projectName: string, latestProjectsData: Ma
     // Handle nested team_members structure
     pmName = latestProjectData.projects.team_members.name;
   }
+
+  // Extract submission date for better tracking of latest data
+  let submissionDate;
+  if ('submissionDate' in latestProjectData) {
+    submissionDate = latestProjectData.submissionDate;
+  } else if ('submission_date' in latestProjectData) {
+    submissionDate = latestProjectData.submission_date;
+  } else if ('updated_at' in latestProjectData) {
+    submissionDate = latestProjectData.updated_at;
+  } else if (latestProjectData.projects?.updated_at) {
+    submissionDate = latestProjectData.projects.updated_at;
+  }
   
   // Safely access properties using optional chaining
   return {
@@ -131,6 +171,7 @@ export function normalizeProjectData(projectName: string, latestProjectsData: Ma
             latestProjectData.projects?.jira_id || undefined,
     overallScore: 'overallProjectScore' in latestProjectData ? latestProjectData.overallProjectScore : 
                   'overall_project_score' in latestProjectData ? latestProjectData.overall_project_score : 
-                  latestProjectData.projects?.overall_project_score || undefined
+                  latestProjectData.projects?.overall_project_score || undefined,
+    submissionDate: submissionDate
   };
 }

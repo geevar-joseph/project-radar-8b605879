@@ -5,6 +5,7 @@ import { mapToProjectReport } from "./mappers";
 
 /**
  * Fetches all project reports from Supabase
+ * Returns the latest report for each project
  */
 export const fetchProjectReports = async () => {
   try {
@@ -19,13 +20,36 @@ export const fetchProjectReports = async () => {
             name
           )
         )
-      `);
+      `)
+      .order('submission_date', { ascending: false });
 
     if (reportsError) {
       throw reportsError;
     }
     
-    return { reportsData, error: null };
+    // Create a map to store the latest report for each project
+    const latestReportsByProject = new Map<string, any>();
+      
+    // Process reports to find the latest for each project
+    if (reportsData && reportsData.length > 0) {
+      reportsData.forEach(report => {
+        const projectId = report.project_id;
+        if (!projectId) return;
+        
+        // If we don't have this project yet, or this report is newer
+        const existingReport = latestReportsByProject.get(projectId);
+        if (!existingReport || 
+            (new Date(report.submission_date) > new Date(existingReport.submission_date))) {
+          latestReportsByProject.set(projectId, report);
+        }
+      });
+    }
+    
+    // Convert map back to array of latest reports only
+    const dedupedReports = Array.from(latestReportsByProject.values());
+    console.log('Deduplicated reports from API:', dedupedReports.length);
+    
+    return { reportsData: dedupedReports, error: null };
   } catch (error) {
     console.error('Error fetching project reports:', error);
     return { reportsData: [], error };

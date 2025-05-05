@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectsHeader } from "@/components/ProjectsHeader";
@@ -30,15 +29,35 @@ const Projects = () => {
 
   const { projects, loadProjects } = useProjectContext();
 
+  // Load projects on mount, ensuring we get deduplicated data
   useEffect(() => {
-    if (loadProjects) {
-      loadProjects();
-    }
+    const loadInitialData = async () => {
+      console.log("Projects page - Loading initial data");
+      if (loadProjects) {
+        await loadProjects();
+      }
+    };
+    
+    loadInitialData();
   }, [loadProjects]);
 
-  // Apply filtering
+  // Apply filtering and maintain one entry per project
   useEffect(() => {
-    let result = [...projects];
+    console.log("Filtering and deduplicating projects data", projects.length);
+    
+    // Create a map to deduplicate by project name
+    const projectMap = new Map<string, ProjectReport>();
+    
+    // Add projects to the map, keeping only the latest entry
+    projects.forEach(project => {
+      const existingProject = projectMap.get(project.projectName);
+      if (!existingProject || new Date(project.submissionDate) > new Date(existingProject.submissionDate)) {
+        projectMap.set(project.projectName, project);
+      }
+    });
+    
+    // Convert map to array
+    let result = Array.from(projectMap.values());
     
     // Apply search term
     if (searchTerm) {

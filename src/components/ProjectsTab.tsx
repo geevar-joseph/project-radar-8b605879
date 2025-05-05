@@ -90,28 +90,46 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
       }
       
       if (data) {
-        // Process data to ensure it has the right format for display
-        const processedData = data.map(project => ({
-          ...project,
-          id: project.id,
-          projectName: project.project_name,
-          clientName: project.client_name || 'N/A',
-          projectType: project.project_type || 'Service',
-          projectStatus: project.project_status || 'Active',
-          // Ensure team_members name is properly accessed - store both ID and name
-          assignedPM: project.team_members?.name || 'N/A',
-          assignedPMId: project.assigned_pm,
-          jiraId: project.jira_id || undefined
-        }));
+        // Ensure we have unique project names in the data
+        const uniqueProjects = new Map<string, any>();
+        
+        data.forEach(project => {
+          // Use project_name as the key for uniqueness
+          uniqueProjects.set(project.project_name, {
+            ...project,
+            id: project.id,
+            projectName: project.project_name,
+            clientName: project.client_name || 'N/A',
+            projectType: project.project_type || 'Service',
+            projectStatus: project.project_status || 'Active',
+            // Ensure team_members name is properly accessed - store both ID and name
+            assignedPM: project.team_members?.name || 'N/A',
+            assignedPMId: project.assigned_pm,
+            jiraId: project.jira_id || undefined
+          });
+        });
+        
+        // Convert map back to array
+        const processedData = Array.from(uniqueProjects.values());
         
         setProjectsData(processedData);
-        console.log("Processed projects data:", processedData);
+        console.log("Processed deduplicated projects data:", processedData.length);
       }
     } catch (error) {
       console.error('Error fetching projects data:', error);
       // Use the projects from context as fallback
       if (projects && projects.length > 0) {
-        setProjectsData(projects);
+        // Ensure we have unique project names in the data from context too
+        const uniqueContextProjects = new Map<string, ProjectReport>();
+        
+        projects.forEach(project => {
+          if (!uniqueContextProjects.has(project.projectName)) {
+            uniqueContextProjects.set(project.projectName, project);
+          }
+        });
+        
+        const dedupedProjects = Array.from(uniqueContextProjects.values());
+        setProjectsData(dedupedProjects);
       } else {
         toast({
           title: "Error fetching projects",
