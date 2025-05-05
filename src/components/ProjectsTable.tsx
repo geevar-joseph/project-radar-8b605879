@@ -103,7 +103,16 @@ export function ProjectsTable({
                     overallScore: project.overallProjectScore || project.overall_project_score,
                     riskLevel: project.riskLevel,
                     financialHealth: project.financialHealth,
-                    submissionDate: project.submissionDate || project.updated_at
+                    submissionDate: project.submissionDate || project.updated_at,
+                    // Additional fields for score calculation
+                    completionOfPlannedWork: project.completionOfPlannedWork,
+                    teamMorale: project.teamMorale,
+                    customerSatisfaction: project.customerSatisfaction,
+                    projectManagerEvaluation: project.projectManagerEvaluation,
+                    frontEndQuality: project.frontEndQuality,
+                    backEndQuality: project.backEndQuality,
+                    testingQuality: project.testingQuality,
+                    designQuality: project.designQuality
                   }}
                   onEdit={() => handleEdit(projectName)}
                   onRemove={() => handleRemove(projectName)}

@@ -57,20 +57,19 @@ export function MonthlyReportsTable({ reports }: MonthlyReportsTableProps) {
     ];
     
     // Filter out N.A. values and convert score strings to numbers
-    // Fixed TypeScript error by checking values against a string array instead of specific enum types
     const validScores = scores.filter(score => 
       score !== undefined && 
-      !["N.A.", "N/A"].includes(score as string)
+      !["N.A.", "N/A", null].includes(score as string)
     );
     
     if (validScores.length === 0) return "N/A";
     
     // Map string scores to numeric values
     const scoreMap: Record<string, number> = {
-      "Poor": 1,
-      "Fair": 2,
-      "Good": 3,
       "Excellent": 4,
+      "Good": 3,
+      "Fair": 2,
+      "Poor": 1,
       "Low": 3,
       "Medium": 2,
       "High": 3,
@@ -79,6 +78,7 @@ export function MonthlyReportsTable({ reports }: MonthlyReportsTableProps) {
       "Needs Attention": 2,
       "On Track": 3,
       "Healthy": 4,
+      "On Watch": 3,
       "None": 1,
       "Some": 2,
       "Mostly": 3,

@@ -8,13 +8,26 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import { ProjectKPIChart } from "@/components/ProjectKPIChart";
 import { MonthlyReportsTable } from "@/components/MonthlyReportsTable";
+import { useEffect, useState } from "react";
+import { ProjectReport } from "@/types/project";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { getProject, projects } = useProjectContext();
   const navigate = useNavigate();
+  const [projectReports, setProjectReports] = useState<ProjectReport[]>([]);
   
   const project = getProject(id || "");
+
+  useEffect(() => {
+    if (project) {
+      // Get all reports for the current project's name
+      const allReportsForProject = projects.filter(p => 
+        p.projectName === project.projectName
+      );
+      setProjectReports(allReportsForProject);
+    }
+  }, [project, projects]);
   
   if (!project) {
     return (
@@ -29,11 +42,7 @@ const ProjectDetail = () => {
     );
   }
   
-  // Get project reports for the same project name (in a real app, this would filter by project ID)
-  const projectReports = projects.filter(p => p.projectName === project.projectName);
-  
-  const dateParts = project.submissionDate.split('-');
-  const formattedDate = `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`;
+  const formattedDate = formatDate(project.submissionDate);
   
   return (
     <div className="container mx-auto py-10">
@@ -94,6 +103,22 @@ const ProjectDetail = () => {
       </div>
     </div>
   );
+};
+
+// Helper function for formatting date
+const formatDate = (dateString: string) => {
+  if (!dateString) return "N/A";
+  
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (error) {
+    return "Invalid Date";
+  }
 };
 
 export default ProjectDetail;
