@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -39,7 +38,7 @@ interface EditProjectModalProps {
 const formSchema = z.object({
   projectName: z.string().min(1, "Project name is required"),
   clientName: z.string().optional(),
-  jiraId: z.string().optional(), // Added JIRA ID field
+  jiraId: z.string().optional(),
   projectType: z.string().optional(),
   projectStatus: z.string().optional(),
   assignedPM: z.string().optional(),
@@ -58,7 +57,7 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
     defaultValues: {
       projectName: projectName,
       clientName: currentProject?.clientName || "",
-      jiraId: currentProject?.jiraId || "", // Initialize JIRA ID field
+      jiraId: currentProject?.jiraId || "",
       projectType: currentProject?.projectType || "",
       projectStatus: currentProject?.projectStatus || "",
       assignedPM: currentProject?.assignedPM || "",
@@ -71,7 +70,7 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
       form.reset({
         projectName: projectName,
         clientName: currentProject?.clientName || "",
-        jiraId: currentProject?.jiraId || "", // Reset JIRA ID field
+        jiraId: currentProject?.jiraId || "",
         projectType: currentProject?.projectType || "",
         projectStatus: currentProject?.projectStatus || "",
         assignedPM: currentProject?.assignedPM || "",
@@ -82,7 +81,6 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      // Now TypeScript will recognize jiraId as a valid property
       await updateProjectDetails(projectName, {
         projectName: values.projectName,
         clientName: values.clientName,
@@ -145,7 +143,6 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
               )}
             />
 
-            {/* JIRA ID field */}
             <FormField
               control={form.control}
               name="jiraId"
