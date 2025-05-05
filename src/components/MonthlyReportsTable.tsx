@@ -130,6 +130,8 @@ export function MonthlyReportsTable({ reports }: MonthlyReportsTableProps) {
     setCurrentPage(page);
   };
 
+  console.log('Monthly Reports Table - Reports:', reports.length, 'Current Reports:', currentReports.length);
+
   return (
     <div>
       <Table>

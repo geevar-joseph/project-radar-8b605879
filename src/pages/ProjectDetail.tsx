@@ -10,6 +10,7 @@ import { ProjectKPIChart } from "@/components/ProjectKPIChart";
 import { MonthlyReportsTable } from "@/components/MonthlyReportsTable";
 import { useEffect, useState } from "react";
 import { ProjectReport } from "@/types/project";
+import { supabase } from "@/integrations/supabase/client";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,14 +22,103 @@ const ProjectDetail = () => {
 
   useEffect(() => {
     if (project) {
-      // Get all reports for the current project name, not just the latest one
-      const allReportsForProject = projects.filter(p => 
-        p.projectName === project.projectName
-      );
-      
-      setProjectReports(allReportsForProject);
+      // We need to check database directly to get all reports, not just filter by name
+      fetchAllProjectReports(project.projectName);
     }
-  }, [project, projects]);
+  }, [project]);
+  
+  const fetchAllProjectReports = async (projectName: string) => {
+    try {
+      // First find the project in the database by name
+      const { data: projectData, error: projectError } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('project_name', projectName)
+        .single();
+      
+      if (projectError) {
+        console.error('Error fetching project:', projectError);
+        // Fallback to filtering from local state if database fetch fails
+        const reportsFromState = projects.filter(p => 
+          p.projectName === projectName
+        );
+        setProjectReports(reportsFromState);
+        return;
+      }
+      
+      // Then fetch all reports for this project
+      const { data: reportsData, error: reportsError } = await supabase
+        .from('project_reports')
+        .select(`
+          *,
+          projects (
+            project_name,
+            client_name,
+            project_type,
+            project_status
+          )
+        `)
+        .eq('project_id', projectData.id)
+        .order('submission_date', { ascending: false });
+      
+      if (reportsError) {
+        console.error('Error fetching project reports:', reportsError);
+        // Fallback to filtering from local state if database fetch fails
+        const reportsFromState = projects.filter(p => 
+          p.projectName === projectName
+        );
+        setProjectReports(reportsFromState);
+        return;
+      }
+      
+      // Map the reports to match our ProjectReport type
+      const mappedReports = reportsData.map(report => ({
+        id: report.id,
+        projectName: report.projects?.project_name || projectName,
+        clientName: report.projects?.client_name || 'N/A',
+        projectType: report.projects?.project_type || 'N/A',
+        projectStatus: report.projects?.project_status || 'N/A',
+        submittedBy: report.submitted_by,
+        reportingPeriod: report.reporting_period,
+        riskLevel: report.risk_level,
+        financialHealth: report.financial_health,
+        completionOfPlannedWork: report.completion_of_planned_work,
+        teamMorale: report.team_morale,
+        customerSatisfaction: report.customer_satisfaction,
+        projectManagerEvaluation: report.project_manager_evaluation,
+        frontEndQuality: report.front_end_quality,
+        backEndQuality: report.back_end_quality,
+        testingQuality: report.testing_quality,
+        designQuality: report.design_quality,
+        overallProjectScore: report.overall_project_score,
+        submissionDate: report.submission_date,
+        keyAchievements: report.key_achievements,
+        primaryChallenges: report.primary_challenges,
+        nextSteps: report.next_steps,
+        followUpActions: report.follow_up_actions,
+        notes: report.notes
+      }));
+      
+      console.log('Fetched project reports:', mappedReports);
+      
+      if (mappedReports.length === 0) {
+        // If no reports found in the database, fallback to local state
+        const reportsFromState = projects.filter(p => 
+          p.projectName === projectName
+        );
+        setProjectReports(reportsFromState);
+      } else {
+        setProjectReports(mappedReports);
+      }
+    } catch (error) {
+      console.error('Error fetching project reports:', error);
+      // Fallback to filtering from local state if database fetch fails
+      const reportsFromState = projects.filter(p => 
+        p.projectName === projectName
+      );
+      setProjectReports(reportsFromState);
+    }
+  };
   
   if (!project) {
     return (
