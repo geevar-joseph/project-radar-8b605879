@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   BarChart, 
@@ -71,7 +70,6 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
   };
   
   const chartConfig = {
-    overallScore: { label: "Overall Score", color: "#8B5CF6" },
     risk: { label: "Risk Level", color: "#F97316" },
     financial: { label: "Financial Health", color: "#0EA5E9" },
     completion: { label: "Completion", color: "#10B981" },
@@ -81,6 +79,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
     backend: { label: "Backend", color: "#8B5CF6" },
     testing: { label: "Testing", color: "#14B8A6" },
     design: { label: "Design", color: "#F59E0B" },
+    customer: { label: "Customer Satisfaction", color: "#84CC16" },
   };
   
   // Convert risk level to numeric
@@ -124,14 +123,18 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
     }
   };
 
+  // Convert customer satisfaction to numeric
+  const satisfactionToNumeric = (satisfaction: string) => {
+    switch (satisfaction) {
+      case 'Very Satisfied': return 4;
+      case 'Satisfied': return 3;
+      case 'Neutral / Unclear': return 2;
+      case 'Dissatisfied': return 1;
+      default: return 0;
+    }
+  };
+
   const chartData = [
-    {
-      name: "Overall",
-      category: "overallScore",
-      value: ratingToNumeric(selectedReport.overallProjectScore),
-      fill: chartConfig.overallScore.color,
-      label: "OS"
-    },
     {
       name: "Risk",
       category: "risk",
@@ -194,6 +197,13 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
       value: ratingToNumeric(selectedReport.designQuality),
       fill: chartConfig.design.color,
       label: "DE"
+    },
+    {
+      name: "Customer",
+      category: "customer",
+      value: satisfactionToNumeric(selectedReport.customerSatisfaction),
+      fill: chartConfig.customer.color,
+      label: "CS"
     }
   ];
 

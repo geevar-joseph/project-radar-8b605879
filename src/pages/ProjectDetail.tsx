@@ -49,7 +49,7 @@ const ProjectDetail = () => {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-2xl font-bold">{project.projectName}</h1>
-              <StatusBadge value={project.overallProjectScore} type="rating" />
+              <StatusBadge value={project.riskLevel} type="risk" />
             </div>
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex gap-1">

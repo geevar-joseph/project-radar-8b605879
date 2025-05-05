@@ -47,6 +47,7 @@ export const MonthlyReportsTable: React.FC<MonthlyReportsTableProps> = ({ report
                 <TableHead>Financial Health</TableHead>
                 <TableHead>Completion</TableHead>
                 <TableHead>Team Morale</TableHead>
+                <TableHead>Customer Satisfaction</TableHead>
                 <TableHead>PM Evaluation</TableHead>
                 <TableHead>Frontend</TableHead>
                 <TableHead>Backend</TableHead>
@@ -64,6 +65,7 @@ export const MonthlyReportsTable: React.FC<MonthlyReportsTableProps> = ({ report
                   <TableCell><StatusBadge value={report.financialHealth} type="health" /></TableCell>
                   <TableCell><StatusBadge value={report.completionOfPlannedWork} type="completion" /></TableCell>
                   <TableCell><StatusBadge value={report.teamMorale} type="morale" /></TableCell>
+                  <TableCell><StatusBadge value={report.customerSatisfaction} type="satisfaction" /></TableCell>
                   <TableCell><StatusBadge value={report.projectManagerEvaluation} type="rating" /></TableCell>
                   <TableCell><StatusBadge value={report.frontEndQuality} type="rating" /></TableCell>
                   <TableCell><StatusBadge value={report.backEndQuality} type="rating" /></TableCell>

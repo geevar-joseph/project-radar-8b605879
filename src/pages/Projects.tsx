@@ -95,8 +95,8 @@ const Projects = () => {
               <TableHead className="cursor-pointer" onClick={() => handleSort('submissionDate')}>
                 Last Updated {getSortIndicator('submissionDate')}
               </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort('overallProjectScore')}>
-                Project Health {getSortIndicator('overallProjectScore')}
+              <TableHead className="cursor-pointer" onClick={() => handleSort('riskLevel')}>
+                Project Health {getSortIndicator('riskLevel')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('riskLevel')}>
                 Risk Level {getSortIndicator('riskLevel')}
@@ -133,7 +133,7 @@ const Projects = () => {
                 </TableCell>
                 <TableCell>{formatDate(project.submissionDate)}</TableCell>
                 <TableCell>
-                  <StatusBadge value={project.overallProjectScore} type="rating" />
+                  <StatusBadge value={project.riskLevel} type="risk" />
                 </TableCell>
                 <TableCell>
                   <StatusBadge value={project.riskLevel} type="risk" />

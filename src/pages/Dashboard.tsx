@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectCard } from "@/components/ProjectCard";
@@ -29,16 +30,16 @@ const Dashboard = () => {
     }
   }, [periods, selectedPeriod, setSelectedPeriod]);
 
-  // Calculate project statistics based on scores
+  // Calculate project statistics based on risk levels
   const totalProjects = projects.length;
   const projectsDoingWell = projects.filter(p => 
-    p.overallProjectScore === "Excellent" || p.overallProjectScore === "Good"
+    p.riskLevel === "Low"
   );
   const projectsNeedingAttention = projects.filter(p => 
-    p.overallProjectScore === "Fair"
+    p.riskLevel === "Medium"
   );
   const projectsAtRisk = projects.filter(p => 
-    p.overallProjectScore === "Poor"
+    p.riskLevel === "High" || p.riskLevel === "Critical"
   );
 
   return (
@@ -153,7 +154,7 @@ const Dashboard = () => {
                       <span className="text-xs text-muted-foreground">
                         {project.assignedPM || 'Unassigned'}
                       </span>
-                      <StatusBadge value={project.overallProjectScore} type="rating" />
+                      <StatusBadge value={project.riskLevel} type="risk" />
                     </div>
                   </div>
                 ))
@@ -186,7 +187,7 @@ const Dashboard = () => {
                       <span className="text-xs text-muted-foreground">
                         {project.assignedPM || 'Unassigned'}
                       </span>
-                      <StatusBadge value={project.overallProjectScore} type="rating" />
+                      <StatusBadge value={project.riskLevel} type="risk" />
                     </div>
                   </div>
                 ))
@@ -219,7 +220,7 @@ const Dashboard = () => {
                       <span className="text-xs text-muted-foreground">
                         {project.assignedPM || 'Unassigned'}
                       </span>
-                      <StatusBadge value={project.overallProjectScore} type="rating" />
+                      <StatusBadge value={project.riskLevel} type="risk" />
                     </div>
                   </div>
                 ))
