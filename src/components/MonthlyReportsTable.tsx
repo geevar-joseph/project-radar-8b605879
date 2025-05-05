@@ -9,6 +9,11 @@ interface MonthlyReportsTableProps {
   reports: ProjectReport[];
 }
 
+// Define an interface for the internal report type with calculated score
+interface ReportWithScore extends ProjectReport {
+  calculatedScore?: string;
+}
+
 export const MonthlyReportsTable: React.FC<MonthlyReportsTableProps> = ({ reports }) => {
   const sortedReports = [...reports].sort((a, b) => {
     return new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime();
@@ -19,7 +24,10 @@ export const MonthlyReportsTable: React.FC<MonthlyReportsTableProps> = ({ report
     return sortedReports.map(report => {
       // Return early if report already has a score
       if (report.overallProjectScore && report.overallProjectScore !== "N/A" && report.overallProjectScore !== "N.A.") {
-        return report;
+        return {
+          ...report,
+          calculatedScore: report.overallProjectScore
+        } as ReportWithScore;
       }
       
       // Calculate score based on all KPIs
@@ -40,7 +48,7 @@ export const MonthlyReportsTable: React.FC<MonthlyReportsTableProps> = ({ report
           return {
             ...report,
             calculatedScore: "0.0"
-          };
+          } as ReportWithScore;
         }
         
         // Calculate average and format to one decimal place
@@ -48,13 +56,13 @@ export const MonthlyReportsTable: React.FC<MonthlyReportsTableProps> = ({ report
         return {
           ...report,
           calculatedScore: average.toFixed(1)
-        };
+        } as ReportWithScore;
       } catch (error) {
         console.error("Error calculating score for report:", report.projectName, error);
         return {
           ...report,
           calculatedScore: "0.0"
-        };
+        } as ReportWithScore;
       }
     });
   }, [sortedReports]);
@@ -109,7 +117,7 @@ export const MonthlyReportsTable: React.FC<MonthlyReportsTableProps> = ({ report
                   <TableCell>{formatDate(report.submissionDate)}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
-                      <span className="font-medium">{report.calculatedScore || report.overallProjectScore || "0.0"}</span>
+                      <StatusBadge value={(report as ReportWithScore).calculatedScore || report.overallProjectScore || "0.0"} type="score" />
                     </div>
                   </TableCell>
                   <TableCell><StatusBadge value={report.riskLevel} type="risk" /></TableCell>
