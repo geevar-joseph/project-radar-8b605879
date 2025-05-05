@@ -8,18 +8,8 @@ interface KPIScoreMeterProps {
 }
 
 export function KPIScoreMeter({ score, label, maxScore = 4 }: KPIScoreMeterProps) {
-  // Handle null or undefined score
-  if (score === null || score === undefined) {
-    return (
-      <div className="flex flex-col items-center">
-        <div className="text-sm font-medium mb-1">{label}</div>
-        <div className="text-gray-400 italic">No data available</div>
-      </div>
-    );
-  }
-
   // Calculate the number of pills to fill
-  const filledPills = Math.round(score);
+  const filledPills = score !== null ? Math.round(score) : 0;
   
   // Determine color based on score for filled pills
   const getColor = (value: number) => {
@@ -31,7 +21,7 @@ export function KPIScoreMeter({ score, label, maxScore = 4 }: KPIScoreMeterProps
 
   // Generate the pill elements
   const pills = Array.from({ length: maxScore }, (_, i) => {
-    const shouldFill = i < filledPills;
+    const shouldFill = score !== null && i < filledPills;
     return (
       <div
         key={i}
@@ -50,9 +40,15 @@ export function KPIScoreMeter({ score, label, maxScore = 4 }: KPIScoreMeterProps
       <div className="flex items-center justify-center mb-1">
         {pills}
       </div>
-      <div className={`text-xs ${getColor(filledPills).replace('bg-', 'text-')}`}>
-        {score.toFixed(2)} / {maxScore}
-      </div>
+      {score !== null ? (
+        <div className={`text-xs ${getColor(filledPills).replace('bg-', 'text-')}`}>
+          {score.toFixed(2)} / {maxScore}
+        </div>
+      ) : (
+        <div className="text-xs text-gray-400">
+          0.00 / {maxScore}
+        </div>
+      )}
     </div>
   );
 }
