@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -219,26 +220,26 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select rating">
-                    {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as RatingValue} />}
+                    {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as RatingValue} type="rating" />}
                     {(!field.value || field.value === "N.A.") && "Select rating"}
                   </SelectValue>
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
                 <SelectItem value="Excellent">
-                  <ScoreIndicator value="Excellent" />
+                  <ScoreIndicator value="Excellent" type="rating" />
                 </SelectItem>
                 <SelectItem value="Good">
-                  <ScoreIndicator value="Good" />
+                  <ScoreIndicator value="Good" type="rating" />
                 </SelectItem>
                 <SelectItem value="Fair">
-                  <ScoreIndicator value="Fair" />
+                  <ScoreIndicator value="Fair" type="rating" />
                 </SelectItem>
                 <SelectItem value="Poor">
-                  <ScoreIndicator value="Poor" />
+                  <ScoreIndicator value="Poor" type="rating" />
                 </SelectItem>
                 <SelectItem value="N.A.">
-                  <ScoreIndicator value="N.A." />
+                  <ScoreIndicator value="N.A." type="rating" />
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -261,7 +262,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select satisfaction level">
-                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as CustomerSatisfaction} />}
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as CustomerSatisfaction} type="satisfaction" />}
                   {(!field.value || field.value === "N.A.") && "Select satisfaction level"}
                 </SelectValue>
               </SelectTrigger>
@@ -269,31 +270,31 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <SelectContent>
               <SelectItem value="Very Satisfied">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Very Satisfied" />
+                  <ScoreIndicator value="Very Satisfied" type="satisfaction" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Customers are highly complimentary</span>
                 </div>
               </SelectItem>
               <SelectItem value="Satisfied">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Satisfied" />
+                  <ScoreIndicator value="Satisfied" type="satisfaction" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Customers are generally pleased</span>
                 </div>
               </SelectItem>
               <SelectItem value="Neutral / Unclear">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Neutral / Unclear" />
+                  <ScoreIndicator value="Neutral / Unclear" type="satisfaction" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Mixed feedback or limited communication</span>
                 </div>
               </SelectItem>
               <SelectItem value="Dissatisfied">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Dissatisfied" />
+                  <ScoreIndicator value="Dissatisfied" type="satisfaction" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Multiple complaints or issues raised</span>
                 </div>
               </SelectItem>
               <SelectItem value="N.A.">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="N.A." />
+                  <ScoreIndicator value="N.A." type="satisfaction" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">No customer interaction this period</span>
                 </div>
               </SelectItem>
@@ -317,7 +318,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select risk level">
-                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as RiskLevel} />}
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as RiskLevel} type="risk" />}
                   {(!field.value || field.value === "N.A.") && "Select risk level"}
                 </SelectValue>
               </SelectTrigger>
@@ -325,31 +326,31 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <SelectContent>
               <SelectItem value="Low">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Low" />
+                  <ScoreIndicator value="Low" type="risk" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Project has minimal identified risks</span>
                 </div>
               </SelectItem>
               <SelectItem value="Medium">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Medium" />
+                  <ScoreIndicator value="Medium" type="risk" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Some risks identified but manageable</span>
                 </div>
               </SelectItem>
               <SelectItem value="High">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="High" />
+                  <ScoreIndicator value="High" type="risk" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Significant risks requiring mitigation</span>
                 </div>
               </SelectItem>
               <SelectItem value="Critical">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Critical" />
+                  <ScoreIndicator value="Critical" type="risk" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Major issues threatening project success</span>
                 </div>
               </SelectItem>
               <SelectItem value="N.A.">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="N.A." />
+                  <ScoreIndicator value="N.A." type="risk" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Risk assessment not applicable</span>
                 </div>
               </SelectItem>
@@ -373,7 +374,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select financial status">
-                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as FinancialHealth} />}
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as FinancialHealth} type="health" />}
                   {(!field.value || field.value === "N.A.") && "Select financial status"}
                 </SelectValue>
               </SelectTrigger>
@@ -381,31 +382,31 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <SelectContent>
               <SelectItem value="Healthy">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Healthy" />
+                  <ScoreIndicator value="Healthy" type="health" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Project is on budget with strong margins</span>
                 </div>
               </SelectItem>
               <SelectItem value="On Watch">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="On Watch" />
+                  <ScoreIndicator value="On Watch" type="health" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Minor budget concerns or margin trend declining</span>
                 </div>
               </SelectItem>
               <SelectItem value="At Risk">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="At Risk" />
+                  <ScoreIndicator value="At Risk" type="health" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Over budget or margin pressure is material</span>
                 </div>
               </SelectItem>
               <SelectItem value="Critical">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Critical" />
+                  <ScoreIndicator value="Critical" type="health" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Significantly over budget and/or negative margin</span>
                 </div>
               </SelectItem>
               <SelectItem value="N.A.">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="N.A." />
+                  <ScoreIndicator value="N.A." type="health" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Not applicable or insufficient financial data</span>
                 </div>
               </SelectItem>
@@ -429,7 +430,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select morale level">
-                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as TeamMorale} />}
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as TeamMorale} type="morale" />}
                   {(!field.value || field.value === "N.A.") && "Select morale level"}
                 </SelectValue>
               </SelectTrigger>
@@ -437,31 +438,31 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <SelectContent>
               <SelectItem value="High">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="High" />
+                  <ScoreIndicator value="High" type="morale" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Team is energized and highly motivated</span>
                 </div>
               </SelectItem>
               <SelectItem value="Moderate">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Moderate" />
+                  <ScoreIndicator value="Moderate" type="morale" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Team is generally positive but not exceptional</span>
                 </div>
               </SelectItem>
               <SelectItem value="Low">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Low" />
+                  <ScoreIndicator value="Low" type="morale" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Team shows signs of discouragement</span>
                 </div>
               </SelectItem>
               <SelectItem value="Burnt Out">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Burnt Out" />
+                  <ScoreIndicator value="Burnt Out" type="morale" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Team is exhausted and morale is critically low</span>
                 </div>
               </SelectItem>
               <SelectItem value="N.A.">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="N.A." />
+                  <ScoreIndicator value="N.A." type="morale" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Unable to assess team morale</span>
                 </div>
               </SelectItem>
@@ -485,7 +486,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select completion status">
-                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as CompletionStatus} />}
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as CompletionStatus} type="completion" />}
                   {(!field.value || field.value === "N.A.") && "Select completion status"}
                 </SelectValue>
               </SelectTrigger>
@@ -493,31 +494,31 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <SelectContent>
               <SelectItem value="All completed">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="All completed" />
+                  <ScoreIndicator value="All completed" type="completion" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">100% of planned deliverables completed</span>
                 </div>
               </SelectItem>
               <SelectItem value="Mostly">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Mostly" />
+                  <ScoreIndicator value="Mostly" type="completion" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">75-99% of planned deliverables completed</span>
                 </div>
               </SelectItem>
               <SelectItem value="Partially">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Partially" />
+                  <ScoreIndicator value="Partially" type="completion" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">40-74% of planned deliverables completed</span>
                 </div>
               </SelectItem>
               <SelectItem value="Not completed">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="Not completed" />
+                  <ScoreIndicator value="Not completed" type="completion" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">Less than 40% of planned work completed</span>
                 </div>
               </SelectItem>
               <SelectItem value="N.A.">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="N.A." />
+                  <ScoreIndicator value="N.A." type="completion" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">No planned work to measure</span>
                 </div>
               </SelectItem>
