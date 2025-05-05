@@ -51,10 +51,16 @@ const formSchema = z.object({
 });
 
 export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjectModalProps) => {
-  const { updateProjectDetails, projects, teamMembers, loadProjects } = useProjectContext();
+  const { 
+    updateProjectDetails, 
+    projects, 
+    teamMembers,
+    loadProjects 
+  } = useProjectContext();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [teamMemberOptions, setTeamMemberOptions] = useState<Array<{id: string, name: string}>>([]);
 
   // Find the current project data
   const currentProject = projects.find(p => p.projectName === projectName);
@@ -71,23 +77,63 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
     },
   });
 
+  // Fetch full team member data on component mount
+  useEffect(() => {
+    const fetchTeamMemberData = async () => {
+      try {
+        // Fetch team members including their IDs
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('id, name');
+
+        if (error) {
+          console.error('Error fetching team members:', error);
+          return;
+        }
+
+        if (data) {
+          setTeamMemberOptions(data);
+        }
+      } catch (err) {
+        console.error('Error in fetchTeamMemberData:', err);
+      }
+    };
+
+    if (open) {
+      fetchTeamMemberData();
+    }
+  }, [open]);
+
   // Only initialize form values when modal opens or project changes
   useEffect(() => {
     if (open && currentProject && !initialized) {
+      // Find the assigned PM's ID based on name if we have team member data
+      let pmId = currentProject?.assignedPM || "";
+      
+      // If we have team member options and the current project has an assigned PM name
+      if (teamMemberOptions.length > 0 && currentProject.assignedPM) {
+        // Try to find the team member by name
+        const teamMember = teamMemberOptions.find(tm => tm.name === currentProject.assignedPM);
+        if (teamMember) {
+          pmId = teamMember.id;
+        }
+      }
+
       form.reset({
         projectName: projectName,
         clientName: currentProject?.clientName || "",
         jiraId: currentProject?.jiraId || "",
         projectType: (currentProject?.projectType as any) || "Service",
         projectStatus: (currentProject?.projectStatus as any) || "Active",
-        assignedPM: currentProject?.assignedPM || "",
+        assignedPM: pmId,
       });
       setInitialized(true);
     } else if (!open) {
       // Reset initialization flag when modal closes
       setInitialized(false);
     }
-  }, [open, currentProject, form, projectName, initialized]);
+  }, [open, currentProject, form, projectName, initialized, teamMemberOptions]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -100,7 +146,8 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
         jiraId: values.jiraId || "",
         projectType: values.projectType || "Service",
         projectStatus: values.projectStatus || "Active",
-        assignedPM: values.assignedPM || "",
+        // Pass the UUID directly from the form - this will be a UUID string
+        assignedPM: values.assignedPM || null,
       };
       
       console.log("Submitting update with data:", updateData);
@@ -248,9 +295,9 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {teamMembers.map((member) => (
-                        <SelectItem key={member} value={member}>
-                          {member}
+                      {teamMemberOptions.map((member) => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {member.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

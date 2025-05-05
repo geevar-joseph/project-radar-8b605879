@@ -9,7 +9,6 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectContext } from "@/context/ProjectContext";
 import { useToast } from "@/components/ui/use-toast";
-import { createLatestProjectsDataMap, normalizeProjectData } from "@/utils/projectDataUtils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface ProjectsTabProps {
@@ -32,21 +31,35 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
   const loadingRef = useRef(false);
   const { toast } = useToast();
   
-  // Initial data fetch only once when component mounts
+  // Initial data fetch when component mounts
   useEffect(() => {
-    if (!initialLoadDone.current) {
-      fetchProjectsData();
-      initialLoadDone.current = true;
-    }
-  }, []);
+    const loadInitialData = async () => {
+      if (!initialLoadDone.current && !loadingRef.current) {
+        loadingRef.current = true;
+        try {
+          await loadProjects();
+          fetchProjectsData();
+          initialLoadDone.current = true;
+        } catch (error) {
+          console.error("Failed to load initial project data:", error);
+        } finally {
+          loadingRef.current = false;
+        }
+      }
+    };
+    
+    loadInitialData();
+  }, [loadProjects]);
   
-  // Only refetch when modal closes (indicating a possible data change)
+  // Reload data when returning to the page or when modal closes
   useEffect(() => {
     if (!isAddProjectModalOpen && initialLoadDone.current) {
       // Wait a bit before fetching to avoid UI flashing
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         fetchProjectsData();
       }, 300);
+      
+      return () => clearTimeout(timer);
     }
   }, [isAddProjectModalOpen]);
   
@@ -80,8 +93,15 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
         // Process data to ensure it has the right format for display
         const processedData = data.map(project => ({
           ...project,
-          // Ensure team_members name is properly accessed
-          assignedPM: project.team_members?.name || 'N/A'
+          id: project.id,
+          projectName: project.project_name,
+          clientName: project.client_name || 'N/A',
+          projectType: project.project_type || 'Service',
+          projectStatus: project.project_status || 'Active',
+          // Ensure team_members name is properly accessed - store both ID and name
+          assignedPM: project.team_members?.name || 'N/A',
+          assignedPMId: project.assigned_pm,
+          jiraId: project.jira_id || undefined
         }));
         
         setProjectsData(processedData);
@@ -111,11 +131,11 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
     // If modal is being closed, refresh the data after a short delay
     if (!open && initialLoadDone.current) {
       setTimeout(() => {
-        if (loadProjects) {
-          loadProjects().catch(error => {
-            console.error("Error loading projects:", error);
-          });
-        }
+        loadProjects().then(() => {
+          fetchProjectsData();
+        }).catch(error => {
+          console.error("Error reloading projects:", error);
+        });
       }, 300);
     }
   };
@@ -137,8 +157,11 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
       try {
         const success = await removeProjectName(projectToDelete);
         if (success) {
-          // Refresh data after successful deletion
+          // Force a complete data refresh
+          await loadProjects();
+          // Then refresh the local view
           fetchProjectsData();
+          
           toast({
             title: "Project Deleted",
             description: `"${projectToDelete}" has been removed successfully.`

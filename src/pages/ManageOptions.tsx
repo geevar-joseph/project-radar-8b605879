@@ -21,47 +21,47 @@ const ManageOptions = () => {
   const loadingInProgress = useRef(false);
   const { toast } = useToast();
 
-  // Load data when component mounts and ensure we have fresh data
+  // Comprehensive data loading on mount
   useEffect(() => {
-    if (loadProjects && !loadingInProgress.current && !initialLoadDone.current) {
-      console.log("Initial loading of projects in ManageOptions");
-      loadingInProgress.current = true;
-      
-      loadProjects()
-        .then(() => {
+    const initialLoad = async () => {
+      if (loadProjects && !loadingInProgress.current && !initialLoadDone.current) {
+        console.log("Initial loading of projects in ManageOptions");
+        loadingInProgress.current = true;
+        
+        try {
+          await loadProjects();
           console.log("Projects loaded successfully in ManageOptions");
           initialLoadDone.current = true;
-        })
-        .catch(error => {
+        } catch (error) {
           console.error("Error loading projects data:", error);
           toast({
             title: "Failed to load data",
             description: "Could not retrieve project data. Please try refreshing.",
             variant: "destructive"
           });
-        })
-        .finally(() => {
+        } finally {
           loadingInProgress.current = false;
-        });
-    }
+        }
+      }
+    };
+    
+    initialLoad();
   }, [loadProjects, toast]);
 
   // Reload data when the component gains focus
   useEffect(() => {
     // Function to reload projects data
-    const reloadData = () => {
+    const reloadData = async () => {
       if (!loadingInProgress.current && loadProjects) {
         loadingInProgress.current = true;
-        loadProjects()
-          .then(() => {
-            console.log("Projects reloaded on visibility change");
-          })
-          .catch(error => {
-            console.error("Error reloading data:", error);
-          })
-          .finally(() => {
-            loadingInProgress.current = false;
-          });
+        try {
+          await loadProjects();
+          console.log("Projects reloaded on visibility change");
+        } catch (error) {
+          console.error("Error reloading data:", error);
+        } finally {
+          loadingInProgress.current = false;
+        }
       }
     };
     
@@ -74,28 +74,26 @@ const ManageOptions = () => {
     };
   }, [loadProjects]);
 
-  // Refresh data when switching tabs
-  const handleTabChange = (value: string) => {
+  // Ensure data is fresh when switching tabs
+  const handleTabChange = async (value: string) => {
     setActiveTab(value);
     
     // Reload data when switching tabs to ensure we have the latest
     if (!loadingInProgress.current) {
       loadingInProgress.current = true;
-      loadProjects()
-        .then(() => {
-          console.log("Projects reloaded after tab change");
-        })
-        .catch(error => {
-          console.error("Error reloading projects data:", error);
-          toast({
-            title: "Failed to reload data",
-            description: "Could not retrieve updated project data.",
-            variant: "destructive"
-          });
-        })
-        .finally(() => {
-          loadingInProgress.current = false;
+      try {
+        await loadProjects();
+        console.log("Projects reloaded after tab change");
+      } catch (error) {
+        console.error("Error reloading projects data:", error);
+        toast({
+          title: "Failed to reload data",
+          description: "Could not retrieve updated project data.",
+          variant: "destructive"
         });
+      } finally {
+        loadingInProgress.current = false;
+      }
     }
   };
 

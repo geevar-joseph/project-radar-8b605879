@@ -1,95 +1,108 @@
 
-import React from "react";
-import { TableRow, TableCell } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
-import { formatDate, getValidProjectStatus, getValidProjectType } from "@/utils/formatters";
+import { Edit, Trash } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
-import { ProjectType, ProjectStatus, RiskLevel, FinancialHealth } from "@/types/project";
+import { formatDate } from "@/utils/formatters";
+import { riskToColorMap, healthToColorMap } from "@/types/project";
 
-interface ProjectData {
+// Define the project data structure specifically for table rows
+interface ProjectRowData {
+  id?: string;
   name: string;
   client?: string;
   type?: string;
   status?: string;
   pm?: string;
+  pmId?: string; // Add pmId to track the UUID of the PM
   jiraId?: string;
   overallScore?: string;
   riskLevel?: string;
   financialHealth?: string;
-  id?: string;
   submissionDate?: string;
 }
 
 interface ProjectTableRowProps {
-  project: ProjectData;
-  onEdit: (projectName: string) => void;
-  onRemove: (projectName: string) => void;
+  project: ProjectRowData;
+  onEdit?: (projectName: string) => void;
+  onRemove?: (projectName: string) => void;
   isManageView?: boolean;
 }
 
-export const ProjectTableRow: React.FC<ProjectTableRowProps> = ({ 
+export const ProjectTableRow = ({ 
   project, 
   onEdit, 
   onRemove,
   isManageView = false
-}) => {
+}: ProjectTableRowProps) => {
+  // Format and ensure all values have defaults for display
+  const {
+    name,
+    client = "N/A",
+    type = "Service",
+    status = "Active",
+    pm = "N/A",
+    jiraId = "—",
+    overallScore = "—",
+    riskLevel,
+    financialHealth,
+    submissionDate
+  } = project;
+
+  // Format date if available
+  const formattedDate = submissionDate ? formatDate(submissionDate) : "—";
+
   return (
-    <TableRow key={project.name}>
-      <TableCell>{project.jiraId || "—"}</TableCell>
+    <TableRow className="hover:bg-muted/50">
       <TableCell className="font-medium">
-        {project.id ? (
-          <a href={`/project/${project.id}`} className="hover:underline text-primary">
-            {project.name}
-          </a>
-        ) : (
-          project.name
-        )}
+        {jiraId || "—"}
       </TableCell>
-      <TableCell>{project.client || "—"}</TableCell>
-      <TableCell>{project.pm || "—"}</TableCell>
+      <TableCell>{name}</TableCell>
+      <TableCell>{client}</TableCell>
+      <TableCell>{pm}</TableCell>
+      <TableCell>{type}</TableCell>
       <TableCell>
-        {project.type ? (
-          <Badge variant="outline">{getValidProjectType(project.type as ProjectType)}</Badge>
-        ) : "—"}
+        <StatusBadge status={status} />
       </TableCell>
-      <TableCell>
-        {project.status ? (
-          <Badge variant="secondary">{getValidProjectStatus(project.status as ProjectStatus)}</Badge>
-        ) : "—"}
-      </TableCell>
+      
       {!isManageView && (
         <>
-          <TableCell>{formatDate(project.submissionDate) || "—"}</TableCell>
+          <TableCell>{formattedDate}</TableCell>
+          <TableCell>{overallScore}</TableCell>
           <TableCell>
-            <StatusBadge value={project.overallScore || "0.0"} type="score" />
+            {riskLevel ? (
+              <span className={`inline-block w-3 h-3 rounded-full ${riskToColorMap[riskLevel] || "bg-gray-300"}`}></span>
+            ) : "—"}
           </TableCell>
           <TableCell>
-            <StatusBadge value={(project.riskLevel || 'N.A.') as RiskLevel} type="risk" />
-          </TableCell>
-          <TableCell>
-            <StatusBadge value={(project.financialHealth || 'N.A.') as FinancialHealth} type="health" />
+            {financialHealth ? (
+              <span className={`inline-block w-3 h-3 rounded-full ${healthToColorMap[financialHealth] || "bg-gray-300"}`}></span>
+            ) : "—"}
           </TableCell>
         </>
       )}
-      {/* Only show action cell in manage view */}
-      {isManageView && (
-        <TableCell className="text-right space-x-2 flex justify-end">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => onEdit(project.name)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => onRemove(project.name)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+      
+      {isManageView && onEdit && onRemove && (
+        <TableCell className="text-right">
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => onEdit(name)}
+              title="Edit Project"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => onRemove(name)}
+              title="Delete Project"
+              className="text-destructive hover:bg-destructive/10"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
         </TableCell>
       )}
     </TableRow>

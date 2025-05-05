@@ -1,4 +1,3 @@
-
 import { ProjectReport, ProjectType, ProjectStatus } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -147,10 +146,16 @@ export const useProjectMutations = (
     jiraId?: string;
     projectType?: string;
     projectStatus?: string;
-    assignedPM?: string;
+    assignedPM?: string | null;
   }) => {
     try {
       console.log('Updating project details:', originalName, updateData);
+      
+      // Ensure assignedPM is either a valid UUID or null, never an empty string
+      // This prevents the "invalid input syntax for type uuid" error
+      const validatedAssignedPM = updateData.assignedPM && updateData.assignedPM.trim() !== "" 
+        ? updateData.assignedPM 
+        : null;
       
       // Safely convert string types to enum types before sending to API
       const typeSafeData = {
@@ -164,8 +169,10 @@ export const useProjectMutations = (
         projectStatus: updateData.projectStatus && (updateData.projectStatus === "Active" || updateData.projectStatus === "Inactive" || updateData.projectStatus === "Support")
           ? updateData.projectStatus as ProjectStatus
           : "Active" as ProjectStatus,
-        assignedPM: updateData.assignedPM || null
+        assignedPM: validatedAssignedPM
       };
+      
+      console.log('Sending validated data to API:', typeSafeData);
       
       // Ensure all values are properly passed to the API
       const result = await apiUpdateProjectDetails(originalName, typeSafeData);
@@ -185,38 +192,13 @@ export const useProjectMutations = (
         throw result.error || new Error("Failed to update project");
       }
 
-      // Update local state - find and update the project in projects array with proper type casting
-      const updatedProjects = projects.map(project => {
-        if (project.projectName === originalName) {
-          return {
-            ...project,
-            projectName: typeSafeData.projectName,
-            clientName: typeSafeData.clientName,
-            jiraId: typeSafeData.jiraId || "",
-            projectType: typeSafeData.projectType,
-            projectStatus: typeSafeData.projectStatus,
-            assignedPM: typeSafeData.assignedPM || ""
-          } as ProjectReport;
-        }
-        return project;
-      });
-      
-      setProjects(updatedProjects);
-
-      // If project name changed, update projectNames array
-      if (originalName !== typeSafeData.projectName) {
-        setProjectNames(projectNames.map(name => 
-          name === originalName ? typeSafeData.projectName : name
-        ));
-      }
+      // After successful update, refresh the data from the server
+      await loadProjects();
       
       toast({
         title: "Project Updated",
         description: `"${typeSafeData.projectName}" has been updated successfully.`,
       });
-      
-      // Reload projects to ensure data consistency
-      await loadProjects();
       
       return true;
     } catch (error) {
