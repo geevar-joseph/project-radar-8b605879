@@ -81,7 +81,7 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      await updateProjectDetails(projectName, {
+      const result = await updateProjectDetails(projectName, {
         projectName: values.projectName,
         clientName: values.clientName,
         jiraId: values.jiraId,
@@ -89,11 +89,14 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
         projectStatus: values.projectStatus,
         assignedPM: values.assignedPM,
       });
-      toast({
-        title: "Project Updated",
-        description: `${values.projectName} has been updated successfully.`,
-      });
-      onOpenChange(false);
+      
+      if (result) {
+        toast({
+          title: "Project Updated",
+          description: `${values.projectName} has been updated successfully.`,
+        });
+        onOpenChange(false);
+      }
     } catch (error) {
       console.error('Error updating project:', error);
       toast({

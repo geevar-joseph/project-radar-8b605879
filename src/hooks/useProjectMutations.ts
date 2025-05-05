@@ -1,4 +1,3 @@
-
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -6,7 +5,7 @@ import {
   addProjectName as apiAddProjectName,
   removeProjectName as apiRemoveProjectName,
   updateProjectDetails as apiUpdateProjectDetails
-} from "@/api/projectApi";
+} from "@/api/projectsApi";
 
 /**
  * Hook for project mutation operations (add, update, delete)
@@ -207,7 +206,7 @@ export const useProjectMutations = (
         description: "There was an error updating the project. Please try again.",
         variant: "destructive"
       });
-      throw error;
+      return false;
     }
   };
 

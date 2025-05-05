@@ -4,6 +4,7 @@ import { useProjectContext } from "@/context/ProjectContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProjectsTab } from "@/components/ProjectsTab";
 import { TeamMembersTab } from "@/components/TeamMembersTab";
+import { useToast } from "@/components/ui/use-toast";
 
 const ManageOptions = () => {
   const [activeTab, setActiveTab] = useState("projects");
@@ -18,18 +19,27 @@ const ManageOptions = () => {
   } = useProjectContext();
   const initialLoadDone = useRef(false);
   const loadingInProgress = useRef(false);
+  const { toast } = useToast();
 
   // Load data only once when component mounts
   useEffect(() => {
     if (!initialLoadDone.current && loadProjects && !loadingInProgress.current) {
       loadingInProgress.current = true;
       loadProjects()
+        .catch(error => {
+          console.error("Error loading projects data:", error);
+          toast({
+            title: "Failed to load data",
+            description: "Could not retrieve project data. Please try refreshing.",
+            variant: "destructive"
+          });
+        })
         .finally(() => {
           initialLoadDone.current = true;
           loadingInProgress.current = false;
         });
     }
-  }, [loadProjects]);
+  }, [loadProjects, toast]);
 
   // Refresh data when switching tabs, but only if we haven't loaded already
   const handleTabChange = (value: string) => {
@@ -39,6 +49,14 @@ const ManageOptions = () => {
     if (isError && !loadingInProgress.current) {
       loadingInProgress.current = true;
       loadProjects()
+        .catch(error => {
+          console.error("Error reloading projects data:", error);
+          toast({
+            title: "Failed to reload data",
+            description: "Could not retrieve updated project data.",
+            variant: "destructive"
+          });
+        })
         .finally(() => {
           loadingInProgress.current = false;
         });
