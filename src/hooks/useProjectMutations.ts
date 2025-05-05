@@ -152,15 +152,23 @@ export const useProjectMutations = (
     try {
       console.log('Updating project details:', originalName, updateData);
       
-      // Ensure all values are properly passed to the API
-      const result = await apiUpdateProjectDetails(originalName, {
+      // Safely convert string types to enum types before sending to API
+      const typeSafeData = {
         projectName: updateData.projectName,
         clientName: updateData.clientName || "",
         jiraId: updateData.jiraId || null,
-        projectType: updateData.projectType || "Service",
-        projectStatus: updateData.projectStatus || "Active",
+        // Ensure these are valid enum values or use defaults
+        projectType: updateData.projectType && (updateData.projectType === "Service" || updateData.projectType === "Product") 
+          ? updateData.projectType as ProjectType 
+          : "Service" as ProjectType,
+        projectStatus: updateData.projectStatus && (updateData.projectStatus === "Active" || updateData.projectStatus === "Inactive" || updateData.projectStatus === "Support")
+          ? updateData.projectStatus as ProjectStatus
+          : "Active" as ProjectStatus,
         assignedPM: updateData.assignedPM || null
-      });
+      };
+      
+      // Ensure all values are properly passed to the API
+      const result = await apiUpdateProjectDetails(originalName, typeSafeData);
       
       if (!result) {
         console.error('No result returned from updateProjectDetails API call');
@@ -177,19 +185,18 @@ export const useProjectMutations = (
         throw result.error || new Error("Failed to update project");
       }
 
-      // Update local state - find and update the project in projects array
+      // Update local state - find and update the project in projects array with proper type casting
       const updatedProjects = projects.map(project => {
         if (project.projectName === originalName) {
           return {
             ...project,
-            projectName: updateData.projectName,
-            clientName: updateData.clientName || project.clientName || "",
-            jiraId: updateData.jiraId || project.jiraId || "",
-            // Ensure proper type casting for enum values
-            projectType: (updateData.projectType as ProjectType) || project.projectType || "Service" as ProjectType,
-            projectStatus: (updateData.projectStatus as ProjectStatus) || project.projectStatus || "Active" as ProjectStatus,
-            assignedPM: updateData.assignedPM || project.assignedPM || ""
-          } as ProjectReport; // Explicitly cast to ProjectReport
+            projectName: typeSafeData.projectName,
+            clientName: typeSafeData.clientName,
+            jiraId: typeSafeData.jiraId || "",
+            projectType: typeSafeData.projectType,
+            projectStatus: typeSafeData.projectStatus,
+            assignedPM: typeSafeData.assignedPM || ""
+          } as ProjectReport;
         }
         return project;
       });
@@ -197,15 +204,15 @@ export const useProjectMutations = (
       setProjects(updatedProjects);
 
       // If project name changed, update projectNames array
-      if (originalName !== updateData.projectName) {
+      if (originalName !== typeSafeData.projectName) {
         setProjectNames(projectNames.map(name => 
-          name === originalName ? updateData.projectName : name
+          name === originalName ? typeSafeData.projectName : name
         ));
       }
       
       toast({
         title: "Project Updated",
-        description: `"${updateData.projectName}" has been updated successfully.`,
+        description: `"${typeSafeData.projectName}" has been updated successfully.`,
       });
       
       // Reload projects to ensure data consistency

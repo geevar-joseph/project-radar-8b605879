@@ -37,17 +37,21 @@ interface EditProjectModalProps {
   projectName: string;
 }
 
+// Define valid project types and statuses for validation
+const validProjectTypes = ["Service", "Product"] as const;
+const validProjectStatuses = ["Active", "Inactive", "Support"] as const;
+
 const formSchema = z.object({
   projectName: z.string().min(1, "Project name is required"),
   clientName: z.string().optional(),
   jiraId: z.string().optional(),
-  projectType: z.string().optional(),
-  projectStatus: z.string().optional(),
+  projectType: z.enum(validProjectTypes).optional(),
+  projectStatus: z.enum(validProjectStatuses).optional(),
   assignedPM: z.string().optional(),
 });
 
 export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjectModalProps) => {
-  const { updateProjectDetails, projects, teamMembers } = useProjectContext();
+  const { updateProjectDetails, projects, teamMembers, loadProjects } = useProjectContext();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -61,8 +65,8 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
       projectName: "",
       clientName: "",
       jiraId: "",
-      projectType: "",
-      projectStatus: "",
+      projectType: "Service" as const,
+      projectStatus: "Active" as const,
       assignedPM: "",
     },
   });
@@ -74,8 +78,8 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
         projectName: projectName,
         clientName: currentProject?.clientName || "",
         jiraId: currentProject?.jiraId || "",
-        projectType: currentProject?.projectType || "",
-        projectStatus: currentProject?.projectStatus || "",
+        projectType: (currentProject?.projectType as any) || "Service",
+        projectStatus: (currentProject?.projectStatus as any) || "Active",
         assignedPM: currentProject?.assignedPM || "",
       });
       setInitialized(true);
@@ -109,6 +113,9 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
           title: "Project Updated",
           description: `${values.projectName} has been updated successfully.`,
         });
+        
+        // Refresh projects data after successful update
+        await loadProjects();
         onOpenChange(false);
       }
     } catch (error) {
