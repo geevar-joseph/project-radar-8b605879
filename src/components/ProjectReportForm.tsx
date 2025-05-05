@@ -13,11 +13,12 @@ import { v4 as uuidv4 } from "uuid";
 import { ScoreIndicator } from "./ScoreIndicator";
 import { Save } from "lucide-react";
 import { RatingValue, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale } from "@/types/project";
+import { useMemo } from "react";
 
 const formSchema = z.object({
   projectName: z.string().min(2, "Project name must be at least 2 characters"),
   submittedBy: z.string().min(2, "Submitter name must be at least 2 characters"),
-  reportingPeriod: z.string().regex(/^\d{4}-\d{2}$/, "Format must be YYYY-MM"),
+  reportingPeriod: z.string().min(6, "Reporting period is required"),
   overallProjectScore: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."]),
   riskLevel: z.enum(["Low", "Medium", "High", "N.A."]),
   financialHealth: z.enum(["Healthy", "On Watch", "At Risk", "N.A."]),
@@ -45,12 +46,33 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
   const { addProject, projectNames, teamMembers } = useProjectContext();
   const navigate = useNavigate();
   
+  // Generate the last 3 months options (current month and previous 2 months)
+  const reportingPeriodOptions = useMemo(() => {
+    const options = [];
+    const currentDate = new Date();
+    
+    for (let i = 0; i < 3; i++) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const formattedDate = `${year}-${month}`;
+      
+      // Create a readable label (e.g. "May 2025")
+      const monthName = date.toLocaleString('default', { month: 'long' });
+      const label = `${monthName} ${year}`;
+      
+      options.push({ value: formattedDate, label });
+    }
+    
+    return options;
+  }, []);
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       projectName: projectNames[0] || "",
       submittedBy: teamMembers[0] || "",
-      reportingPeriod: new Date().toISOString().substring(0, 7), // YYYY-MM
+      reportingPeriod: reportingPeriodOptions[0]?.value || "", // Current month as default
       overallProjectScore: "Good",
       riskLevel: "Low",
       financialHealth: "Healthy",
@@ -377,11 +399,22 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Reporting Period</FormLabel>
-                  <FormControl>
-                    <Input placeholder="YYYY-MM" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select reporting period" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {reportingPeriodOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormDescription>
-                    Format: YYYY-MM (e.g. 2025-05)
+                    Select the month and year for this report
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
