@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   LineChart,
@@ -12,7 +13,7 @@ import {
 import { ProjectReport, ratingToValueMap, RatingValue } from '@/types/project';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useProjectContext } from '@/context/ProjectContext';
-import { Star, Smile, Users, Building } from 'lucide-react';
+import { Star, Smile, Users, Building, ArrowUp, ArrowDown, Circle } from 'lucide-react';
 
 interface ProjectKPITrendChartProps {
   projectName: string;
@@ -129,6 +130,70 @@ const calculateDepartmentalScore = (report: ProjectReport): number => {
   return parseFloat((validMetrics.reduce((a, b) => a + b, 0) / validMetrics.length).toFixed(2));
 };
 
+// New function to calculate KPI changes between two reports
+interface KPIChange {
+  name: string;
+  previous: number;
+  current: number;
+  change: number;
+  status: 'improved' | 'declined' | 'no-change';
+}
+
+const calculateKPIChanges = (currentReport: ProjectReport, previousReport: ProjectReport | undefined): KPIChange[] => {
+  if (!previousReport) return [];
+  
+  const metrics = [
+    {
+      name: "Overall Score",
+      current: calculateOverallScore(currentReport),
+      previous: calculateOverallScore(previousReport)
+    },
+    {
+      name: "Risk Level",
+      current: statusToNumeric(currentReport.riskLevel, 'risk'),
+      previous: statusToNumeric(previousReport.riskLevel, 'risk')
+    },
+    {
+      name: "Financial Health",
+      current: statusToNumeric(currentReport.financialHealth, 'financial'),
+      previous: statusToNumeric(previousReport.financialHealth, 'financial')
+    },
+    {
+      name: "Customer Satisfaction",
+      current: statusToNumeric(currentReport.customerSatisfaction, 'satisfaction'),
+      previous: statusToNumeric(previousReport.customerSatisfaction, 'satisfaction')
+    },
+    {
+      name: "Team KPIs",
+      current: calculateTeamKPIsScore(currentReport),
+      previous: calculateTeamKPIsScore(previousReport)
+    },
+    {
+      name: "Departmental Score",
+      current: calculateDepartmentalScore(currentReport),
+      previous: calculateDepartmentalScore(previousReport)
+    }
+  ];
+  
+  return metrics
+    .filter(metric => metric.current > 0 && metric.previous > 0) // Filter out metrics with no data
+    .map(metric => {
+      const change = parseFloat((metric.current - metric.previous).toFixed(1));
+      let status: 'improved' | 'declined' | 'no-change' = 'no-change';
+      
+      if (change > 0) status = 'improved';
+      else if (change < 0) status = 'declined';
+      
+      return {
+        name: metric.name,
+        current: metric.current,
+        previous: metric.previous,
+        change,
+        status
+      };
+    });
+};
+
 export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ projectName }) => {
   const { projects } = useProjectContext();
   
@@ -144,6 +209,18 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
       </div>
     );
   }
+
+  // Get latest two reports for KPI change calculation
+  const latestReport = projectReports[projectReports.length - 1];
+  const previousReport = projectReports[projectReports.length - 2];
+  
+  // Calculate KPI changes
+  const kpiChanges = calculateKPIChanges(latestReport, previousReport);
+  
+  // Group KPI changes by status
+  const improvedKPIs = kpiChanges.filter(kpi => kpi.status === 'improved');
+  const declinedKPIs = kpiChanges.filter(kpi => kpi.status === 'declined');
+  const unchangedKPIs = kpiChanges.filter(kpi => kpi.status === 'no-change');
 
   // Format reporting period for better display
   const formatPeriod = (periodString: string) => {
@@ -242,7 +319,7 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
         </ChartContainer>
       </div>
 
-      {/* Trend Analysis Summary */}
+      {/* Trend Analysis Summary with KPI Movement */}
       <div className="flex flex-col">
         <div className="border rounded-md p-6 h-full">
           <h3 className="font-semibold text-lg mb-4">Trend Analysis</h3>
@@ -253,6 +330,60 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
               <p className="text-sm text-muted-foreground">
                 This chart shows how key performance indicators have changed over {trendData.length} reporting periods.
               </p>
+            </div>
+            
+            {/* KPI Movement Summary Section */}
+            <div>
+              <h4 className="text-sm font-medium mb-3">KPI Movement Summary</h4>
+              <div className="space-y-4">
+                {improvedKPIs.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-green-600 mb-1">Improved:</p>
+                    <ul className="space-y-1">
+                      {improvedKPIs.map((kpi) => (
+                        <li key={kpi.name} className="flex items-center text-sm">
+                          <ArrowUp className="h-4 w-4 text-green-600 mr-1" />
+                          <span>{kpi.name} (+{Math.abs(kpi.change).toFixed(1)})</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {declinedKPIs.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-red-600 mb-1">Declined:</p>
+                    <ul className="space-y-1">
+                      {declinedKPIs.map((kpi) => (
+                        <li key={kpi.name} className="flex items-center text-sm">
+                          <ArrowDown className="h-4 w-4 text-red-600 mr-1" />
+                          <span>{kpi.name} (–{Math.abs(kpi.change).toFixed(1)})</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {unchangedKPIs.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">No Change:</p>
+                    <ul className="space-y-1">
+                      {unchangedKPIs.map((kpi) => (
+                        <li key={kpi.name} className="flex items-center text-sm">
+                          <Circle className="h-4 w-4 text-gray-400 mr-1" />
+                          <span>{kpi.name} ({kpi.current.toFixed(1)})</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {kpiChanges.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No comparable KPI data available between reporting periods.
+                  </p>
+                )}
+              </div>
             </div>
             
             <div>
