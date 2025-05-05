@@ -53,8 +53,8 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
         if (project && typeof project === 'object') {
           if ('projectName' in project) {
             projectName = project.projectName;
-          } else if ('project_name' in project && project.project_name) {
-            projectName = project.project_name as string;
+          } else if ('project_name' in project && typeof project.project_name === 'string') {
+            projectName = project.project_name;
           }
         }
         

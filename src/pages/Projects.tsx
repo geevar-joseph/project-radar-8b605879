@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectReport } from "@/types/project";
@@ -15,7 +14,8 @@ import {
   PaginationItem, 
   PaginationLink, 
   PaginationNext, 
-  PaginationPrevious
+  PaginationPrevious,
+  PaginationEllipsis
 } from "@/components/ui/pagination";
 
 const Projects = () => {
