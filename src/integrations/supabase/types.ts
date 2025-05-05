@@ -14,6 +14,7 @@ export type Database = {
           back_end_quality: string
           completion_of_planned_work: string
           created_at: string
+          customer_satisfaction: string
           design_quality: string
           financial_health: string
           follow_up_actions: string | null
@@ -38,6 +39,7 @@ export type Database = {
           back_end_quality: string
           completion_of_planned_work: string
           created_at?: string
+          customer_satisfaction?: string
           design_quality: string
           financial_health: string
           follow_up_actions?: string | null
@@ -62,6 +64,7 @@ export type Database = {
           back_end_quality?: string
           completion_of_planned_work?: string
           created_at?: string
+          customer_satisfaction?: string
           design_quality?: string
           financial_health?: string
           follow_up_actions?: string | null

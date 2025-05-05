@@ -125,6 +125,8 @@ export const addProjectReport = async (project: ProjectReport) => {
         testing_quality: project.testingQuality,
         design_quality: project.designQuality,
         submission_date: new Date().toISOString(),
+        // We no longer use overall_project_score
+        overall_project_score: "N.A.", // Keep for backward compatibility with database schema
         // Add the new fields
         notes: project.notes,
         key_achievements: project.keyAchievements,
