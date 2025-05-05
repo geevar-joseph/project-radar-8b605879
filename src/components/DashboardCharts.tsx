@@ -45,11 +45,18 @@ const getScoreColor = (score: number): string => {
   return "#ef4444"; // Red
 };
 
+// Helper function to determine color based on count of projects
+const getCountColor = (count: number): string => {
+  if (count >= 5) return "#B91C1C"; // Dark Red for 5+ projects
+  if (count >= 3) return "#EF4444"; // Medium Red for 3-4 projects
+  return "#F97316"; // Light Red/Orange for 1-2 projects
+};
+
 export function DashboardCharts() {
   const { getFilteredProjects, selectedPeriod } = useProjectContext();
   const filteredProjects = getFilteredProjects(selectedPeriod);
   
-  // Calculate underperforming KPIs (score <= 2)
+  // Calculate underperforming KPIs with custom thresholds
   const calculateUnderperformingKPIs = (): KPIData[] => {
     const kpiFields = [
       { field: "overallProjectScore", name: "OS", fullName: "Overall Score", label: "OS" },
@@ -89,19 +96,29 @@ export function DashboardCharts() {
       }
     };
     
-    // Count underperforming KPIs (score <= 2)
+    // Count KPIs using the new thresholds
     const kpiCounts = kpiFields.map(kpi => {
-      const count = filteredProjects.filter(project => {
-        const value = getKpiValue(project, kpi.field);
-        return value <= 2 && value > 0; // Only count if <= 2 (Poor or Fair) and not 0 (N.A.)
-      }).length;
+      let count;
+      
+      // Apply different logic for Risk Level (High/Critical is bad)
+      if (kpi.field === "riskLevel") {
+        count = filteredProjects.filter(project => {
+          return project.riskLevel === "High" || project.riskLevel === "Critical";
+        }).length;
+      } else {
+        // For all other KPIs, score <= 2 is considered underperforming
+        count = filteredProjects.filter(project => {
+          const value = getKpiValue(project, kpi.field);
+          return value <= 2 && value > 0; // Only count if <= 2 (Poor or Fair) and not 0 (N.A.)
+        }).length;
+      }
       
       return {
         name: kpi.name,
         label: kpi.label,
         fullName: kpi.fullName,
         value: count,
-        color: "#ef4444" // Consistent red color for all underperforming KPIs
+        color: getCountColor(count) // Dynamic color based on count
       };
     });
     
@@ -207,9 +224,14 @@ export function DashboardCharts() {
   const kpiTooltipFormatter = (value: number, name: string, props: any) => {
     const item = kpiData.find(k => k.label === name);
     if (item) {
+      let colorDescription = "";
+      if (item.value >= 5) colorDescription = "(Critical: 5+ projects)";
+      else if (item.value >= 3) colorDescription = "(Warning: 3-4 projects)";
+      else colorDescription = "(Caution: 1-2 projects)";
+      
       return [
         <div className="flex flex-col">
-          <span>{`${item.fullName}: ${value} projects`}</span>
+          <span>{`${item.fullName}: ${value} projects ${colorDescription}`}</span>
         </div>,
         ''
       ];
@@ -234,7 +256,15 @@ export function DashboardCharts() {
                   margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                  <XAxis type="number" />
+                  <XAxis
+                    type="number"
+                    label={{ 
+                      value: "# of Projects Rated Poor or At Risk", 
+                      position: "insideBottom", 
+                      offset: -5,
+                      fontSize: 12
+                    }}
+                  />
                   <YAxis 
                     dataKey="label" 
                     type="category" 
@@ -268,9 +298,11 @@ export function DashboardCharts() {
                   <Bar 
                     dataKey="value" 
                     name="Count" 
-                    fill="#ef4444"
                     radius={[0, 4, 4, 0]}
                   >
+                    {kpiData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
                     <LabelList dataKey="value" position="right" />
                   </Bar>
                 </BarChart>
