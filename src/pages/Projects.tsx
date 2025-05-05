@@ -104,19 +104,56 @@ const Projects = () => {
     setFilterCriteria(filters);
   };
   
-  const handleSort = (field: keyof ProjectReport) => {
+  // Updated handleSort to correctly handle sorting
+  const handleSort = (field: string) => {
+    // Map the field names from the table to the actual field names in our data
+    const fieldMapping: Record<string, keyof ProjectReport> = {
+      'projectName': 'projectName',
+      'clientName': 'clientName',
+      'assignedPM': 'assignedPM',
+      'projectType': 'projectType',
+      'projectStatus': 'projectStatus',
+      'reportingPeriod': 'reportingPeriod',
+      'overallProjectScore': 'overallProjectScore',
+      'riskLevel': 'riskLevel',
+      'financialHealth': 'financialHealth',
+      'jiraId': 'jiraId',
+      // Add any other fields here
+    };
+    
+    const mappedField = fieldMapping[field] || field as keyof ProjectReport;
+    
     // If clicking the same field, toggle direction
-    if (field === sortField) {
+    if (mappedField === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       // New field, default to ascending
-      setSortField(field);
+      setSortField(mappedField);
       setSortDirection('asc');
     }
+
+    console.log(`Sorting by ${mappedField} in ${sortDirection} order`);
   };
   
-  const getSortIndicator = (field: keyof ProjectReport) => {
-    if (field !== sortField) return null;
+  const getSortIndicator = (field: string) => {
+    // Map the field names from the table to the actual field names in our data
+    const fieldMapping: Record<string, keyof ProjectReport> = {
+      'projectName': 'projectName',
+      'clientName': 'clientName',
+      'assignedPM': 'assignedPM',
+      'projectType': 'projectType',
+      'projectStatus': 'projectStatus',
+      'reportingPeriod': 'reportingPeriod',
+      'overallProjectScore': 'overallProjectScore',
+      'riskLevel': 'riskLevel',
+      'financialHealth': 'financialHealth',
+      'jiraId': 'jiraId',
+      // Add any other fields here
+    };
+    
+    const mappedField = fieldMapping[field] || field as keyof ProjectReport;
+    
+    if (mappedField !== sortField) return null;
     return sortDirection === 'asc' ? '↑' : '↓';
   };
 

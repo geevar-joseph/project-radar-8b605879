@@ -26,60 +26,43 @@ export function ProjectsTable({ projects, handleSort, getSortIndicator, isManage
     setEditingProject(null);
   };
 
-  // Mapping function to handle different property naming conventions
-  const getSortKey = (uiKey: string): string => {
-    const keyMapping: Record<string, string> = {
-      'projectName': 'project_name',
-      'clientName': 'client_name',
-      'assignedPM': 'assigned_pm',
-      'projectType': 'project_type',
-      'projectStatus': 'project_status',
-      'reportingPeriod': 'reporting_period',
-      'overallProjectScore': 'overall_project_score',
-      'riskLevel': 'risk_level',
-      'financialHealth': 'financial_health',
-      'jiraId': 'jira_id'
-    };
-    return keyMapping[uiKey] || uiKey;
-  };
-
   return (
     <div className="rounded-md border w-full overflow-x-auto">
       <Table>
         <TableCaption>A list of all projects (latest reports only)</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="cursor-pointer" onClick={() => handleSort(getSortKey('jiraId'))}>
-              JIRA ID {getSortIndicator(getSortKey('jiraId'))}
+            <TableHead className="cursor-pointer" onClick={() => handleSort('jiraId')}>
+              JIRA ID {getSortIndicator('jiraId')}
             </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort(getSortKey('projectName'))}>
-              Project Name {getSortIndicator(getSortKey('projectName'))}
+            <TableHead className="cursor-pointer" onClick={() => handleSort('projectName')}>
+              Project Name {getSortIndicator('projectName')}
             </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort(getSortKey('clientName'))}>
-              Client {getSortIndicator(getSortKey('clientName'))}
+            <TableHead className="cursor-pointer" onClick={() => handleSort('clientName')}>
+              Client {getSortIndicator('clientName')}
             </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort(getSortKey('assignedPM'))}>
-              Assigned PM {getSortIndicator(getSortKey('assignedPM'))}
+            <TableHead className="cursor-pointer" onClick={() => handleSort('assignedPM')}>
+              Assigned PM {getSortIndicator('assignedPM')}
             </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort(getSortKey('projectType'))}>
-              Type {getSortIndicator(getSortKey('projectType'))}
+            <TableHead className="cursor-pointer" onClick={() => handleSort('projectType')}>
+              Type {getSortIndicator('projectType')}
             </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort(getSortKey('projectStatus'))}>
-              Status {getSortIndicator(getSortKey('projectStatus'))}
+            <TableHead className="cursor-pointer" onClick={() => handleSort('projectStatus')}>
+              Status {getSortIndicator('projectStatus')}
             </TableHead>
             {!isManageView && (
               <>
-                <TableHead className="cursor-pointer" onClick={() => handleSort(getSortKey('reportingPeriod'))}>
-                  Last Report Date {getSortIndicator(getSortKey('reportingPeriod'))}
+                <TableHead className="cursor-pointer" onClick={() => handleSort('reportingPeriod')}>
+                  Last Report Date {getSortIndicator('reportingPeriod')}
                 </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort(getSortKey('overallProjectScore'))}>
-                  Overall Score {getSortIndicator(getSortKey('overallProjectScore'))}
+                <TableHead className="cursor-pointer" onClick={() => handleSort('overallProjectScore')}>
+                  Overall Score {getSortIndicator('overallProjectScore')}
                 </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort(getSortKey('riskLevel'))}>
-                  Risk Level {getSortIndicator(getSortKey('riskLevel'))}
+                <TableHead className="cursor-pointer" onClick={() => handleSort('riskLevel')}>
+                  Risk Level {getSortIndicator('riskLevel')}
                 </TableHead>
-                <TableHead className="cursor-pointer" onClick={() => handleSort(getSortKey('financialHealth'))}>
-                  Financials {getSortIndicator(getSortKey('financialHealth'))}
+                <TableHead className="cursor-pointer" onClick={() => handleSort('financialHealth')}>
+                  Financials {getSortIndicator('financialHealth')}
                 </TableHead>
               </>
             )}
