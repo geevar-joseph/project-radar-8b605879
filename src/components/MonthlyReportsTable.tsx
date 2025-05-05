@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -6,24 +5,15 @@ import { ProjectReport, RiskLevel, FinancialHealth } from "@/types/project";
 import { formatDate } from "@/utils/formatters";
 import { useNavigate } from "react-router-dom";
 import { ProjectPagination } from "@/components/ProjectPagination";
-import { ArrowUp, ArrowDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface MonthlyReportsTableProps {
   reports: ProjectReport[];
 }
 
-type SortField = "period" | "overallScore" | "risk" | "financial";
-type SortDirection = "asc" | "desc";
-
 export function MonthlyReportsTable({ reports }: MonthlyReportsTableProps) {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  
-  // Add state for sorting
-  const [sortField, setSortField] = useState<SortField>("period");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   
   // Format the reporting period for display
   const formatReportingPeriod = (period: string) => {
@@ -119,76 +109,11 @@ export function MonthlyReportsTable({ reports }: MonthlyReportsTableProps) {
     return averageScore;
   };
 
-  // Get numeric value for a score (for sorting)
-  const getScoreValue = (scoreText: string): number => {
-    // For numeric scores like "3.5"
-    const numericScore = parseFloat(scoreText);
-    if (!isNaN(numericScore)) return numericScore;
-    
-    // For text-based scores
-    switch (scoreText) {
-      case "Critical": return 1;
-      case "High": return 2;
-      case "Medium": return 3;
-      case "Low": return 4;
-      case "At Risk": return 1;
-      case "Needs Attention": return 2;
-      case "On Track": return 3;
-      case "Healthy": return 4;
-      case "N/A":
-      case "N.A.":
-      default: return 0;
-    }
-  };
-  
-  // Handle sorting toggle
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      // Toggle direction if the same field
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      // Set new field and default direction
-      setSortField(field);
-      setSortDirection("desc");
-    }
-  };
-  
-  // Apply sorting to reports
+  // Sort reports by reporting period (most recent first by default)
   const sortedReports = [...reports].sort((a, b) => {
-    let compareValueA, compareValueB;
-    
-    switch (sortField) {
-      case "period":
-        compareValueA = periodToDate(a.reportingPeriod);
-        compareValueB = periodToDate(b.reportingPeriod);
-        break;
-      case "overallScore":
-        compareValueA = getScoreValue(calculateOverallScore(a));
-        compareValueB = getScoreValue(calculateOverallScore(b));
-        break;
-      case "risk":
-        compareValueA = getScoreValue(a.riskLevel || "N/A");
-        compareValueB = getScoreValue(b.riskLevel || "N/A");
-        break;
-      case "financial":
-        compareValueA = getScoreValue(a.financialHealth || "N/A");
-        compareValueB = getScoreValue(b.financialHealth || "N/A");
-        break;
-      default:
-        return 0;
-    }
-    
-    // For dates
-    if (compareValueA instanceof Date && compareValueB instanceof Date) {
-      return sortDirection === "asc" 
-        ? compareValueA.getTime() - compareValueB.getTime() 
-        : compareValueB.getTime() - compareValueA.getTime();
-    }
-    
-    // For numbers
-    return sortDirection === "asc" 
-      ? Number(compareValueA) - Number(compareValueB)
-      : Number(compareValueB) - Number(compareValueA);
+    const dateA = periodToDate(a.reportingPeriod);
+    const dateB = periodToDate(b.reportingPeriod);
+    return dateB.getTime() - dateA.getTime(); // Sort in descending order (newest first)
   });
 
   // Calculate pagination
@@ -202,62 +127,18 @@ export function MonthlyReportsTable({ reports }: MonthlyReportsTableProps) {
     setCurrentPage(page);
   };
 
-  // Render sort indicator
-  const renderSortIcon = (field: SortField) => {
-    if (sortField === field) {
-      return sortDirection === "asc" ? (
-        <ArrowUp className="ml-1 h-4 w-4 inline" />
-      ) : (
-        <ArrowDown className="ml-1 h-4 w-4 inline" />
-      );
-    }
-    return null;
-  };
-
   return (
     <div>
       <Table>
         <TableCaption>Monthly project report submissions.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>
-              <Button 
-                variant="ghost" 
-                onClick={() => handleSort("period")}
-                className="p-0 font-medium flex items-center"
-              >
-                Period {renderSortIcon("period")}
-              </Button>
-            </TableHead>
+            <TableHead className="font-medium">Period</TableHead>
             <TableHead>Submitted By</TableHead>
             <TableHead>Submission Date</TableHead>
-            <TableHead>
-              <Button 
-                variant="ghost" 
-                onClick={() => handleSort("overallScore")}
-                className="p-0 font-medium flex items-center"
-              >
-                Overall Score {renderSortIcon("overallScore")}
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button 
-                variant="ghost" 
-                onClick={() => handleSort("risk")}
-                className="p-0 font-medium flex items-center"
-              >
-                Risk {renderSortIcon("risk")}
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button 
-                variant="ghost" 
-                onClick={() => handleSort("financial")}
-                className="p-0 font-medium flex items-center"
-              >
-                Financial {renderSortIcon("financial")}
-              </Button>
-            </TableHead>
+            <TableHead>Overall Score</TableHead>
+            <TableHead>Risk</TableHead>
+            <TableHead>Financial</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -278,10 +159,10 @@ export function MonthlyReportsTable({ reports }: MonthlyReportsTableProps) {
                     <StatusBadge value={overallScore} type="score" />
                   </TableCell>
                   <TableCell>
-                    <StatusBadge value={(report.riskLevel || 'N.A.') as RiskLevel} type="risk" />
+                    <StatusBadge value={(report.riskLevel || 'N/A') as RiskLevel} type="risk" />
                   </TableCell>
                   <TableCell>
-                    <StatusBadge value={(report.financialHealth || 'N.A.') as FinancialHealth} type="health" />
+                    <StatusBadge value={(report.financialHealth || 'N/A') as FinancialHealth} type="health" />
                   </TableCell>
                 </TableRow>
               )
