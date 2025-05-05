@@ -32,12 +32,14 @@ export const fetchProjects = async () => {
  */
 export const addProjectName = async (name: string, clientName?: string, jiraId?: string | null, projectType?: string, projectStatus?: string, assignedPM?: string | null) => {
   try {
+    console.log("Adding project with jiraId:", jiraId);
+    
     const { error } = await supabase
       .from('projects')
       .insert({
         project_name: name,
         client_name: clientName || null,
-        jira_id: jiraId || null,  // Ensuring we use correct column name: jira_id not jiraId
+        jira_id: jiraId || null,  // Using the correct column name: jira_id
         project_type: projectType || 'Service',
         project_status: projectStatus || 'Active',
         assigned_pm: assignedPM || null

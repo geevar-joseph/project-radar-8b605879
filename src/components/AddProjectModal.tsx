@@ -90,6 +90,8 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
         pmId = selectedPM?.id || null;
       }
       
+      console.log("Adding project with jiraCode:", jiraCode || null);
+      
       // Add the project to the database
       const result = await addProjectName(
         projectName,
