@@ -36,23 +36,37 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
       
       // Fair/Medium ratings
       case 'Fair':
+      case 'Medium': // Risk level
+      case 'On Watch': // Financial health
+        return {
+          count: 4,
+          activeCount: 2,
+          color: 'bg-amber-400'
+        };
+
+      // Partial completion
       case 'Partially':
-      case 'On Watch': // For financial health
-      case 'Medium': // For risk level
+        return {
+          count: 4,
+          activeCount: 2,
+          color: 'bg-amber-400'
+        };
+
+      // Neutral customer satisfaction
       case 'Neutral / Unclear':
         return {
           count: 4,
-          activeCount: 3, // Changed from 2 to 3 for Medium risk level and On Watch financial health
+          activeCount: 2,
           color: 'bg-amber-400'
         };
       
-      // Orange/At Risk ratings - Added this specific case for Low team morale and High risk level
+      // Orange/At Risk ratings
       case 'At Risk': // For financial health
-      case 'High': // For risk level
-      case 'Low': // For team morale, "Low" is negative
+      case 'High': // For risk level - high risk
+      case 'Low': // For team morale - low morale is negative
         return {
           count: 4,
-          activeCount: 2, // Changed from 1.5 to 2 for High risk level and Low team morale
+          activeCount: 2,
           color: 'bg-orange-400'
         };
       

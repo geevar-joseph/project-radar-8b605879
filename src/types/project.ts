@@ -125,7 +125,7 @@ export const ratingToColorMap: Record<RatingValue, string> = {
 export const moraleToColorMap: Record<TeamMorale, string> = {
   'High': 'bg-emerald-500',
   'Moderate': 'bg-blue-400',
-  'Low': 'bg-orange-400', // Changed from amber to orange
+  'Low': 'bg-orange-400',
   'Burnt Out': 'bg-red-500',
   'N.A.': 'bg-gray-300'
 };
