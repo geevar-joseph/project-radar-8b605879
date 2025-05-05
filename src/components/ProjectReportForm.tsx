@@ -1,18 +1,33 @@
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown, Save } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea"; 
 import { useProjectContext } from "@/context/ProjectContext";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { cn } from "@/lib/utils";
 import { ScoreIndicator } from "./ScoreIndicator";
-import { Save } from "lucide-react";
 import { KPIScoreMeter } from "./KPIScoreMeter";
 import { OverallProjectScore } from "./OverallProjectScore";
+import { useState, useEffect, useMemo } from "react";
 import { 
   RatingValue, 
   RiskLevel, 
@@ -27,7 +42,6 @@ import {
   moraleToValueMap,
   satisfactionToValueMap
 } from "@/types/project";
-import { useMemo, useState, useEffect } from "react";
 
 const formSchema = z.object({
   projectName: z.string().min(2, "Project name must be at least 2 characters"),
@@ -57,7 +71,7 @@ interface ProjectReportFormProps {
 }
 
 export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
-  const { addProject, projectNames, teamMembers } = useProjectContext();
+  const { addProject, projectNames, teamMembers, projects } = useProjectContext();
   const navigate = useNavigate();
   
   // States to track KPI scores
@@ -69,6 +83,10 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
   const [overallProjectScore, setOverallProjectScore] = useState<number | null>(null);
   const [doingWellKPIs, setDoingWellKPIs] = useState<string[]>([]);
   const [needsAttentionKPIs, setNeedsAttentionKPIs] = useState<string[]>([]);
+  
+  // New state for period validation
+  const [periodExists, setPeriodExists] = useState<boolean>(false);
+  const [selectedProject, setSelectedProject] = useState<string>("");
 
   // Generate the last 3 months options (current month and previous 2 months)
   const reportingPeriodOptions = useMemo(() => {
@@ -114,6 +132,22 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
       followUpActions: ""
     },
   });
+
+  // Check if a report exists for the selected project and period
+  useEffect(() => {
+    const currentProjectName = form.watch("projectName");
+    const currentPeriod = form.watch("reportingPeriod");
+    
+    if (currentProjectName && currentPeriod) {
+      const reportExists = projects.some(
+        project => project.projectName === currentProjectName && 
+                  project.reportingPeriod === currentPeriod
+      );
+      
+      setPeriodExists(reportExists);
+      setSelectedProject(currentProjectName);
+    }
+  }, [form.watch("projectName"), form.watch("reportingPeriod"), projects]);
 
   // Calculate scores whenever form values change
   const formValues = form.watch();
@@ -645,66 +679,128 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             <CardTitle>Project Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Project Name Field */}
+            {/* Project Name Field - Updated with Command for searching */}
             <FormField
               control={form.control}
               name="projectName"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col">
                   <FormLabel>Project Name</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a project" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {projectNames.map(name => (
-                        <SelectItem key={name} value={name}>
-                          {name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value || "Select a project"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Search projects..." />
+                        <CommandEmpty>No project found.</CommandEmpty>
+                        <CommandGroup>
+                          {projectNames.map((project) => (
+                            <CommandItem
+                              key={project}
+                              value={project}
+                              onSelect={() => {
+                                form.setValue("projectName", project);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  project === field.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {project}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
             />
             
-            {/* Submitted By Field */}
+            {/* Submitted By Field - Updated with Command for searching */}
             <FormField
               control={form.control}
               name="submittedBy"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col">
                   <FormLabel>Submitted By</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select team member" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {teamMembers.map(name => (
-                        <SelectItem key={name} value={name}>
-                          {name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value || "Select team member"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Search team members..." />
+                        <CommandEmpty>No team member found.</CommandEmpty>
+                        <CommandGroup>
+                          {teamMembers.map((member) => (
+                            <CommandItem
+                              key={member}
+                              value={member}
+                              onSelect={() => {
+                                form.setValue("submittedBy", member);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  member === field.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {member}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
             />
             
-            {/* Reporting Period Field */}
+            {/* Reporting Period Field - Updated with validation and warning */}
             <FormField
               control={form.control}
               name="reportingPeriod"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Reporting Period</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={(value) => {
+                    field.onChange(value);
+                  }} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select reporting period" />
@@ -719,7 +815,12 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Select the month and year for this report
+                    {periodExists && (
+                      <div className="text-amber-600 font-medium flex items-center mt-1">
+                        ⚠️ A report for "{selectedProject}" already exists for this period
+                      </div>
+                    )}
+                    {!periodExists && "Select the month and year for this report"}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
