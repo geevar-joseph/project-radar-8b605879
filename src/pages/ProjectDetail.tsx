@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Tag } from "lucide-react";
 import { ProjectKPIChart } from "@/components/ProjectKPIChart";
 import { MonthlyReportsTable } from "@/components/MonthlyReportsTable";
 import { useEffect, useState } from "react";
@@ -21,10 +21,11 @@ const ProjectDetail = () => {
 
   useEffect(() => {
     if (project) {
-      // Get all reports for the current project's name
+      // Get all reports for the current project name, not just the latest one
       const allReportsForProject = projects.filter(p => 
         p.projectName === project.projectName
       );
+      
       setProjectReports(allReportsForProject);
     }
   }, [project, projects]);
@@ -67,7 +68,9 @@ const ProjectDetail = () => {
               </div>
               <div className="flex gap-1">
                 <span className="text-muted-foreground">Type:</span>
-                <Badge variant="outline" className="font-normal">{project.projectType || 'N/A'}</Badge>
+                <Badge variant="outline" className="font-normal flex items-center gap-1">
+                  <Tag size={12} /> {project.projectType || 'N/A'}
+                </Badge>
               </div>
               <div className="flex gap-1">
                 <span className="text-muted-foreground">Status:</span>

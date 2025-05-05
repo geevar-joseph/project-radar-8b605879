@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { ProjectTableRow } from "./ProjectTableRow";
 import { useState } from "react";
 import { EditProjectModal } from "./EditProjectModal";
+import { Tag } from "lucide-react";
 
 interface ProjectsTableProps {
   projects: ProjectReport[] | any[];

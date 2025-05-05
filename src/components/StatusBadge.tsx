@@ -7,12 +7,15 @@ interface StatusBadgeProps {
   value: RatingValue | RiskLevel | FinancialHealth | CompletionStatus | TeamMorale | CustomerSatisfaction | string;
   type: "risk" | "health" | "completion" | "morale" | "satisfaction" | "rating" | "score";
   className?: string;
+  showIcon?: boolean;
 }
 
-export function StatusBadge({ value, type, className }: StatusBadgeProps) {
+export function StatusBadge({ value, type, className, showIcon = true }: StatusBadgeProps) {
+  // Don't show the icon for some badge types if showIcon is false
   return (
     <Badge variant="outline" className={`flex items-center gap-1 border-0 px-1 py-0.5 ${className || ''}`}>
-      <ScoreIndicator value={value} type={type} />
+      {showIcon && <ScoreIndicator value={value} type={type} />}
+      {type === "score" && value}
     </Badge>
   );
 }
