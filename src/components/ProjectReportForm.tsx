@@ -774,10 +774,11 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           </CardContent>
         </Card>
         
-        {/* Overall Project Score Card */}
+        {/* Overall Project Score Card - UPDATED TO HAVE INLINE SCORE METER */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Overall Project Score</CardTitle>
+            <KPIScoreMeter score={overallProjectScore} label="Overall Score" />
           </CardHeader>
           <CardContent>
             <OverallProjectScore 
