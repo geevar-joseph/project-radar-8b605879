@@ -32,6 +32,9 @@ export const useProjectMutations = (
         title: "Report Submitted",
         description: `Project report for ${project.projectName} has been submitted successfully.`,
       });
+      
+      // Refresh projects data to ensure consistency
+      await loadProjects();
     } catch (error) {
       console.error('Error adding project:', error);
       toast({
@@ -71,8 +74,8 @@ export const useProjectMutations = (
           description: `"${name}" has been added to the projects list.`,
         });
         
-        // Reload projects to get the latest data
-        loadProjects();
+        // Always reload projects immediately after adding to ensure data consistency
+        await loadProjects();
         
         return { success: true };
       } catch (error) {
@@ -117,6 +120,9 @@ export const useProjectMutations = (
         title: "Project Removed",
         description: `"${name}" has been removed from the projects list.`,
       });
+      
+      // Reload projects after removal
+      await loadProjects();
       
       return true;
     } catch (error) {
@@ -182,6 +188,9 @@ export const useProjectMutations = (
         title: "Project Updated",
         description: `"${updateData.projectName}" has been updated successfully.`,
       });
+      
+      // Reload projects to ensure data consistency
+      await loadProjects();
       
       return true;
     } catch (error) {

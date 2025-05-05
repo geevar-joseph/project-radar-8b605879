@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,7 @@ interface TeamMember {
 }
 
 export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) => {
-  const { addProjectName } = useProjectContext();
+  const { addProjectName, loadProjects } = useProjectContext();
   const [jiraCode, setJiraCode] = useState("");
   const [projectName, setProjectName] = useState("");
   const [clientName, setClientName] = useState("");
@@ -106,7 +105,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
         throw new Error(result?.error?.message || 'Failed to add project');
       }
       
-      // Reset form and close modal
+      // Reset form
       setJiraCode("");
       setProjectName("");
       setClientName("");
@@ -119,6 +118,10 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
         description: `"${projectName}" has been added successfully.`,
       });
       
+      // Ensure data is refreshed
+      await loadProjects();
+      
+      // Close modal
       onOpenChange(false);
     } catch (error: any) {
       console.error('Error adding project:', error);
@@ -142,6 +145,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
               Enter the details for the new project.
             </DialogDescription>
           </DialogHeader>
+          
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="jiraCode" className="text-right">
@@ -245,6 +249,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
               </Select>
             </div>
           </div>
+          
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Cancel

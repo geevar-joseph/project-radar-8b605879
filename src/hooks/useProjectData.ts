@@ -27,6 +27,8 @@ export const useProjectData = () => {
       
       if (projectsError) throw projectsError;
 
+      console.log('Projects Data:', projectsData);
+
       // Extract project names
       const names = projectsData.map(project => project.project_name);
       setProjectNames(names);
@@ -38,23 +40,58 @@ export const useProjectData = () => {
 
       console.log('Project Reports Data:', reportsData);
 
-      // If no reports yet, use the sample data temporarily
-      if (reportsData.length === 0) {
-        setProjects(sampleProjects);
-      } else {
-        // Convert the report data to our application format
-        const formattedReports = reportsData.map(report => {
-          return mapToProjectReport(report);
-        });
-        
-        console.log('Formatted Reports:', formattedReports);
-        setProjects(formattedReports);
+      // Create a combined dataset from projects and reports
+      let formattedReports: ProjectReport[] = [];
+
+      // Include all projects that have reports
+      if (reportsData && reportsData.length > 0) {
+        formattedReports = reportsData.map(report => mapToProjectReport(report));
       }
+
+      // Add projects that don't have reports yet with default values
+      projectsData.forEach(project => {
+        const hasReport = formattedReports.some(report => 
+          report.projectName === project.project_name
+        );
+
+        if (!hasReport) {
+          formattedReports.push({
+            id: project.id,
+            projectName: project.project_name,
+            clientName: project.client_name || 'N/A',
+            projectType: project.project_type as any || 'Service',
+            projectStatus: project.project_status as any || 'Active',
+            assignedPM: project.team_members?.name || 'N/A',
+            jiraId: project.jira_id || undefined,
+            submittedBy: 'N/A',
+            reportingPeriod: 'N/A',
+            riskLevel: 'N/A' as any,
+            financialHealth: 'N/A' as any,
+            completionOfPlannedWork: 'N/A' as any,
+            teamMorale: 'N/A' as any,
+            customerSatisfaction: 'N/A' as any,
+            projectManagerEvaluation: 'N/A',
+            frontEndQuality: 'N/A',
+            backEndQuality: 'N/A',
+            testingQuality: 'N/A',
+            designQuality: 'N/A',
+            submissionDate: project.updated_at
+          });
+        }
+      });
+      
+      console.log('Combined Formatted Data:', formattedReports);
+      setProjects(formattedReports);
     } catch (error) {
       console.error('Error loading projects data:', error);
       // Fallback to sample data
       setProjects(sampleProjects);
       setProjectNames(sampleProjects.map(p => p.projectName).filter((value, index, self) => self.indexOf(value) === index));
+      toast({
+        title: "Error",
+        description: "Failed to load project data. Using sample data instead.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
