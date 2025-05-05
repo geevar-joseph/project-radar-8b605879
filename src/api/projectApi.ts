@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectReport } from "@/types/project";
 import { v4 as uuidv4 } from "uuid";
@@ -6,6 +7,15 @@ import { v4 as uuidv4 } from "uuid";
  * Maps data from Supabase format to our application format
  */
 export const mapToProjectReport = (dbReport: any): ProjectReport => {
+  // Get PM name from team_members object if it exists
+  let pmName = "";
+  
+  if (dbReport.projects?.team_members) {
+    pmName = dbReport.projects.team_members.name;
+  } else if (dbReport.team_members) {
+    pmName = dbReport.team_members.name;
+  }
+
   return {
     id: dbReport.id,
     projectName: dbReport.project_name || "",
@@ -25,7 +35,10 @@ export const mapToProjectReport = (dbReport: any): ProjectReport => {
     clientName: dbReport.client_name || "",
     projectType: dbReport.project_type || undefined,
     projectStatus: dbReport.project_status || undefined,
-    assignedPM: dbReport.assigned_pm || "",
+    assignedPM: pmName || "",
+    jiraId: dbReport.jira_id || "",
+    // Properly map the overall score
+    overallProjectScore: dbReport.overall_project_score || "N.A.",
     // Add the new fields
     notes: dbReport.notes || "",
     keyAchievements: dbReport.key_achievements || "",
@@ -42,7 +55,13 @@ export const fetchProjects = async () => {
   try {
     const { data: projectsData, error: projectsError } = await supabase
       .from('projects')
-      .select('*');
+      .select(`
+        *,
+        team_members (
+          id,
+          name
+        )
+      `);
 
     if (projectsError) {
       throw projectsError;
@@ -62,7 +81,16 @@ export const fetchProjectReports = async () => {
   try {
     const { data: reportsData, error: reportsError } = await supabase
       .from('project_reports')
-      .select('*, projects(*)');
+      .select(`
+        *, 
+        projects (
+          *,
+          team_members (
+            id,
+            name
+          )
+        )
+      `);
 
     if (reportsError) {
       throw reportsError;
@@ -231,7 +259,10 @@ export const addProjectName = async (name: string) => {
     const { error } = await supabase
       .from('projects')
       .insert({
-        project_name: name
+        project_name: name,
+        // Add default values for type and status
+        project_type: 'Service',
+        project_status: 'Active'
       });
 
     if (error) throw error;

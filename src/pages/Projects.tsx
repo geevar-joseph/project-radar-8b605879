@@ -180,8 +180,8 @@ const Projects = () => {
               <TableHead className="cursor-pointer" onClick={() => handleSort('reportingPeriod')}>
                 Last Report Date {getSortIndicator('reportingPeriod')}
               </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort('overallProjectScore' as keyof ProjectReport)}>
-                Overall Score {getSortIndicator('overallProjectScore' as keyof ProjectReport)}
+              <TableHead className="cursor-pointer" onClick={() => handleSort('overallProjectScore')}>
+                Overall Score {getSortIndicator('overallProjectScore')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('riskLevel')}>
                 Risk Level {getSortIndicator('riskLevel')}

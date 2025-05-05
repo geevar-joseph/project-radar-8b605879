@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ProjectReport, ProjectType, ProjectStatus } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
@@ -41,22 +40,18 @@ export const useProjects = () => {
       
       if (reportsError) throw reportsError;
 
+      console.log('Project Reports Data:', reportsData);
+
       // If no reports yet, use the sample data temporarily
       if (reportsData.length === 0) {
         setProjects(sampleProjects);
       } else {
         // Convert the report data to our application format
         const formattedReports = reportsData.map(report => {
-          const project = report.projects;
-          return mapToProjectReport({
-            ...report,
-            project_name: project?.project_name,
-            client_name: project?.client_name,
-            project_type: project?.project_type,
-            project_status: project?.project_status,
-            assigned_pm: project?.assigned_pm
-          });
+          return mapToProjectReport(report);
         });
+        
+        console.log('Formatted Reports:', formattedReports);
         setProjects(formattedReports);
       }
     } catch (error) {
