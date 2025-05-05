@@ -22,7 +22,7 @@ export const useProjectMutations = (
 
   const addProject = async (project: ProjectReport) => {
     try {
-      const { success, error } = await apiAddProjectReport(project);
+      const { success, error } = await addProjectReport(project);
       
       if (!success) throw error;
       
@@ -53,7 +53,7 @@ export const useProjectMutations = (
     if (!projectNames.includes(name)) {
       try {
         // Ensure jiraId is handled correctly
-        const { success, error } = await apiAddProjectName(
+        const { success, error } = await addProjectName(
           name,
           clientName,
           jiraId,  // This will be null if empty
@@ -90,7 +90,7 @@ export const useProjectMutations = (
 
   const removeProjectName = async (name: string) => {
     try {
-      const { success, error } = await apiRemoveProjectName(name);
+      const { success, error } = await removeProjectName(name);
       
       if (!success) {
         toast({
@@ -128,7 +128,7 @@ export const useProjectMutations = (
     assignedPM?: string;
   }) => {
     try {
-      const { success, error } = await apiUpdateProjectDetails(originalName, updateData);
+      const { success, error } = await updateProjectDetails(originalName, updateData);
       
       if (!success) throw error;
 
