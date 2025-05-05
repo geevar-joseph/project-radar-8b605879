@@ -1,3 +1,4 @@
+
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -138,7 +139,7 @@ export const useProjectMutations = (
   const updateProjectDetails = async (originalName: string, updateData: {
     projectName: string;
     clientName?: string;
-    jiraId?: string; // Added JIRA ID
+    jiraId?: string; // Added JIRA ID to updateData
     projectType?: string;
     projectStatus?: string;
     assignedPM?: string;
