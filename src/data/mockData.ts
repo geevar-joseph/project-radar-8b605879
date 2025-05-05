@@ -19,8 +19,8 @@ export const sampleProjects: ProjectReport[] = [
     designQuality: "Excellent",
     submissionDate: "2025-04-30",
     clientName: "Acme Corp",
-    projectType: "Development",
-    projectStatus: "Ongoing",
+    projectType: "Service",
+    projectStatus: "Active",
     assignedPM: "Jane Smith"
   },
   {
@@ -40,8 +40,8 @@ export const sampleProjects: ProjectReport[] = [
     designQuality: "Good",
     submissionDate: "2025-04-28",
     clientName: "TechStart Inc.",
-    projectType: "Development",
-    projectStatus: "Ongoing",
+    projectType: "Service",
+    projectStatus: "Active",
     assignedPM: "John Davis"
   },
   {
@@ -61,8 +61,8 @@ export const sampleProjects: ProjectReport[] = [
     designQuality: "Fair",
     submissionDate: "2025-04-25",
     clientName: "Global Industries",
-    projectType: "Maintenance",
-    projectStatus: "On Hold",
+    projectType: "Service",
+    projectStatus: "Inactive",
     assignedPM: "Alice Johnson"
   },
   {
@@ -82,8 +82,8 @@ export const sampleProjects: ProjectReport[] = [
     designQuality: "Excellent",
     submissionDate: "2025-03-31",
     clientName: "DataViz Corp",
-    projectType: "Development",
-    projectStatus: "Completed",
+    projectType: "Product",
+    projectStatus: "Support",
     assignedPM: "Michael Brown"
   },
   {
@@ -103,8 +103,8 @@ export const sampleProjects: ProjectReport[] = [
     designQuality: "N.A.",
     submissionDate: "2025-03-29",
     clientName: "SecureBank",
-    projectType: "Consulting",
-    projectStatus: "Ongoing",
+    projectType: "Service",
+    projectStatus: "Active",
     assignedPM: "Sarah Williams"
   },
   // Adding previous month reports for E-commerce Redesign project
@@ -125,8 +125,8 @@ export const sampleProjects: ProjectReport[] = [
     designQuality: "Good",
     submissionDate: "2025-03-31",
     clientName: "Acme Corp",
-    projectType: "Development",
-    projectStatus: "Ongoing",
+    projectType: "Service",
+    projectStatus: "Active",
     assignedPM: "Jane Smith"
   },
   {
@@ -146,8 +146,8 @@ export const sampleProjects: ProjectReport[] = [
     designQuality: "Good",
     submissionDate: "2025-02-28",
     clientName: "Acme Corp",
-    projectType: "Development",
-    projectStatus: "Ongoing",
+    projectType: "Service",
+    projectStatus: "Active",
     assignedPM: "Jane Smith"
   }
 ];
