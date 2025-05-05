@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, X } from "lucide-react";
 import { formatDate, getValidProjectStatus, getValidProjectType } from "@/utils/formatters";
 import { StatusBadge } from "@/components/StatusBadge";
+import { ProjectType, ProjectStatus, RiskLevel, FinancialHealth } from "@/types/project";
 
 interface ProjectData {
   name: string;
@@ -48,21 +49,21 @@ export const ProjectTableRow: React.FC<ProjectTableRowProps> = ({
       <TableCell>{project.pm || "—"}</TableCell>
       <TableCell>
         {project.type ? (
-          <Badge variant="outline">{getValidProjectType(project.type)}</Badge>
+          <Badge variant="outline">{getValidProjectType(project.type as ProjectType)}</Badge>
         ) : "—"}
       </TableCell>
       <TableCell>
         {project.status ? (
-          <Badge variant="secondary">{getValidProjectStatus(project.status)}</Badge>
+          <Badge variant="secondary">{getValidProjectStatus(project.status as ProjectStatus)}</Badge>
         ) : "—"}
       </TableCell>
       <TableCell>{formatDate(project.submissionDate) || "—"}</TableCell>
       <TableCell>{project.overallScore || "—"}</TableCell>
       <TableCell>
-        <StatusBadge value={project.riskLevel || 'N.A.'} type="risk" />
+        <StatusBadge value={(project.riskLevel || 'N.A.') as RiskLevel} type="risk" />
       </TableCell>
       <TableCell>
-        <StatusBadge value={project.financialHealth || 'N.A.'} type="health" />
+        <StatusBadge value={(project.financialHealth || 'N.A.') as FinancialHealth} type="health" />
       </TableCell>
       <TableCell className="text-right space-x-2 flex justify-end">
         <Button 
