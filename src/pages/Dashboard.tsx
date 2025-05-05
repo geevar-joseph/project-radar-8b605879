@@ -5,28 +5,37 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
-import { Check, AlertTriangle, XOctagon } from "lucide-react";
+import { Check, AlertTriangle, XOctagon, Clock } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { DashboardCharts } from "@/components/DashboardCharts";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { MissingReportsBlock } from "@/components/MissingReportsBlock";
 import { ComplianceTable } from "@/components/ComplianceTable";
+import { formatPeriod } from "@/utils/formatPeriods";
 
 const Dashboard = () => {
   const { 
     getFilteredProjects, 
     getUniqueReportingPeriods, 
     selectedPeriod, 
-    setSelectedPeriod 
+    setSelectedPeriod,
+    projectNames
   } = useProjectContext();
   
   const periods = getUniqueReportingPeriods();
   const projects = getFilteredProjects(selectedPeriod);
   
   useEffect(() => {
+    // Select the latest period by default if no period is selected
     if (periods.length > 0 && !selectedPeriod) {
-      setSelectedPeriod(periods[0]);
+      // Sort periods in descending order to get the latest one
+      const sortedPeriods = [...periods].sort((a, b) => {
+        const [yearA, monthA] = a.split('-').map(Number);
+        const [yearB, monthB] = b.split('-').map(Number);
+        return yearB - yearA || monthB - monthA;
+      });
+      setSelectedPeriod(sortedPeriods[0]);
     }
   }, [periods, selectedPeriod, setSelectedPeriod]);
 
@@ -41,6 +50,13 @@ const Dashboard = () => {
   const projectsAtRisk = projects.filter(p => 
     p.riskLevel === "High" || p.riskLevel === "Critical"
   );
+  
+  // Calculate pending projects (projects that don't have reports for the selected period)
+  const pendingProjects = selectedPeriod 
+    ? projectNames.filter(name => 
+        !projects.some(p => p.projectName === name && p.reportingPeriod === selectedPeriod)
+      ).length
+    : 0;
 
   return (
     <div className="container mx-auto py-10">
@@ -49,7 +65,7 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold">Project Reports Dashboard</h1>
           <p className="text-muted-foreground">
             {selectedPeriod 
-              ? `Viewing data for period ${selectedPeriod}` 
+              ? `Viewing data for ${formatPeriod(selectedPeriod)}` 
               : "Viewing all project data"}
           </p>
         </div>
@@ -62,9 +78,8 @@ const Dashboard = () => {
               </SelectTrigger>
               <SelectContent>
                 {periods.map((period) => (
-                  <SelectItem key={period} value={period}>{period}</SelectItem>
+                  <SelectItem key={period} value={period}>{formatPeriod(period)}</SelectItem>
                 ))}
-                <SelectItem value={undefined}>All Periods</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -78,7 +93,7 @@ const Dashboard = () => {
       </div>
       
       {/* Block 1: Summary Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
         {/* Total Projects Card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
           <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-3 mr-4">
@@ -89,8 +104,19 @@ const Dashboard = () => {
           <div>
             <h3 className="font-semibold text-lg">Total Projects</h3>
             <p className="text-sm text-muted-foreground">
-              {selectedPeriod ? `For ${selectedPeriod}` : "All periods"}
+              {selectedPeriod ? `For ${formatPeriod(selectedPeriod)}` : "All periods"}
             </p>
+          </div>
+        </div>
+        
+        {/* Pending Projects Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
+          <div className="rounded-full bg-orange-100 dark:bg-orange-900/30 p-3 mr-4">
+            <Clock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">{pendingProjects}</h3>
+            <p className="text-sm text-muted-foreground">Pending</p>
           </div>
         </div>
         
@@ -233,11 +259,13 @@ const Dashboard = () => {
       {/* Block 3: KPI and Department Charts */}
       <DashboardCharts />
       
-      {/* Block 4: New Reporting Accountability Section */}
-      <h2 className="text-2xl font-semibold mt-10 mb-4">Reporting Accountability</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-        <MissingReportsBlock selectedPeriod={selectedPeriod} />
-        <ComplianceTable />
+      {/* Block 4: New Reporting Accountability Section - HIDDEN */}
+      <div className="hidden">
+        <h2 className="text-2xl font-semibold mt-10 mb-4">Reporting Accountability</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+          <MissingReportsBlock selectedPeriod={selectedPeriod} />
+          <ComplianceTable />
+        </div>
       </div>
       
       {/* Fallback for no projects */}
