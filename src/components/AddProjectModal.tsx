@@ -79,20 +79,22 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
       let pmId = null;
       if (projectManager) {
         const selectedPM = teamMembers.find(member => member.name === projectManager);
-        pmId = selectedPM?.id;
+        pmId = selectedPM?.id || null;
       }
       
       // Add the project to the database
       const result = await addProjectName(
         projectName,
         clientName,
-        jiraCode,
+        jiraCode || null,  // Ensure jiraCode is null if empty
         projectType,
         projectStatus,
-        pmId || null
+        pmId
       );
       
-      if (!result.success) throw new Error('Failed to add project');
+      if (!result?.success) {
+        throw new Error(result?.error?.message || 'Failed to add project');
+      }
       
       // Reset form and close modal
       setJiraCode("");
@@ -108,11 +110,11 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
       });
       
       onOpenChange(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding project:', error);
       toast({
         title: "Error",
-        description: "There was an error adding the project. Please try again.",
+        description: error.message || "There was an error adding the project. Please try again.",
         variant: "destructive"
       });
     } finally {

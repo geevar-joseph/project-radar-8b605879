@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ProjectReport, ProjectType, ProjectStatus } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
@@ -103,10 +104,10 @@ export const useProjects = () => {
   const addProjectName = async (
     name: string,
     clientName?: string,
-    jiraId?: string,
+    jiraId?: string | null,
     projectType?: string,
     projectStatus?: string,
-    assignedPM?: string
+    assignedPM?: string | null
   ) => {
     if (!projectNames.includes(name)) {
       try {

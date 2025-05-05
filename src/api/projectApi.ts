@@ -254,7 +254,7 @@ export const removeTeamMember = async (name: string) => {
 /**
  * Adds a project name to Supabase
  */
-export const addProjectName = async (name: string, clientName?: string, jiraId?: string, projectType?: string, projectStatus?: string, assignedPM?: string) => {
+export const addProjectName = async (name: string, clientName?: string, jiraId?: string | null, projectType?: string, projectStatus?: string, assignedPM?: string | null) => {
   try {
     const { error } = await supabase
       .from('projects')
