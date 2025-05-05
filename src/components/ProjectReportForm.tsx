@@ -10,6 +10,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -701,31 +702,33 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[300px] p-0" align="start">
-                      <Command>
+                    <PopoverContent className="w-[300px] p-0 z-50" align="start">
+                      <Command className="rounded-md border shadow-md">
                         <CommandInput placeholder="Search projects..." />
-                        <CommandEmpty>No project found.</CommandEmpty>
-                        <CommandGroup className="max-h-[200px] overflow-y-auto">
-                          {projectNames.map((project) => (
-                            <CommandItem
-                              key={project}
-                              value={project}
-                              onSelect={() => {
-                                form.setValue("projectName", project);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  project === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {project}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
+                        <CommandList>
+                          <CommandEmpty>No project found.</CommandEmpty>
+                          <CommandGroup className="max-h-[200px] overflow-y-auto">
+                            {projectNames.map((project) => (
+                              <CommandItem
+                                key={project}
+                                value={project}
+                                onSelect={() => {
+                                  form.setValue("projectName", project);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    project === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {project}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
                       </Command>
                     </PopoverContent>
                   </Popover>
@@ -757,31 +760,33 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[300px] p-0" align="start">
-                      <Command>
+                    <PopoverContent className="w-[300px] p-0 z-50" align="start">
+                      <Command className="rounded-md border shadow-md">
                         <CommandInput placeholder="Search team members..." />
-                        <CommandEmpty>No team member found.</CommandEmpty>
-                        <CommandGroup className="max-h-[200px] overflow-y-auto">
-                          {teamMembers.map((member) => (
-                            <CommandItem
-                              key={member}
-                              value={member}
-                              onSelect={() => {
-                                form.setValue("submittedBy", member);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  member === field.value
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {member}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
+                        <CommandList>
+                          <CommandEmpty>No team member found.</CommandEmpty>
+                          <CommandGroup className="max-h-[200px] overflow-y-auto">
+                            {teamMembers.map((member) => (
+                              <CommandItem
+                                key={member}
+                                value={member}
+                                onSelect={() => {
+                                  form.setValue("submittedBy", member);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    member === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {member}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
                       </Command>
                     </PopoverContent>
                   </Popover>
@@ -790,7 +795,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               )}
             />
             
-            {/* Reporting Period Field - Updated with validation and warning */}
+            {/* Reporting Period Field - Keep validation logic */}
             <FormField
               control={form.control}
               name="reportingPeriod"
