@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectReport } from "@/types/project";
 import { v4 as uuidv4 } from "uuid";
@@ -12,11 +11,11 @@ export const mapToProjectReport = (dbReport: any): ProjectReport => {
     projectName: dbReport.project_name || "",
     submittedBy: dbReport.submitted_by || "",
     reportingPeriod: dbReport.reporting_period || "",
-    overallProjectScore: dbReport.overall_project_score || "N.A.",
     riskLevel: dbReport.risk_level || "N.A.",
     financialHealth: dbReport.financial_health || "N.A.",
     completionOfPlannedWork: dbReport.completion_of_planned_work || "N.A.",
     teamMorale: dbReport.team_morale || "N.A.",
+    customerSatisfaction: dbReport.customer_satisfaction || "N.A.",
     projectManagerEvaluation: dbReport.project_manager_evaluation || "N.A.",
     frontEndQuality: dbReport.front_end_quality || "N.A.",
     backEndQuality: dbReport.back_end_quality || "N.A.",
@@ -115,11 +114,11 @@ export const addProjectReport = async (project: ProjectReport) => {
         project_id: projectId,
         submitted_by: project.submittedBy,
         reporting_period: project.reportingPeriod,
-        overall_project_score: project.overallProjectScore,
         risk_level: project.riskLevel,
         financial_health: project.financialHealth,
         completion_of_planned_work: project.completionOfPlannedWork,
         team_morale: project.teamMorale,
+        customer_satisfaction: project.customerSatisfaction,
         project_manager_evaluation: project.projectManagerEvaluation,
         front_end_quality: project.frontEndQuality,
         back_end_quality: project.backEndQuality,

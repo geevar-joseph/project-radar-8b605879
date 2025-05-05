@@ -10,11 +10,11 @@ export function ProjectStats() {
   
   // Calculate stats
   const totalProjects = filteredProjects.length;
-  const projectsByScore = {
-    Excellent: filteredProjects.filter(p => p.overallProjectScore === "Excellent").length,
-    Good: filteredProjects.filter(p => p.overallProjectScore === "Good").length,
-    Fair: filteredProjects.filter(p => p.overallProjectScore === "Fair").length,
-    Poor: filteredProjects.filter(p => p.overallProjectScore === "Poor").length,
+  const projectsByRiskLevel = {
+    Low: filteredProjects.filter(p => p.riskLevel === "Low").length,
+    Medium: filteredProjects.filter(p => p.riskLevel === "Medium").length,
+    High: filteredProjects.filter(p => p.riskLevel === "High").length,
+    Critical: filteredProjects.filter(p => p.riskLevel === "Critical").length,
   };
   
   const healthData = [
@@ -61,24 +61,24 @@ export function ProjectStats() {
       
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Projects by Score</CardTitle>
+          <CardTitle className="text-sm font-medium">Projects by Risk</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Excellent:</span>
-            <span className="text-sm font-medium">{projectsByScore.Excellent}</span>
+            <span className="text-xs text-muted-foreground">Low:</span>
+            <span className="text-sm font-medium">{projectsByRiskLevel.Low}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Good:</span>
-            <span className="text-sm font-medium">{projectsByScore.Good}</span>
+            <span className="text-xs text-muted-foreground">Medium:</span>
+            <span className="text-sm font-medium">{projectsByRiskLevel.Medium}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Fair:</span>
-            <span className="text-sm font-medium">{projectsByScore.Fair}</span>
+            <span className="text-xs text-muted-foreground">High:</span>
+            <span className="text-sm font-medium">{projectsByRiskLevel.High}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Poor:</span>
-            <span className="text-sm font-medium">{projectsByScore.Poor}</span>
+            <span className="text-xs text-muted-foreground">Critical:</span>
+            <span className="text-sm font-medium">{projectsByRiskLevel.Critical}</span>
           </div>
         </CardContent>
       </Card>

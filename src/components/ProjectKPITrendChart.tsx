@@ -84,7 +84,6 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
   // Prepare data for the line chart
   const trendData = projectReports.map(report => ({
     period: formatPeriod(report.reportingPeriod),
-    overallScore: ratingToNumeric(report.overallProjectScore),
     risk: statusToNumeric(report.riskLevel, 'risk'),
     financial: statusToNumeric(report.financialHealth, 'financial'),
     completion: statusToNumeric(report.completionOfPlannedWork, 'completion'),
@@ -97,7 +96,6 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
   }));
 
   const chartConfig = {
-    overallScore: { label: "Overall Score", color: "#8B5CF6" },
     risk: { label: "Risk Level", color: "#F97316" },
     financial: { label: "Financial Health", color: "#0EA5E9" },
     completion: { label: "Completion", color: "#10B981" },
@@ -137,15 +135,6 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
                 align="center"
                 wrapperStyle={{ paddingBottom: '20px' }}
               />
-              <Line 
-                type="monotone" 
-                dataKey="overallScore" 
-                name="Overall Score"
-                stroke={chartConfig.overallScore.color} 
-                strokeWidth={2.5}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }} 
-              />
               <Line type="monotone" dataKey="risk" name="Risk Level" stroke={chartConfig.risk.color} />
               <Line type="monotone" dataKey="financial" name="Financial Health" stroke={chartConfig.financial.color} />
               <Line type="monotone" dataKey="completion" name="Completion" stroke={chartConfig.completion.color} />
@@ -171,9 +160,8 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
             <div>
               <h4 className="text-sm font-medium mb-2">KPI Timeline Highlights</h4>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Overall score trend shows the project's general direction</li>
-                <li>Financial health indicates budget adherence</li>
                 <li>Risk level tracks potential project obstacles</li>
+                <li>Financial health indicates budget adherence</li>
                 <li>Completion rate shows progress against planned work</li>
                 <li>Team morale reflects the project environment</li>
               </ul>

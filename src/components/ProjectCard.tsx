@@ -25,7 +25,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg font-bold">{project.projectName}</CardTitle>
-          <StatusBadge value={project.overallProjectScore} type="rating" />
+          <StatusBadge value={project.riskLevel} type="risk" />
         </div>
         <div className="text-sm text-muted-foreground flex flex-wrap gap-2 mt-1">
           <Badge variant="outline" className="flex items-center gap-1">

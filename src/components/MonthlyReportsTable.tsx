@@ -43,7 +43,6 @@ export const MonthlyReportsTable: React.FC<MonthlyReportsTableProps> = ({ report
                 <TableHead>Reporting Period</TableHead>
                 <TableHead>Submitted By</TableHead>
                 <TableHead>Submitted On</TableHead>
-                <TableHead>Overall Score</TableHead>
                 <TableHead>Risk Level</TableHead>
                 <TableHead>Financial Health</TableHead>
                 <TableHead>Completion</TableHead>
@@ -61,7 +60,6 @@ export const MonthlyReportsTable: React.FC<MonthlyReportsTableProps> = ({ report
                   <TableCell>{formatPeriod(report.reportingPeriod)}</TableCell>
                   <TableCell>{report.submittedBy}</TableCell>
                   <TableCell>{formatDate(report.submissionDate)}</TableCell>
-                  <TableCell><StatusBadge value={report.overallProjectScore} type="rating" /></TableCell>
                   <TableCell><StatusBadge value={report.riskLevel} type="risk" /></TableCell>
                   <TableCell><StatusBadge value={report.financialHealth} type="health" /></TableCell>
                   <TableCell><StatusBadge value={report.completionOfPlannedWork} type="completion" /></TableCell>
@@ -79,4 +77,4 @@ export const MonthlyReportsTable: React.FC<MonthlyReportsTableProps> = ({ report
       </ScrollArea>
     </div>
   );
-};
+}
