@@ -5,9 +5,10 @@ import { Plus } from "lucide-react";
 import { ProjectReport } from "@/types/project";
 import { ProjectsTable } from "./ProjectsTable";
 import { AddProjectModal } from "./AddProjectModal";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProjectContext } from "@/context/ProjectContext";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ProjectsTabProps {
   projectNames: string[];
@@ -20,10 +21,23 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
   const [isLoading, setIsLoading] = useState(false);
   const [projectsData, setProjectsData] = useState<any[]>([]);
   const { loadProjects } = useProjectContext();
+  const initialLoadDone = useRef(false);
+  const { toast } = useToast();
   
+  // Initial data fetch only once when component mounts
   useEffect(() => {
-    fetchProjectsData();
-  }, [projectNames, isAddProjectModalOpen]);
+    if (!initialLoadDone.current) {
+      fetchProjectsData();
+      initialLoadDone.current = true;
+    }
+  }, []);
+  
+  // Only refetch when modal closes (indicating a possible data change)
+  useEffect(() => {
+    if (!isAddProjectModalOpen && initialLoadDone.current) {
+      fetchProjectsData();
+    }
+  }, [isAddProjectModalOpen]);
   
   const fetchProjectsData = async () => {
     setIsLoading(true);
@@ -52,6 +66,11 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
       }
     } catch (error) {
       console.error('Error fetching projects data:', error);
+      toast({
+        title: "Error fetching projects",
+        description: "Could not load project data. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -59,10 +78,6 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
 
   const handleAddProject = (open: boolean) => {
     setIsAddProjectModalOpen(open);
-    // Refresh data when modal closes
-    if (!open) {
-      fetchProjectsData();
-    }
   };
 
   const handleRemoveProject = async (name: string) => {
