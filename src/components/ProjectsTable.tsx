@@ -29,10 +29,12 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
   const normalizeProjectData = (projectName: string): ProjectData => {
     const projectData = projects.find(p => {
       // Handle data from different sources (Supabase direct or frontend format)
-      if ('projectName' in p) {
-        return p.projectName === projectName;
-      } else if ('project_name' in p) {
-        return p.project_name === projectName;
+      if (p && typeof p === 'object') {
+        if ('projectName' in p) {
+          return p.projectName === projectName;
+        } else if ('project_name' in p) {
+          return p.project_name === projectName;
+        }
       }
       return false;
     });
