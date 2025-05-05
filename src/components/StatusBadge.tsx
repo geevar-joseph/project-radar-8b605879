@@ -6,16 +6,18 @@ import {
   FinancialHealth, 
   CompletionStatus,
   TeamMorale,
+  CustomerSatisfaction,
   ratingToColorMap,
   riskToColorMap,
   healthToColorMap,
   completionToColorMap,
-  moraleToColorMap
+  moraleToColorMap,
+  satisfactionToColorMap
 } from "@/types/project";
 
 interface StatusBadgeProps {
-  value: RatingValue | RiskLevel | FinancialHealth | CompletionStatus | TeamMorale;
-  type: 'rating' | 'risk' | 'health' | 'completion' | 'morale';
+  value: RatingValue | RiskLevel | FinancialHealth | CompletionStatus | TeamMorale | CustomerSatisfaction;
+  type: 'rating' | 'risk' | 'health' | 'completion' | 'morale' | 'satisfaction';
   className?: string;
 }
 
@@ -37,6 +39,9 @@ export function StatusBadge({ value, type, className }: StatusBadgeProps) {
       break;
     case 'morale':
       colorClass = moraleToColorMap[value as TeamMorale];
+      break;
+    case 'satisfaction':
+      colorClass = satisfactionToColorMap[value as CustomerSatisfaction];
       break;
   }
   

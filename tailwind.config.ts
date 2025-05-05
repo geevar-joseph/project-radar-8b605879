@@ -70,11 +70,13 @@ export default {
 					fair: '#fbbf24', // Yellow
 					poor: '#ef4444', // Red
 					na: '#9ca3af', // Gray
+					orange: '#f97316', // Orange
 				},
 				risk: {
 					low: '#10b981', // Green
 					medium: '#fbbf24', // Yellow
-					high: '#ef4444', // Red
+					high: '#f97316', // Orange
+					critical: '#ef4444', // Red
 				}
 			},
 			borderRadius: {

@@ -1,8 +1,8 @@
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,18 +12,25 @@ import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { ScoreIndicator } from "./ScoreIndicator";
 import { Save } from "lucide-react";
-import { RatingValue, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale } from "@/types/project";
+import { 
+  RatingValue, 
+  RiskLevel, 
+  FinancialHealth, 
+  CompletionStatus, 
+  TeamMorale,
+  CustomerSatisfaction
+} from "@/types/project";
 import { useMemo } from "react";
 
 const formSchema = z.object({
   projectName: z.string().min(2, "Project name must be at least 2 characters"),
   submittedBy: z.string().min(2, "Submitter name must be at least 2 characters"),
   reportingPeriod: z.string().min(6, "Reporting period is required"),
-  overallProjectScore: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."]),
-  riskLevel: z.enum(["Low", "Medium", "High", "N.A."]),
-  financialHealth: z.enum(["Healthy", "On Watch", "At Risk", "N.A."]),
+  riskLevel: z.enum(["Low", "Medium", "High", "Critical", "N.A."]),
+  financialHealth: z.enum(["Healthy", "On Watch", "At Risk", "Critical", "N.A."]),
   completionOfPlannedWork: z.enum(["All completed", "Mostly", "Partially", "Not completed", "N.A."]),
-  teamMorale: z.enum(["High", "Moderate", "Low", "N.A."]),
+  teamMorale: z.enum(["High", "Moderate", "Low", "Burnt Out", "N.A."]),
+  customerSatisfaction: z.enum(["Very Satisfied", "Satisfied", "Neutral / Unclear", "Dissatisfied", "N.A."]),
   projectManagerEvaluation: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."]),
   frontEndQuality: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."]),
   backEndQuality: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."]),
@@ -72,12 +79,12 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
     defaultValues: {
       projectName: projectNames[0] || "",
       submittedBy: teamMembers[0] || "",
-      reportingPeriod: reportingPeriodOptions[0]?.value || "", // Current month as default
-      overallProjectScore: "Good",
+      reportingPeriod: reportingPeriodOptions[0]?.value || "",
       riskLevel: "Low",
       financialHealth: "Healthy",
       completionOfPlannedWork: "Mostly",
       teamMorale: "High",
+      customerSatisfaction: "Satisfied",
       projectManagerEvaluation: "Good",
       frontEndQuality: "Good",
       backEndQuality: "Good",
@@ -101,11 +108,11 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
       projectName: data.projectName,
       submittedBy: data.submittedBy,
       reportingPeriod: data.reportingPeriod,
-      overallProjectScore: data.overallProjectScore,
       riskLevel: data.riskLevel,
       financialHealth: data.financialHealth,
       completionOfPlannedWork: data.completionOfPlannedWork,
       teamMorale: data.teamMorale,
+      customerSatisfaction: data.customerSatisfaction,
       projectManagerEvaluation: data.projectManagerEvaluation,
       frontEndQuality: data.frontEndQuality,
       backEndQuality: data.backEndQuality,
@@ -143,7 +150,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
 
   // Render a field with a ScoreIndicator for any rating-type field
   const renderScoreField = (name: keyof FormValues, label: string) => {
-    if (!['overallProjectScore', 'projectManagerEvaluation', 'frontEndQuality', 'backEndQuality', 'testingQuality', 'designQuality'].includes(name)) {
+    if (!['projectManagerEvaluation', 'frontEndQuality', 'backEndQuality', 'testingQuality', 'designQuality'].includes(name)) {
       return null;
     }
     
@@ -187,7 +194,47 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
     );
   };
 
-  // Now add visual indicators for other status fields
+  // Customer satisfaction field
+  const renderCustomerSatisfactionField = () => (
+    <FormField
+      control={form.control}
+      name="customerSatisfaction"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Customer Satisfaction</FormLabel>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select satisfaction level">
+                  {field.value && <ScoreIndicator value={field.value as CustomerSatisfaction} />}
+                </SelectValue>
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              <SelectItem value="Very Satisfied">
+                <ScoreIndicator value="Very Satisfied" />
+              </SelectItem>
+              <SelectItem value="Satisfied">
+                <ScoreIndicator value="Satisfied" />
+              </SelectItem>
+              <SelectItem value="Neutral / Unclear">
+                <ScoreIndicator value="Neutral / Unclear" />
+              </SelectItem>
+              <SelectItem value="Dissatisfied">
+                <ScoreIndicator value="Dissatisfied" />
+              </SelectItem>
+              <SelectItem value="N.A.">
+                <ScoreIndicator value="N.A." />
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+
+  // Risk level field with updated options
   const renderRiskLevelField = () => (
     <FormField
       control={form.control}
@@ -213,6 +260,9 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               <SelectItem value="High">
                 <ScoreIndicator value="High" />
               </SelectItem>
+              <SelectItem value="Critical">
+                <ScoreIndicator value="Critical" />
+              </SelectItem>
               <SelectItem value="N.A.">
                 <ScoreIndicator value="N.A." />
               </SelectItem>
@@ -224,6 +274,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
     />
   );
 
+  // Financial health field with updated options
   const renderFinancialHealthField = () => (
     <FormField
       control={form.control}
@@ -241,16 +292,34 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             </FormControl>
             <SelectContent>
               <SelectItem value="Healthy">
-                <ScoreIndicator value="Healthy" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Healthy" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Project is on budget with strong margins</span>
+                </div>
               </SelectItem>
               <SelectItem value="On Watch">
-                <ScoreIndicator value="On Watch" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="On Watch" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Minor budget concerns or margin trend declining</span>
+                </div>
               </SelectItem>
               <SelectItem value="At Risk">
-                <ScoreIndicator value="At Risk" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="At Risk" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Over budget or margin pressure is material</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="Critical">
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Critical" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Significantly over budget and/or negative margin</span>
+                </div>
               </SelectItem>
               <SelectItem value="N.A.">
-                <ScoreIndicator value="N.A." />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="N.A." />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Not applicable or insufficient financial data</span>
+                </div>
               </SelectItem>
             </SelectContent>
           </Select>
@@ -323,6 +392,9 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               </SelectItem>
               <SelectItem value="Low">
                 <ScoreIndicator value="Low" />
+              </SelectItem>
+              <SelectItem value="Burnt Out">
+                <ScoreIndicator value="Burnt Out" />
               </SelectItem>
               <SelectItem value="N.A.">
                 <ScoreIndicator value="N.A." />
@@ -429,10 +501,9 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderScoreField('overallProjectScore', 'Overall Project Score')}
               {renderRiskLevelField()}
               {renderFinancialHealthField()}
-              {renderCompletionStatusField()}
+              {renderCustomerSatisfactionField()}
             </div>
           </CardContent>
         </Card>
@@ -444,7 +515,8 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {renderTeamMoraleField()}
-              {/* Project Manager Self-Evaluation moved to Departmental Performance section */}
+              {renderCompletionStatusField()} {/* Moved from Project Health to Team KPIs */}
+              {/* Project Manager Self-Evaluation is in Departmental Performance section */}
             </div>
           </CardContent>
         </Card>

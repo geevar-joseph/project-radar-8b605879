@@ -1,9 +1,10 @@
 
 export type RatingValue = 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'N.A.';
-export type RiskLevel = 'Low' | 'Medium' | 'High' | 'N.A.';
-export type FinancialHealth = 'Healthy' | 'On Watch' | 'At Risk' | 'N.A.';
+export type RiskLevel = 'Low' | 'Medium' | 'High' | 'Critical' | 'N.A.';
+export type FinancialHealth = 'Healthy' | 'On Watch' | 'At Risk' | 'Critical' | 'N.A.';
 export type CompletionStatus = 'All completed' | 'Mostly' | 'Partially' | 'Not completed' | 'N.A.';
-export type TeamMorale = 'High' | 'Moderate' | 'Low' | 'N.A.';
+export type TeamMorale = 'High' | 'Moderate' | 'Low' | 'Burnt Out' | 'N.A.';
+export type CustomerSatisfaction = 'Very Satisfied' | 'Satisfied' | 'Neutral / Unclear' | 'Dissatisfied' | 'N.A.';
 export type ProjectType = 'Development' | 'Design' | 'Research' | 'Maintenance' | 'Consulting';
 export type ProjectStatus = 'Ongoing' | 'On Hold' | 'Completed' | 'Not Started';
 
@@ -12,11 +13,11 @@ export interface ProjectReport {
   projectName: string;
   submittedBy: string;
   reportingPeriod: string;
-  overallProjectScore: RatingValue;
   riskLevel: RiskLevel;
   financialHealth: FinancialHealth;
   completionOfPlannedWork: CompletionStatus;
   teamMorale: TeamMorale;
+  customerSatisfaction: CustomerSatisfaction;
   projectManagerEvaluation: RatingValue;
   frontEndQuality: RatingValue;
   backEndQuality: RatingValue;
@@ -45,16 +46,18 @@ export const ratingToValueMap: Record<RatingValue, number | null> = {
 };
 
 export const riskToColorMap: Record<RiskLevel, string> = {
-  'Low': 'bg-risk-low',
-  'Medium': 'bg-risk-medium',
-  'High': 'bg-risk-high',
+  'Low': 'bg-status-excellent',
+  'Medium': 'bg-status-fair',
+  'High': 'bg-status-orange',
+  'Critical': 'bg-status-poor',
   'N.A.': 'bg-gray-300'
 };
 
 export const healthToColorMap: Record<FinancialHealth, string> = {
   'Healthy': 'bg-status-excellent',
-  'On Watch': 'bg-status-good', 
-  'At Risk': 'bg-status-poor',
+  'On Watch': 'bg-status-fair', 
+  'At Risk': 'bg-status-orange',
+  'Critical': 'bg-status-poor',
   'N.A.': 'bg-status-na'
 };
 
@@ -77,6 +80,15 @@ export const ratingToColorMap: Record<RatingValue, string> = {
 export const moraleToColorMap: Record<TeamMorale, string> = {
   'High': 'bg-status-excellent',
   'Moderate': 'bg-status-good',
-  'Low': 'bg-status-poor',
+  'Low': 'bg-status-fair',
+  'Burnt Out': 'bg-status-poor',
+  'N.A.': 'bg-status-na'
+};
+
+export const satisfactionToColorMap: Record<CustomerSatisfaction, string> = {
+  'Very Satisfied': 'bg-status-excellent',
+  'Satisfied': 'bg-status-good',
+  'Neutral / Unclear': 'bg-status-fair',
+  'Dissatisfied': 'bg-status-poor',
   'N.A.': 'bg-status-na'
 };

@@ -1,51 +1,73 @@
 
 import { cn } from "@/lib/utils";
-import { RatingValue, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale } from "@/types/project";
+import { RatingValue, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale, CustomerSatisfaction } from "@/types/project";
 
 interface ScoreIndicatorProps {
-  value: RatingValue | RiskLevel | FinancialHealth | CompletionStatus | TeamMorale;
+  value: RatingValue | RiskLevel | FinancialHealth | CompletionStatus | TeamMorale | CustomerSatisfaction;
   className?: string;
 }
 
 export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
   const getDotsConfig = () => {
     switch (value) {
+      // Excellent ratings
       case 'Excellent':
       case 'Healthy':
       case 'All completed':
-      case 'High':
+      case 'High': // For team morale, "High" is positive
+      case 'Very Satisfied':
+      case 'Low': // For risk level, "Low" is positive
         return {
           count: 4,
           activeCount: 4,
           color: 'bg-status-excellent'
         };
+      
+      // Good ratings
       case 'Good':
-      case 'On Watch':
       case 'Mostly':
-      case 'Moderate':
-      case 'Low': // For risk level, "Low" is positive
+      case 'Moderate': // For team morale
+      case 'Satisfied':
         return {
           count: 4,
           activeCount: 3,
           color: 'bg-status-good'
         };
+      
+      // Fair/Medium ratings
       case 'Fair':
       case 'Partially':
+      case 'On Watch': // For financial health
       case 'Medium': // For risk level
+      case 'Low': // For team morale, "Low" is negative
+      case 'Neutral / Unclear':
         return {
           count: 4,
           activeCount: 2,
           color: 'bg-status-fair'
         };
+      
+      // Orange/At Risk ratings
+      case 'At Risk': // For financial health
+      case 'High': // For risk level
+        return {
+          count: 4,
+          activeCount: 1.5,
+          color: 'bg-status-orange'
+        };
+      
+      // Poor/Critical ratings
       case 'Poor':
-      case 'At Risk':
       case 'Not completed':
-      case 'High': // For risk level, "High" is negative
+      case 'Critical': // For risk level and financial health
+      case 'Burnt Out': // For team morale
+      case 'Dissatisfied':
         return {
           count: 4,
           activeCount: 1,
           color: 'bg-status-poor'
         };
+      
       case 'N.A.':
       default:
         return {
