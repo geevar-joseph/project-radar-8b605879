@@ -90,12 +90,12 @@ export const useProjectMutations = (
 
   const removeProjectName = async (name: string) => {
     try {
-      const { success, error } = await removeProjectName(name);
+      const result = await removeProjectName(name);
       
-      if (!success) {
+      if (!result.success) {
         toast({
           title: "Error",
-          description: error instanceof Error ? error.message : "There was an error removing the project.",
+          description: result.error instanceof Error ? result.error.message : "There was an error removing the project.",
           variant: "destructive"
         });
         return false;
@@ -128,9 +128,9 @@ export const useProjectMutations = (
     assignedPM?: string;
   }) => {
     try {
-      const { success, error } = await updateProjectDetails(originalName, updateData);
+      const result = await updateProjectDetails(originalName, updateData);
       
-      if (!success) throw error;
+      if (!result.success) throw result.error;
 
       // Update local state - find and update the project in projects array
       const updatedProjects = projects.map(project => {
