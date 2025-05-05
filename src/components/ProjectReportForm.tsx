@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -702,11 +701,11 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
+                    <PopoverContent className="w-[300px] p-0" align="start">
                       <Command>
                         <CommandInput placeholder="Search projects..." />
                         <CommandEmpty>No project found.</CommandEmpty>
-                        <CommandGroup>
+                        <CommandGroup className="max-h-[200px] overflow-y-auto">
                           {projectNames.map((project) => (
                             <CommandItem
                               key={project}
@@ -758,11 +757,11 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-full p-0">
+                    <PopoverContent className="w-[300px] p-0" align="start">
                       <Command>
                         <CommandInput placeholder="Search team members..." />
                         <CommandEmpty>No team member found.</CommandEmpty>
-                        <CommandGroup>
+                        <CommandGroup className="max-h-[200px] overflow-y-auto">
                           {teamMembers.map((member) => (
                             <CommandItem
                               key={member}
