@@ -53,9 +53,9 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
         if (project && typeof project === 'object') {
           if ('projectName' in project) {
             projectName = project.projectName;
-          } else if ('project_name' in project && typeof project.project_name === 'string') {
-            // Use type assertion to access project_name property
-            projectName = (project as { project_name: string }).project_name;
+          } else if ('project_name' in project && project.project_name) {
+            // Fixed: Ensure project_name exists and is a string before using it
+            projectName = project.project_name;
           } else {
             // Skip this project if we can't determine its name
             return;
