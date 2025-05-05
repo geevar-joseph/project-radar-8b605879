@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -58,14 +59,36 @@ export const addProjectName = async (name: string, clientName?: string, jiraId?:
  */
 export const removeProjectName = async (name: string) => {
   try {
-    // First check if there are any project reports
+    // First get the project ID by name
+    const { data: projectData, error: projectError } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('project_name', name)
+      .single();
+    
+    if (projectError) {
+      console.error('Error finding project:', projectError);
+      throw projectError;
+    }
+
+    if (!projectData) {
+      return {
+        success: false,
+        error: new Error('Project not found')
+      };
+    }
+    
+    // Now check if there are any project reports linked to this project
     const { data: reportData, error: reportError } = await supabase
       .from('project_reports')
-      .select('project_id')
-      .eq('projects.project_name', name)
+      .select('id')
+      .eq('project_id', projectData.id)
       .limit(1);
     
-    if (reportError) throw reportError;
+    if (reportError) {
+      console.error('Error checking project reports:', reportError);
+      throw reportError;
+    }
     
     // If there are project reports linked to this project, we can't delete it
     if (reportData && reportData.length > 0) {
@@ -75,20 +98,15 @@ export const removeProjectName = async (name: string) => {
       };
     }
     
-    // Find the project by name
-    const { data } = await supabase
+    // If no linked reports, proceed with deletion
+    const { error: deleteError } = await supabase
       .from('projects')
-      .select('id')
-      .eq('project_name', name)
-      .single();
-    
-    if (data) {
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', data.id);
+      .delete()
+      .eq('id', projectData.id);
 
-      if (error) throw error;
+    if (deleteError) {
+      console.error('Error deleting project:', deleteError);
+      throw deleteError;
     }
 
     return { success: true, error: null };

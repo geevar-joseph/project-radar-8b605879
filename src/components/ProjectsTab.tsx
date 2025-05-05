@@ -23,6 +23,7 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [projectsData, setProjectsData] = useState<any[]>([]);
   const [sortKey, setSortKey] = useState<string>("client_name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -121,23 +122,48 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
 
   const handleDeleteConfirm = (name: string) => {
     setProjectToDelete(name);
+    setDeleteError(null); // Clear previous errors
     setIsDeleteDialogOpen(true);
   };
 
   const handleDeleteCancel = () => {
     setProjectToDelete(null);
     setIsDeleteDialogOpen(false);
+    setDeleteError(null);
   };
 
   const handleDeleteConfirmed = async () => {
     if (projectToDelete) {
-      const success = await removeProjectName(projectToDelete);
-      if (success) {
-        // Refresh data after successful deletion
-        fetchProjectsData();
+      try {
+        const success = await removeProjectName(projectToDelete);
+        if (success) {
+          // Refresh data after successful deletion
+          fetchProjectsData();
+          toast({
+            title: "Project Deleted",
+            description: `"${projectToDelete}" has been removed successfully.`
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to delete the project. It may have linked reports.",
+            variant: "destructive"
+          });
+          setDeleteError("Failed to delete the project. It may have linked reports.");
+        }
+      } catch (error) {
+        console.error("Error deleting project:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        toast({
+          title: "Error",
+          description: `Failed to delete the project: ${errorMessage}`,
+          variant: "destructive"
+        });
+        setDeleteError(`Failed to delete the project: ${errorMessage}`);
+      } finally {
+        setProjectToDelete(null);
+        setIsDeleteDialogOpen(false);
       }
-      setProjectToDelete(null);
-      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -199,6 +225,9 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the project 
               "{projectToDelete}" and remove it from our servers.
+              {deleteError && (
+                <div className="mt-2 text-red-500">{deleteError}</div>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

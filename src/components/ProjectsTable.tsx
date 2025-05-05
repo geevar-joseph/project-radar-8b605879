@@ -105,7 +105,7 @@ export function ProjectsTable({
                     submissionDate: project.submissionDate || project.updated_at
                   }}
                   onEdit={() => handleEdit(projectName)}
-                  onRemove={() => handleRemove(projectName)} // Use the handleRemove wrapper
+                  onRemove={() => handleRemove(projectName)}
                   isManageView={isManageView}
                 />
               );

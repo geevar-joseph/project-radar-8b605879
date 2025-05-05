@@ -106,11 +106,15 @@ export const useProjectMutations = (
       }
       
       if (!result.success) {
+        const errorMessage = result.error instanceof Error ? result.error.message : "There was an error removing the project.";
+        
         toast({
           title: "Error",
-          description: result.error instanceof Error ? result.error.message : "There was an error removing the project.",
+          description: errorMessage,
           variant: "destructive"
         });
+        
+        console.error("Remove project error:", errorMessage);
         return false;
       }
 
@@ -127,9 +131,10 @@ export const useProjectMutations = (
       return true;
     } catch (error) {
       console.error('Error removing project name:', error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       toast({
         title: "Error",
-        description: "There was an error removing the project. Please try again.",
+        description: `There was an error removing the project: ${errorMessage}`,
         variant: "destructive"
       });
       return false;
