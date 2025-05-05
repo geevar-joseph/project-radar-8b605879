@@ -1,11 +1,12 @@
+
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  addProjectReport,
   addProjectName as apiAddProjectName,
   removeProjectName as apiRemoveProjectName,
   updateProjectDetails as apiUpdateProjectDetails
 } from "@/api/projectsApi";
+import { addProjectReport } from "@/api/projectReportsApi";
 
 /**
  * Hook for project mutation operations (add, update, delete)
