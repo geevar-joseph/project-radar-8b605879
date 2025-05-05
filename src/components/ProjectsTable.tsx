@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -55,6 +54,9 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
             projectName = project.projectName;
           } else if ('project_name' in project && typeof project.project_name === 'string') {
             projectName = project.project_name;
+          } else {
+            // Skip this project if we can't determine its name
+            return;
           }
         }
         
@@ -146,7 +148,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
         (projectData.jiraId && projectData.jiraId.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     });
-  }, [projectNames, searchTerm]);
+  }, [projectNames, searchTerm, latestProjectsData]);
 
   // Pagination logic
   const pageCount = Math.ceil(filteredProjectNames.length / itemsPerPage);
