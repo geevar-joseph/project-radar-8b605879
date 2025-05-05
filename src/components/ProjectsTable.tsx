@@ -1,114 +1,96 @@
 
-import { useState, useMemo } from "react";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { EditProjectModal } from "./EditProjectModal";
-import { ProjectSearchBar } from "./ProjectSearchBar";
-import { ProjectPagination } from "./ProjectPagination";
-import { ProjectTableHeader } from "./ProjectTableHeader";
-import { ProjectTableRow } from "./ProjectTableRow";
-import { 
-  createLatestProjectsDataMap, 
-  normalizeProjectData 
-} from "@/utils/projectDataUtils";
+import { formatDate, getValidProjectStatus, getValidProjectType } from "@/utils/formatters";
+import { ProjectReport, ProjectStatus, ProjectType } from "@/types/project";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/StatusBadge";
 
 interface ProjectsTableProps {
-  projectNames: string[];
-  projects: any[];
-  removeProjectName: (name: string) => void;
+  projects: ProjectReport[];
+  handleSort: (key: keyof ProjectReport) => void;
+  getSortIndicator: (key: keyof ProjectReport) => string | null;
 }
 
-export const ProjectsTable = ({ projectNames, projects, removeProjectName }: ProjectsTableProps) => {
-  const [editingProject, setEditingProject] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  
-  // Group projects by name and get the latest data
-  const latestProjectsData = useMemo(() => {
-    return createLatestProjectsDataMap(projects);
-  }, [projects]);
-
-  // Filter project names based on search - restricted to project name and JIRA ID
-  const filteredProjectNames = useMemo(() => {
-    return projectNames.filter(name => {
-      const projectData = normalizeProjectData(name, latestProjectsData);
-      return (
-        name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (projectData.jiraId && projectData.jiraId.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    });
-  }, [projectNames, searchTerm, latestProjectsData]);
-
-  // Pagination logic
-  const pageCount = Math.ceil(filteredProjectNames.length / itemsPerPage);
-  const paginatedProjectNames = filteredProjectNames.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Handle search term change
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1); // Reset page when search changes
-  };
-
-  // Handle page change
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
+export function ProjectsTable({ projects, handleSort, getSortIndicator }: ProjectsTableProps) {
   return (
-    <div>
-      {/* Search Bar */}
-      <ProjectSearchBar 
-        searchTerm={searchTerm} 
-        onSearchChange={handleSearchChange} 
-      />
-      
-      {/* Projects Table */}
-      <div className="overflow-x-auto w-full">
-        <Table>
-          <ProjectTableHeader />
-          <TableBody>
-            {paginatedProjectNames.length > 0 ? (
-              paginatedProjectNames.map(projectName => {
-                const projectData = normalizeProjectData(projectName, latestProjectsData);
-                
-                return (
-                  <ProjectTableRow
-                    key={projectName}
-                    project={projectData}
-                    onEdit={setEditingProject}
-                    onRemove={removeProjectName}
-                  />
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
-                  No projects found
+    <div className="rounded-md border w-full overflow-x-auto">
+      <Table>
+        <TableCaption>A list of all projects (latest reports only)</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>JIRA ID</TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort('projectName')}>
+              Project Name {getSortIndicator('projectName')}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort('clientName')}>
+              Client {getSortIndicator('clientName')}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort('assignedPM')}>
+              Assigned PM {getSortIndicator('assignedPM')}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort('projectType')}>
+              Type {getSortIndicator('projectType')}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort('projectStatus')}>
+              Status {getSortIndicator('projectStatus')}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort('reportingPeriod')}>
+              Last Report Date {getSortIndicator('reportingPeriod')}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort('overallProjectScore')}>
+              Overall Score {getSortIndicator('overallProjectScore')}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort('riskLevel')}>
+              Risk Level {getSortIndicator('riskLevel')}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort('financialHealth')}>
+              Financials {getSortIndicator('financialHealth')}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {projects.length > 0 ? (
+            projects.map((project) => (
+              <TableRow key={`${project.projectName}-${project.reportingPeriod}`} className="hover:bg-muted/50">
+                <TableCell>{project.jiraId || "N/A"}</TableCell>
+                <TableCell className="font-medium">
+                  <a href={`/project/${project.id}`} className="hover:underline text-primary">
+                    {project.projectName}
+                  </a>
+                </TableCell>
+                <TableCell>{project.clientName || "N/A"}</TableCell>
+                <TableCell>{project.assignedPM || "N/A"}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">
+                    {getValidProjectType(project.projectType)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="secondary">
+                    {getValidProjectStatus(project.projectStatus)}
+                  </Badge>
+                </TableCell>
+                <TableCell>{formatDate(project.submissionDate)}</TableCell>
+                <TableCell>
+                  {project.overallProjectScore || "N/A"}
+                </TableCell>
+                <TableCell>
+                  <StatusBadge value={project.riskLevel} type="risk" />
+                </TableCell>
+                <TableCell>
+                  <StatusBadge value={project.financialHealth} type="health" />
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Pagination */}
-      <ProjectPagination 
-        currentPage={currentPage}
-        pageCount={pageCount}
-        onPageChange={handlePageChange}
-      />
-
-      {/* Edit Project Modal */}
-      {editingProject && (
-        <EditProjectModal 
-          open={!!editingProject}
-          onOpenChange={() => setEditingProject(null)}
-          projectName={editingProject}
-        />
-      )}
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={10} className="h-24 text-center">
+                No projects found
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
-};
+}
