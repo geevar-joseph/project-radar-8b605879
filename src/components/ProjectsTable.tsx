@@ -1,9 +1,8 @@
-
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { X, Edit, User, Search } from "lucide-react";
+import { X, Edit, Search } from "lucide-react";
 import { ProjectReport } from "@/types/project";
 import { EditProjectModal } from "./EditProjectModal";
 import { Input } from "@/components/ui/input";
@@ -54,8 +53,10 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
           if ('projectName' in project) {
             projectName = project.projectName;
           } else if ('project_name' in project && project.project_name) {
-            // Fixed: Ensure project_name exists and is a string before using it
-            projectName = project.project_name;
+            projectName = String(project.project_name);
+          } else if (project.projects && 'project_name' in project.projects) {
+            // Handle nested project structure
+            projectName = String(project.projects.project_name);
           } else {
             // Skip this project if we can't determine its name
             return;
@@ -125,6 +126,9 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
       pmName = latestProjectData.assignedPM;
     } else if ('assigned_pm' in latestProjectData) {
       pmName = latestProjectData.assigned_pm;
+    } else if (latestProjectData.projects?.team_members) {
+      // Handle nested team_members structure
+      pmName = latestProjectData.projects.team_members.name;
     }
     
     // Safely access properties using optional chaining
@@ -132,20 +136,20 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
       name: projectName,
       client: 'clientName' in latestProjectData ? latestProjectData.clientName : 
              'client_name' in latestProjectData ? latestProjectData.client_name : 
-             undefined,
+             latestProjectData.projects?.client_name || undefined,
       type: 'projectType' in latestProjectData ? latestProjectData.projectType : 
             'project_type' in latestProjectData ? latestProjectData.project_type : 
-            undefined,
+            latestProjectData.projects?.project_type || undefined,
       status: 'projectStatus' in latestProjectData ? latestProjectData.projectStatus : 
               'project_status' in latestProjectData ? latestProjectData.project_status : 
-              undefined,
+              latestProjectData.projects?.project_status || undefined,
       pm: pmName || undefined,
       jiraId: 'jiraId' in latestProjectData ? latestProjectData.jiraId : 
               'jira_id' in latestProjectData ? latestProjectData.jira_id : 
-              undefined,
+              latestProjectData.projects?.jira_id || undefined,
       overallScore: 'overallProjectScore' in latestProjectData ? latestProjectData.overallProjectScore : 
                     'overall_project_score' in latestProjectData ? latestProjectData.overall_project_score : 
-                    undefined
+                    latestProjectData.projects?.overall_project_score || undefined
     };
   };
 
