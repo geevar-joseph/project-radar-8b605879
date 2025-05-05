@@ -1,4 +1,5 @@
 
+import { Link } from "react-router-dom";
 import { formatDate, getValidProjectStatus, getValidProjectType } from "@/utils/formatters";
 import { ProjectReport, ProjectStatus, ProjectType } from "@/types/project";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -92,6 +93,7 @@ export function ProjectsTable({
                 <ProjectTableRow 
                   key={`${project.id || projectName}`}
                   project={{
+                    id: project.id,
                     name: projectName,
                     client: project.clientName || project.client_name,
                     type: project.projectType || project.project_type,
@@ -101,12 +103,12 @@ export function ProjectsTable({
                     overallScore: project.overallProjectScore || project.overall_project_score,
                     riskLevel: project.riskLevel,
                     financialHealth: project.financialHealth,
-                    id: project.id,
                     submissionDate: project.submissionDate || project.updated_at
                   }}
                   onEdit={() => handleEdit(projectName)}
                   onRemove={() => handleRemove(projectName)}
                   isManageView={isManageView}
+                  navigable={!isManageView}
                 />
               );
             })

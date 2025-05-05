@@ -5,6 +5,7 @@ import { Edit, Trash } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { formatDate } from "@/utils/formatters";
 import { riskToColorMap, healthToColorMap } from "@/types/project";
+import { useNavigate } from "react-router-dom";
 
 // Define the project data structure specifically for table rows
 interface ProjectRowData {
@@ -27,16 +28,21 @@ interface ProjectTableRowProps {
   onEdit?: (projectName: string) => void;
   onRemove?: (projectName: string) => void;
   isManageView?: boolean;
+  navigable?: boolean;
 }
 
 export const ProjectTableRow = ({ 
   project, 
   onEdit, 
   onRemove,
-  isManageView = false
+  isManageView = false,
+  navigable = true
 }: ProjectTableRowProps) => {
+  const navigate = useNavigate();
+  
   // Format and ensure all values have defaults for display
   const {
+    id,
     name,
     client = "N/A",
     type = "Service",
@@ -52,8 +58,17 @@ export const ProjectTableRow = ({
   // Format date if available
   const formattedDate = submissionDate ? formatDate(submissionDate) : "—";
 
+  const handleRowClick = () => {
+    if (navigable && id) {
+      navigate(`/project/${id}`);
+    }
+  };
+
   return (
-    <TableRow className="hover:bg-muted/50">
+    <TableRow 
+      className={`${navigable && id ? 'hover:bg-muted/50 cursor-pointer' : 'hover:bg-muted/50'}`}
+      onClick={handleRowClick}
+    >
       <TableCell className="font-medium">
         {jiraId || "—"}
       </TableCell>
@@ -83,7 +98,7 @@ export const ProjectTableRow = ({
       )}
       
       {isManageView && onEdit && onRemove && (
-        <TableCell className="text-right">
+        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
           <div className="flex gap-2 justify-end">
             <Button
               variant="outline"
