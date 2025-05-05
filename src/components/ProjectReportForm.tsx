@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -269,19 +268,34 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             </FormControl>
             <SelectContent>
               <SelectItem value="Very Satisfied">
-                <ScoreIndicator value="Very Satisfied" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Very Satisfied" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Customers are highly complimentary</span>
+                </div>
               </SelectItem>
               <SelectItem value="Satisfied">
-                <ScoreIndicator value="Satisfied" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Satisfied" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Customers are generally pleased</span>
+                </div>
               </SelectItem>
               <SelectItem value="Neutral / Unclear">
-                <ScoreIndicator value="Neutral / Unclear" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Neutral / Unclear" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Mixed feedback or limited communication</span>
+                </div>
               </SelectItem>
               <SelectItem value="Dissatisfied">
-                <ScoreIndicator value="Dissatisfied" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Dissatisfied" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Multiple complaints or issues raised</span>
+                </div>
               </SelectItem>
               <SelectItem value="N.A.">
-                <ScoreIndicator value="N.A." />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="N.A." />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">No customer interaction this period</span>
+                </div>
               </SelectItem>
             </SelectContent>
           </Select>
@@ -310,19 +324,34 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             </FormControl>
             <SelectContent>
               <SelectItem value="Low">
-                <ScoreIndicator value="Low" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Low" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Project has minimal identified risks</span>
+                </div>
               </SelectItem>
               <SelectItem value="Medium">
-                <ScoreIndicator value="Medium" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Medium" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Some risks identified but manageable</span>
+                </div>
               </SelectItem>
               <SelectItem value="High">
-                <ScoreIndicator value="High" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="High" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Significant risks requiring mitigation</span>
+                </div>
               </SelectItem>
               <SelectItem value="Critical">
-                <ScoreIndicator value="Critical" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Critical" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Major issues threatening project success</span>
+                </div>
               </SelectItem>
               <SelectItem value="N.A.">
-                <ScoreIndicator value="N.A." />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="N.A." />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Risk assessment not applicable</span>
+                </div>
               </SelectItem>
             </SelectContent>
           </Select>

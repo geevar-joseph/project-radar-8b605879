@@ -91,49 +91,49 @@ export const satisfactionToValueMap: Record<CustomerSatisfaction, number | null>
 };
 
 export const riskToColorMap: Record<RiskLevel, string> = {
-  'Low': 'bg-status-excellent',
-  'Medium': 'bg-status-fair',
-  'High': 'bg-status-orange',
-  'Critical': 'bg-status-poor',
+  'Low': 'bg-emerald-500',
+  'Medium': 'bg-amber-400',
+  'High': 'bg-orange-400',
+  'Critical': 'bg-red-500',
   'N.A.': 'bg-gray-300'
 };
 
 export const healthToColorMap: Record<FinancialHealth, string> = {
-  'Healthy': 'bg-status-excellent',
-  'On Watch': 'bg-status-fair', 
-  'At Risk': 'bg-status-orange',
-  'Critical': 'bg-status-poor',
-  'N.A.': 'bg-status-na'
+  'Healthy': 'bg-emerald-500',
+  'On Watch': 'bg-amber-400', 
+  'At Risk': 'bg-orange-400',
+  'Critical': 'bg-red-500',
+  'N.A.': 'bg-gray-300'
 };
 
 export const completionToColorMap: Record<CompletionStatus, string> = {
-  'All completed': 'bg-status-excellent',
-  'Mostly': 'bg-status-good',
-  'Partially': 'bg-status-fair',
-  'Not completed': 'bg-status-poor',
-  'N.A.': 'bg-status-na'
+  'All completed': 'bg-emerald-500',
+  'Mostly': 'bg-blue-400',
+  'Partially': 'bg-amber-400',
+  'Not completed': 'bg-red-500',
+  'N.A.': 'bg-gray-300'
 };
 
 export const ratingToColorMap: Record<RatingValue, string> = {
-  'Excellent': 'bg-status-excellent',
-  'Good': 'bg-status-good',
-  'Fair': 'bg-status-fair',
-  'Poor': 'bg-status-poor',
-  'N.A.': 'bg-status-na'
+  'Excellent': 'bg-emerald-500',
+  'Good': 'bg-blue-400',
+  'Fair': 'bg-amber-400',
+  'Poor': 'bg-red-500',
+  'N.A.': 'bg-gray-300'
 };
 
 export const moraleToColorMap: Record<TeamMorale, string> = {
-  'High': 'bg-status-excellent',
-  'Moderate': 'bg-status-good',
-  'Low': 'bg-status-fair',
-  'Burnt Out': 'bg-status-poor',
-  'N.A.': 'bg-status-na'
+  'High': 'bg-emerald-500',
+  'Moderate': 'bg-blue-400',
+  'Low': 'bg-amber-400',
+  'Burnt Out': 'bg-red-500',
+  'N.A.': 'bg-gray-300'
 };
 
 export const satisfactionToColorMap: Record<CustomerSatisfaction, string> = {
-  'Very Satisfied': 'bg-status-excellent',
-  'Satisfied': 'bg-status-good',
-  'Neutral / Unclear': 'bg-status-fair',
-  'Dissatisfied': 'bg-status-poor',
-  'N.A.': 'bg-status-na'
+  'Very Satisfied': 'bg-emerald-500',
+  'Satisfied': 'bg-blue-400',
+  'Neutral / Unclear': 'bg-amber-400',
+  'Dissatisfied': 'bg-red-500',
+  'N.A.': 'bg-gray-300'
 };

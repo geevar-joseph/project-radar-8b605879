@@ -20,7 +20,7 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
         return {
           count: 4,
           activeCount: 4,
-          color: 'bg-status-excellent'
+          color: 'bg-emerald-500'
         };
       
       // Good ratings
@@ -31,7 +31,7 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
         return {
           count: 4,
           activeCount: 3,
-          color: 'bg-status-good'
+          color: 'bg-blue-400'
         };
       
       // Fair/Medium ratings
@@ -39,12 +39,11 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
       case 'Partially':
       case 'On Watch': // For financial health
       case 'Medium': // For risk level
-      case 'Low': // For team morale, "Low" is negative
       case 'Neutral / Unclear':
         return {
           count: 4,
           activeCount: 2,
-          color: 'bg-status-fair'
+          color: 'bg-amber-400'
         };
       
       // Orange/At Risk ratings
@@ -53,7 +52,7 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
         return {
           count: 4,
           activeCount: 1.5,
-          color: 'bg-status-orange'
+          color: 'bg-orange-400'
         };
       
       // Poor/Critical ratings
@@ -65,7 +64,7 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
         return {
           count: 4,
           activeCount: 1,
-          color: 'bg-status-poor'
+          color: 'bg-red-500'
         };
       
       case 'N.A.':
