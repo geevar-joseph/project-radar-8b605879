@@ -34,6 +34,7 @@ interface ProjectContextType {
   }) => Promise<boolean>;
   updateTeamMember: (originalName: string, name: string, email: string, role: string) => Promise<boolean>;
   isLoading: boolean;
+  loadProjects: () => Promise<void>;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -51,7 +52,8 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     getFilteredProjects,
     addProjectName,
     removeProjectName,
-    updateProjectDetails
+    updateProjectDetails,
+    loadProjects
   } = useProjects();
 
   const {
@@ -78,7 +80,8 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       removeTeamMember,
       updateProjectDetails,
       updateTeamMember,
-      isLoading
+      isLoading,
+      loadProjects
     }}>
       {children}
     </ProjectContext.Provider>

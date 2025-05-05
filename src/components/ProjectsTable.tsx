@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -54,7 +55,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
             projectName = project.projectName;
           } else if ('project_name' in project && project.project_name) {
             projectName = String(project.project_name);
-          } else if (project.projects && 'project_name' in project.projects) {
+          } else if (project.projects && project.projects.project_name) {
             // Handle nested project structure
             projectName = String(project.projects.project_name);
           } else {

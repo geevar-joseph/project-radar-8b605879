@@ -18,10 +18,12 @@ export const useTeamMembers = () => {
 
   const loadTeamMembers = async () => {
     try {
-      const { names, error } = await fetchTeamMembers();
+      const { members, error } = await fetchTeamMembers();
       
       if (error) throw error;
       
+      // Extract names from members array
+      const names = members.map(member => member.name);
       setTeamMembers(names);
     } catch (error) {
       console.error('Error loading team members:', error);

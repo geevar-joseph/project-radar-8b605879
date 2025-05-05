@@ -46,7 +46,9 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
       if (data) {
         setProjectsData(data);
         // Also refresh the context data
-        loadProjects();
+        if (loadProjects) {
+          await loadProjects();
+        }
       }
     } catch (error) {
       console.error('Error fetching projects data:', error);

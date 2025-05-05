@@ -18,8 +18,10 @@ const ManageOptions = () => {
 
   // Refresh data when switching tabs
   useEffect(() => {
-    loadProjects();
-  }, [activeTab]);
+    if (loadProjects) {
+      loadProjects();
+    }
+  }, [activeTab, loadProjects]);
 
   return (
     <div className="container mx-auto py-10">
