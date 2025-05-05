@@ -14,8 +14,8 @@ export function KPIScoreMeter({ score, label, maxScore = 4 }: KPIScoreMeterProps
   // Determine color based on score for filled pills
   const getColor = (value: number) => {
     if (value <= 1) return "bg-red-500";
-    if (value <= 2) return "bg-orange-400"; // Changed from amber-400 to orange-400 for consistency
-    if (value <= 3) return "bg-blue-400";
+    if (value === 2) return "bg-orange-400";
+    if (value === 3) return "bg-amber-400";
     return "bg-emerald-500";
   };
 

@@ -34,13 +34,27 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
           color: 'bg-blue-400'
         };
       
-      // Fair/Medium ratings
+      // Fair ratings
       case 'Fair':
-      case 'Medium': // Risk level
-      case 'On Watch': // Financial health
         return {
           count: 4,
           activeCount: 2,
+          color: 'bg-amber-400'
+        };
+
+      // Medium risk level (3 dots, yellow)
+      case 'Medium': 
+        return {
+          count: 4,
+          activeCount: 3,
+          color: 'bg-amber-400'
+        };
+        
+      // On Watch financial health (3 dots, yellow)
+      case 'On Watch':
+        return {
+          count: 4,
+          activeCount: 3,
           color: 'bg-amber-400'
         };
 
@@ -60,10 +74,24 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
           color: 'bg-amber-400'
         };
       
-      // Orange/At Risk ratings
-      case 'At Risk': // For financial health
-      case 'High': // For risk level - high risk
-      case 'Low': // For team morale - low morale is negative
+      // High risk (2 dots, orange)
+      case 'High':
+        return {
+          count: 4,
+          activeCount: 2,
+          color: 'bg-orange-400'
+        };
+        
+      // At Risk financial health
+      case 'At Risk':
+        return {
+          count: 4,
+          activeCount: 2,
+          color: 'bg-orange-400'
+        };
+        
+      // Low team morale
+      case 'Low':
         return {
           count: 4,
           activeCount: 2,

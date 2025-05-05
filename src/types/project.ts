@@ -1,4 +1,3 @@
-
 export type RatingValue = 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'N.A.';
 export type RiskLevel = 'Low' | 'Medium' | 'High' | 'Critical' | 'N.A.';
 export type FinancialHealth = 'Healthy' | 'On Watch' | 'At Risk' | 'Critical' | 'N.A.';
@@ -48,7 +47,7 @@ export const ratingToValueMap: Record<RatingValue, number | null> = {
 // Mapping risk levels to numeric values
 export const riskToValueMap: Record<RiskLevel, number | null> = {
   'Low': 4,
-  'Medium': 3,
+  'Medium': 3,  // Adjusted to match 3 dots
   'High': 2,
   'Critical': 1,
   'N.A.': null
@@ -57,7 +56,7 @@ export const riskToValueMap: Record<RiskLevel, number | null> = {
 // Mapping financial health to numeric values
 export const financialToValueMap: Record<FinancialHealth, number | null> = {
   'Healthy': 4,
-  'On Watch': 3,
+  'On Watch': 3,  // Adjusted to match 3 dots
   'At Risk': 2,
   'Critical': 1,
   'N.A.': null
