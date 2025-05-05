@@ -14,7 +14,8 @@ import {
   Radar,
   PolarGrid,
   PolarAngleAxis,
-  PolarRadiusAxis
+  PolarRadiusAxis,
+  Cell
 } from 'recharts';
 import { 
   ProjectReport, 
@@ -220,6 +221,14 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
   const topPerformers = [...chartData].sort((a, b) => b.value - a.value).slice(0, 3);
   const improvementAreas = [...chartData].sort((a, b) => a.value - b.value).slice(0, 3);
 
+  // Helper for formatting rating labels
+  const getRatingLabel = (value: number): string => {
+    if (value >= 3.5) return "Excellent";
+    if (value >= 2.5) return "Good"; 
+    if (value >= 1.5) return "Fair";
+    return "Poor";
+  };
+
   // Render line chart view (trends over time)
   if (chartView === 'line') {
     return (
@@ -290,10 +299,10 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
                   <XAxis dataKey="name" />
                   <YAxis domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} />
                   <Tooltip 
-                    formatter={(value, name, props) => {
+                    formatter={(value: number, name: string, props: any) => {
                       const item = chartData.find(d => d.name === name);
                       return [
-                        `${value} (${value >= 3.5 ? "Excellent" : value >= 2.5 ? "Good" : value >= 1.5 ? "Fair" : "Poor"})`,
+                        `${value} (${getRatingLabel(value)})`,
                         item?.fullName || name
                       ];
                     }}
@@ -344,10 +353,10 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
                     fillOpacity={0.6} 
                   />
                   <Tooltip
-                    formatter={(value, name, props) => {
+                    formatter={(value: number, name: string, props: any) => {
                       const item = chartData.find(d => d.name === name);
                       return [
-                        `${value} (${value >= 3.5 ? "Excellent" : value >= 2.5 ? "Good" : value >= 1.5 ? "Fair" : "Poor"})`,
+                        `${value} (${getRatingLabel(value)})`,
                         item?.fullName || name
                       ];
                     }}

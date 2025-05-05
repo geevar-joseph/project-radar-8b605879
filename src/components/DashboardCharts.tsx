@@ -287,8 +287,8 @@ export function DashboardCharts() {
                             textAnchor="end" 
                             fill="#666"
                             fontSize={12}
-                            title={item?.fullName || payload.value}
                           >
+                            <title>{item?.fullName || payload.value}</title>
                             {payload.value}
                           </text>
                         </g>
