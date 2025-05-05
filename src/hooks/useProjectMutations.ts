@@ -3,9 +3,9 @@ import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import {
   addProjectReport,
-  addProjectName,
-  removeProjectName,
-  updateProjectDetails
+  addProjectName as apiAddProjectName,
+  removeProjectName as apiRemoveProjectName,
+  updateProjectDetails as apiUpdateProjectDetails
 } from "@/api/projectApi";
 
 /**
@@ -53,7 +53,7 @@ export const useProjectMutations = (
     if (!projectNames.includes(name)) {
       try {
         // Pass jiraId correctly to API
-        const result = await addProjectName(
+        const result = await apiAddProjectName(
           name,
           clientName,
           jiraId,  // Pass jiraId as is - null if empty
@@ -90,28 +90,35 @@ export const useProjectMutations = (
 
   const removeProjectName = async (name: string) => {
     try {
-      const result = await removeProjectName(name);
+      const result = await apiRemoveProjectName(name);
       
-      if (result && typeof result === 'object' && 'success' in result) {
-        if (!result.success) {
-          toast({
-            title: "Error",
-            description: result.error instanceof Error ? result.error.message : "There was an error removing the project.",
-            variant: "destructive"
-          });
-          return false;
-        }
-  
-        setProjectNames(projectNames.filter(project => project !== name));
-        
+      // Check if result exists before accessing its properties
+      if (!result) {
         toast({
-          title: "Project Removed",
-          description: `"${name}" has been removed from the projects list.`,
+          title: "Error",
+          description: "Unexpected error while removing the project.",
+          variant: "destructive"
         });
-        
-        return true;
+        return false;
       }
-      return false;
+      
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error instanceof Error ? result.error.message : "There was an error removing the project.",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      setProjectNames(projectNames.filter(project => project !== name));
+      
+      toast({
+        title: "Project Removed",
+        description: `"${name}" has been removed from the projects list.`,
+      });
+      
+      return true;
     } catch (error) {
       console.error('Error removing project name:', error);
       toast({
@@ -131,43 +138,52 @@ export const useProjectMutations = (
     assignedPM?: string;
   }) => {
     try {
-      const result = await updateProjectDetails(originalName, updateData);
+      const result = await apiUpdateProjectDetails(originalName, updateData);
       
-      if (result && typeof result === 'object' && 'success' in result) {
-        if (!result.success) throw result.error;
-  
-        // Update local state - find and update the project in projects array
-        const updatedProjects = projects.map(project => {
-          if (project.projectName === originalName) {
-            return {
-              ...project,
-              projectName: updateData.projectName,
-              clientName: updateData.clientName || project.clientName,
-              projectType: (updateData.projectType as any) || project.projectType,
-              projectStatus: (updateData.projectStatus as any) || project.projectStatus,
-              assignedPM: updateData.assignedPM || project.assignedPM
-            };
-          }
-          return project;
-        });
-        
-        setProjects(updatedProjects);
-  
-        // If project name changed, update projectNames array
-        if (originalName !== updateData.projectName) {
-          setProjectNames(projectNames.map(name => 
-            name === originalName ? updateData.projectName : name
-          ));
-        }
-        
+      // Check if result exists before accessing its properties
+      if (!result) {
         toast({
-          title: "Project Updated",
-          description: `"${updateData.projectName}" has been updated successfully.`,
+          title: "Error",
+          description: "Unexpected error while updating the project.",
+          variant: "destructive"
         });
-        
-        return true;
+        return false;
       }
-      return false;
+      
+      if (!result.success) {
+        throw result.error;
+      }
+
+      // Update local state - find and update the project in projects array
+      const updatedProjects = projects.map(project => {
+        if (project.projectName === originalName) {
+          return {
+            ...project,
+            projectName: updateData.projectName,
+            clientName: updateData.clientName || project.clientName,
+            projectType: (updateData.projectType as any) || project.projectType,
+            projectStatus: (updateData.projectStatus as any) || project.projectStatus,
+            assignedPM: updateData.assignedPM || project.assignedPM
+          };
+        }
+        return project;
+      });
+      
+      setProjects(updatedProjects);
+
+      // If project name changed, update projectNames array
+      if (originalName !== updateData.projectName) {
+        setProjectNames(projectNames.map(name => 
+          name === originalName ? updateData.projectName : name
+        ));
+      }
+      
+      toast({
+        title: "Project Updated",
+        description: `"${updateData.projectName}" has been updated successfully.`,
+      });
+      
+      return true;
     } catch (error) {
       console.error('Error updating project details:', error);
       toast({
