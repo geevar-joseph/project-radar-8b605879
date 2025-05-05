@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   LineChart,
@@ -13,7 +12,7 @@ import {
 import { ProjectReport, ratingToValueMap, RatingValue } from '@/types/project';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useProjectContext } from '@/context/ProjectContext';
-import { Star, Smile, Users, Building, ArrowUp, ArrowDown, Circle } from 'lucide-react';
+import { Star, Smile, Users, Building } from 'lucide-react';
 
 interface ProjectKPITrendChartProps {
   projectName: string;
@@ -137,6 +136,7 @@ interface KPIChange {
   current: number;
   change: number;
   status: 'improved' | 'declined' | 'no-change';
+  category: string; // Added category for coloring
 }
 
 const calculateKPIChanges = (currentReport: ProjectReport, previousReport: ProjectReport | undefined): KPIChange[] => {
@@ -146,32 +146,38 @@ const calculateKPIChanges = (currentReport: ProjectReport, previousReport: Proje
     {
       name: "Overall Score",
       current: calculateOverallScore(currentReport),
-      previous: calculateOverallScore(previousReport)
+      previous: calculateOverallScore(previousReport),
+      category: "overall"
     },
     {
       name: "Risk Level",
       current: statusToNumeric(currentReport.riskLevel, 'risk'),
-      previous: statusToNumeric(previousReport.riskLevel, 'risk')
+      previous: statusToNumeric(previousReport.riskLevel, 'risk'),
+      category: "risk"
     },
     {
       name: "Financial Health",
       current: statusToNumeric(currentReport.financialHealth, 'financial'),
-      previous: statusToNumeric(previousReport.financialHealth, 'financial')
+      previous: statusToNumeric(previousReport.financialHealth, 'financial'),
+      category: "financial"
     },
     {
       name: "Customer Satisfaction",
       current: statusToNumeric(currentReport.customerSatisfaction, 'satisfaction'),
-      previous: statusToNumeric(previousReport.customerSatisfaction, 'satisfaction')
+      previous: statusToNumeric(previousReport.customerSatisfaction, 'satisfaction'),
+      category: "customerSatisfaction"
     },
     {
       name: "Team KPIs",
       current: calculateTeamKPIsScore(currentReport),
-      previous: calculateTeamKPIsScore(previousReport)
+      previous: calculateTeamKPIsScore(previousReport),
+      category: "teamKPIs"
     },
     {
       name: "Departmental Score",
       current: calculateDepartmentalScore(currentReport),
-      previous: calculateDepartmentalScore(previousReport)
+      previous: calculateDepartmentalScore(previousReport),
+      category: "departmentalScore"
     }
   ];
   
@@ -189,7 +195,8 @@ const calculateKPIChanges = (currentReport: ProjectReport, previousReport: Proje
         current: metric.current,
         previous: metric.previous,
         change,
-        status
+        status,
+        category: metric.category
       };
     });
 };
@@ -217,10 +224,17 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
   // Calculate KPI changes
   const kpiChanges = calculateKPIChanges(latestReport, previousReport);
   
-  // Group KPI changes by status
-  const improvedKPIs = kpiChanges.filter(kpi => kpi.status === 'improved');
-  const declinedKPIs = kpiChanges.filter(kpi => kpi.status === 'declined');
-  const unchangedKPIs = kpiChanges.filter(kpi => kpi.status === 'no-change');
+  // Group KPI changes by status and sort by magnitude of change
+  const improvedKPIs = kpiChanges
+    .filter(kpi => kpi.status === 'improved')
+    .sort((a, b) => Math.abs(b.change) - Math.abs(a.change));
+  
+  const declinedKPIs = kpiChanges
+    .filter(kpi => kpi.status === 'declined')
+    .sort((a, b) => Math.abs(b.change) - Math.abs(a.change));
+  
+  const unchangedKPIs = kpiChanges
+    .filter(kpi => kpi.status === 'no-change');
 
   // Format reporting period for better display
   const formatPeriod = (periodString: string) => {
@@ -324,7 +338,7 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
         <div className="border rounded-md p-6 h-full">
           <h3 className="font-semibold text-lg mb-4">Trend Analysis</h3>
           
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div>
               <h4 className="text-sm font-medium mb-2">Performance Over Time</h4>
               <p className="text-sm text-muted-foreground">
@@ -332,18 +346,21 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
               </p>
             </div>
             
-            {/* KPI Movement Summary Section */}
+            {/* KPI Movement Summary Section - Updated */}
             <div>
               <h4 className="text-sm font-medium mb-3">KPI Movement Summary</h4>
               <div className="space-y-4">
                 {improvedKPIs.length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-green-600 mb-1">Improved:</p>
-                    <ul className="space-y-1">
+                    <p className="text-sm font-medium text-green-600 mb-2">Improved:</p>
+                    <ul className="space-y-2">
                       {improvedKPIs.map((kpi) => (
                         <li key={kpi.name} className="flex items-center text-sm">
-                          <ArrowUp className="h-4 w-4 text-green-600 mr-1" />
-                          <span>{kpi.name} (+{Math.abs(kpi.change).toFixed(1)})</span>
+                          <span className="text-green-600 mr-2">↑</span>
+                          <span style={{ color: chartConfig[kpi.category as keyof typeof chartConfig]?.color }}>
+                            {kpi.name}
+                          </span>
+                          <span className="ml-2 text-green-600">(+{Math.abs(kpi.change).toFixed(1)})</span>
                         </li>
                       ))}
                     </ul>
@@ -352,12 +369,15 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
                 
                 {declinedKPIs.length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-red-600 mb-1">Declined:</p>
-                    <ul className="space-y-1">
+                    <p className="text-sm font-medium text-red-600 mb-2">Declined:</p>
+                    <ul className="space-y-2">
                       {declinedKPIs.map((kpi) => (
                         <li key={kpi.name} className="flex items-center text-sm">
-                          <ArrowDown className="h-4 w-4 text-red-600 mr-1" />
-                          <span>{kpi.name} (–{Math.abs(kpi.change).toFixed(1)})</span>
+                          <span className="text-red-600 mr-2">↓</span>
+                          <span style={{ color: chartConfig[kpi.category as keyof typeof chartConfig]?.color }}>
+                            {kpi.name}
+                          </span>
+                          <span className="ml-2 text-red-600">(–{Math.abs(kpi.change).toFixed(1)})</span>
                         </li>
                       ))}
                     </ul>
@@ -366,12 +386,15 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
                 
                 {unchangedKPIs.length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">No Change:</p>
-                    <ul className="space-y-1">
+                    <p className="text-sm font-medium text-gray-500 mb-2">No Change:</p>
+                    <ul className="space-y-2">
                       {unchangedKPIs.map((kpi) => (
                         <li key={kpi.name} className="flex items-center text-sm">
-                          <Circle className="h-4 w-4 text-gray-400 mr-1" />
-                          <span>{kpi.name} ({kpi.current.toFixed(1)})</span>
+                          <span className="text-gray-400 mr-2">→</span>
+                          <span style={{ color: chartConfig[kpi.category as keyof typeof chartConfig]?.color }}>
+                            {kpi.name}
+                          </span>
+                          <span className="ml-2 text-gray-500">({kpi.current.toFixed(1)})</span>
                         </li>
                       ))}
                     </ul>
@@ -384,17 +407,6 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
                   </p>
                 )}
               </div>
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-medium mb-2">KPI Timeline Highlights</h4>
-              <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li><span className="font-medium" style={{ color: chartConfig.overall.color }}>Overall Score</span> - Project's aggregate performance</li>
-                <li><span className="font-medium" style={{ color: chartConfig.customerSatisfaction.color }}>Customer Satisfaction</span> - Client feedback trends</li>
-                <li><span className="font-medium" style={{ color: chartConfig.teamKPIs.color }}>Team KPIs</span> - Team morale and PM performance</li>
-                <li><span className="font-medium" style={{ color: chartConfig.departmentalScore.color }}>Departmental Score</span> - Technical quality metrics</li>
-                <li><span className="font-medium" style={{ color: chartConfig.risk.color }}>Risk Level</span> - Project risk assessment</li>
-              </ul>
             </div>
             
             <div>
