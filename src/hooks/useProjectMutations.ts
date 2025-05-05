@@ -152,9 +152,16 @@ export const useProjectMutations = (
     try {
       console.log('Updating project details:', originalName, updateData);
       
-      const result = await apiUpdateProjectDetails(originalName, updateData);
+      // Ensure all values are properly passed to the API
+      const result = await apiUpdateProjectDetails(originalName, {
+        projectName: updateData.projectName,
+        clientName: updateData.clientName || "",
+        jiraId: updateData.jiraId || null,
+        projectType: updateData.projectType || "Service",
+        projectStatus: updateData.projectStatus || "Active",
+        assignedPM: updateData.assignedPM || null
+      });
       
-      // Check if result exists before accessing its properties
       if (!result) {
         console.error('No result returned from updateProjectDetails API call');
         toast({
@@ -176,11 +183,11 @@ export const useProjectMutations = (
           return {
             ...project,
             projectName: updateData.projectName,
-            clientName: updateData.clientName || project.clientName,
-            jiraId: updateData.jiraId || project.jiraId,
-            projectType: (updateData.projectType as any) || project.projectType,
-            projectStatus: (updateData.projectStatus as any) || project.projectStatus,
-            assignedPM: updateData.assignedPM || project.assignedPM
+            clientName: updateData.clientName || project.clientName || "",
+            jiraId: updateData.jiraId || project.jiraId || "",
+            projectType: updateData.projectType || project.projectType || "Service",
+            projectStatus: updateData.projectStatus || project.projectStatus || "Active",
+            assignedPM: updateData.assignedPM || project.assignedPM || ""
           };
         }
         return project;

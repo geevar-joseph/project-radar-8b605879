@@ -23,7 +23,8 @@ const ManageOptions = () => {
 
   // Load data when component mounts and ensure we have fresh data
   useEffect(() => {
-    if (loadProjects && !loadingInProgress.current) {
+    if (loadProjects && !loadingInProgress.current && !initialLoadDone.current) {
+      console.log("Initial loading of projects in ManageOptions");
       loadingInProgress.current = true;
       
       loadProjects()
@@ -44,6 +45,34 @@ const ManageOptions = () => {
         });
     }
   }, [loadProjects, toast]);
+
+  // Reload data when the component gains focus
+  useEffect(() => {
+    // Function to reload projects data
+    const reloadData = () => {
+      if (!loadingInProgress.current && loadProjects) {
+        loadingInProgress.current = true;
+        loadProjects()
+          .then(() => {
+            console.log("Projects reloaded on visibility change");
+          })
+          .catch(error => {
+            console.error("Error reloading data:", error);
+          })
+          .finally(() => {
+            loadingInProgress.current = false;
+          });
+      }
+    };
+    
+    // Add event listener for when window regains focus
+    window.addEventListener('focus', reloadData);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('focus', reloadData);
+    };
+  }, [loadProjects]);
 
   // Refresh data when switching tabs
   const handleTabChange = (value: string) => {

@@ -88,15 +88,20 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
     setIsSubmitting(true);
     
     try {
-      // Pass the correct data structure to updateProjectDetails
-      const result = await updateProjectDetails(projectName, {
+      // Ensure we have the correct data types before sending to API
+      const updateData = {
         projectName: values.projectName,
         clientName: values.clientName || "",
         jiraId: values.jiraId || "",
         projectType: values.projectType || "",
         projectStatus: values.projectStatus || "",
         assignedPM: values.assignedPM || "",
-      });
+      };
+      
+      console.log("Submitting update with data:", updateData);
+      
+      // Pass the correct data structure to updateProjectDetails
+      const result = await updateProjectDetails(projectName, updateData);
       
       if (result) {
         toast({
@@ -266,4 +271,3 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
     </Dialog>
   );
 };
-
