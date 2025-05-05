@@ -14,8 +14,15 @@ interface ProjectContextType {
   getFilteredProjects: (period?: string) => ProjectReport[];
   selectedPeriod: string | undefined;
   setSelectedPeriod: (period: string | undefined) => void;
-  addProjectName: (name: string) => Promise<void>;
-  removeProjectName: (name: string) => void;
+  addProjectName: (
+    name: string, 
+    clientName?: string,
+    jiraId?: string,
+    projectType?: string,
+    projectStatus?: string,
+    assignedPM?: string
+  ) => Promise<{ success: boolean; error?: Error }>;
+  removeProjectName: (name: string) => Promise<boolean>;
   addTeamMember: (name: string, email: string, role: string) => Promise<void>;
   removeTeamMember: (name: string) => void;
   updateProjectDetails: (originalName: string, updateData: {

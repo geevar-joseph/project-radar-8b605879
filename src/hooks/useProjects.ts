@@ -100,10 +100,24 @@ export const useProjects = () => {
     return projects.filter(project => project.reportingPeriod === period);
   };
 
-  const addProjectName = async (name: string) => {
+  const addProjectName = async (
+    name: string,
+    clientName?: string,
+    jiraId?: string,
+    projectType?: string,
+    projectStatus?: string,
+    assignedPM?: string
+  ) => {
     if (!projectNames.includes(name)) {
       try {
-        const { success, error } = await apiAddProjectName(name);
+        const { success, error } = await apiAddProjectName(
+          name,
+          clientName,
+          jiraId,
+          projectType,
+          projectStatus,
+          assignedPM
+        );
         
         if (!success) throw error;
         
@@ -113,6 +127,11 @@ export const useProjects = () => {
           title: "Project Added",
           description: `"${name}" has been added to the projects list.`,
         });
+        
+        // Reload projects to get the latest data
+        loadProjects();
+        
+        return { success: true };
       } catch (error) {
         console.error('Error adding project name:', error);
         toast({
@@ -120,15 +139,24 @@ export const useProjects = () => {
           description: "There was an error adding the project. Please try again.",
           variant: "destructive"
         });
+        return { success: false, error };
       }
     }
+    return { success: false, error: new Error("Project name already exists") };
   };
 
   const removeProjectName = async (name: string) => {
     try {
       const { success, error } = await apiRemoveProjectName(name);
       
-      if (!success) throw error;
+      if (!success) {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "There was an error removing the project.",
+          variant: "destructive"
+        });
+        return false;
+      }
 
       setProjectNames(projectNames.filter(project => project !== name));
       
@@ -136,6 +164,8 @@ export const useProjects = () => {
         title: "Project Removed",
         description: `"${name}" has been removed from the projects list.`,
       });
+      
+      return true;
     } catch (error) {
       console.error('Error removing project name:', error);
       toast({
@@ -143,6 +173,7 @@ export const useProjects = () => {
         description: "There was an error removing the project. Please try again.",
         variant: "destructive"
       });
+      return false;
     }
   };
 

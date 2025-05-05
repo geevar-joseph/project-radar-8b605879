@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AddProjectModalProps {
   open: boolean;
@@ -16,18 +17,21 @@ interface AddProjectModalProps {
 interface TeamMember {
   id: string;
   name: string;
+  email?: string;
+  role?: string;
 }
 
 export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) => {
-  const { addProject, addProjectName } = useProjectContext();
+  const { addProjectName } = useProjectContext();
   const [jiraCode, setJiraCode] = useState("");
   const [projectName, setProjectName] = useState("");
   const [clientName, setClientName] = useState("");
   const [projectManager, setProjectManager] = useState("");
-  const [projectType, setProjectType] = useState<string>("");
+  const [projectType, setProjectType] = useState<string>("Service"); // Default to Service
   const [projectStatus, setProjectStatus] = useState<string>("Active"); // Default to Active
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
@@ -39,7 +43,7 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
     try {
       const { data, error } = await supabase
         .from('team_members')
-        .select('id, name');
+        .select('*');
       
       if (error) throw error;
       
@@ -48,6 +52,11 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
       }
     } catch (error) {
       console.error('Error fetching team members:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load team members. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -55,7 +64,12 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
     e.preventDefault();
     
     if (!projectName || !clientName || !projectType) {
-      return; // Don't submit if required fields are missing
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
     }
 
     setIsSubmitting(true);
@@ -68,33 +82,39 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
         pmId = selectedPM?.id;
       }
       
-      // Insert the project into the database
-      const { data, error } = await supabase
-        .from('projects')
-        .insert({
-          project_name: projectName,
-          client_name: clientName,
-          assigned_pm: pmId,
-          project_type: projectType,
-          project_status: projectStatus || "Active" // Default to Active
-        })
-        .select();
+      // Add the project to the database
+      const result = await addProjectName(
+        projectName,
+        clientName,
+        jiraCode,
+        projectType,
+        projectStatus,
+        pmId || null
+      );
       
-      if (error) throw error;
-      
-      // Add to context
-      addProjectName(projectName);
+      if (!result.success) throw new Error('Failed to add project');
       
       // Reset form and close modal
       setJiraCode("");
       setProjectName("");
       setClientName("");
       setProjectManager("");
-      setProjectType("");
+      setProjectType("Service");
       setProjectStatus("Active");
+      
+      toast({
+        title: "Project Added",
+        description: `"${projectName}" has been added successfully.`,
+      });
+      
       onOpenChange(false);
     } catch (error) {
       console.error('Error adding project:', error);
+      toast({
+        title: "Error",
+        description: "There was an error adding the project. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -161,11 +181,17 @@ export const AddProjectModal = ({ open, onOpenChange }: AddProjectModalProps) =>
                   <SelectValue placeholder="Select a project manager" />
                 </SelectTrigger>
                 <SelectContent>
-                  {teamMembers.map((member) => (
-                    <SelectItem key={member.id} value={member.name}>
-                      {member.name}
+                  {teamMembers.length > 0 ? (
+                    teamMembers.map((member) => (
+                      <SelectItem key={member.id} value={member.name}>
+                        {member.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-managers" disabled>
+                      No project managers available
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>

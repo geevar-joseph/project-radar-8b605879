@@ -18,7 +18,7 @@ export const mapToProjectReport = (dbReport: any): ProjectReport => {
 
   return {
     id: dbReport.id,
-    projectName: dbReport.project_name || "",
+    projectName: dbReport.project_name || dbReport.projects?.project_name || "",
     submittedBy: dbReport.submitted_by || "",
     reportingPeriod: dbReport.reporting_period || "",
     riskLevel: dbReport.risk_level || "N.A.",
@@ -32,11 +32,11 @@ export const mapToProjectReport = (dbReport: any): ProjectReport => {
     testingQuality: dbReport.testing_quality || "N.A.",
     designQuality: dbReport.design_quality || "N.A.",
     submissionDate: dbReport.submission_date || new Date().toISOString(),
-    clientName: dbReport.client_name || "",
-    projectType: dbReport.project_type || undefined,
-    projectStatus: dbReport.project_status || undefined,
+    clientName: dbReport.client_name || dbReport.projects?.client_name || "",
+    projectType: dbReport.project_type || dbReport.projects?.project_type || undefined,
+    projectStatus: dbReport.project_status || dbReport.projects?.project_status || undefined,
     assignedPM: pmName || "",
-    jiraId: dbReport.jira_id || "",
+    jiraId: dbReport.jira_id || dbReport.projects?.jira_id || "",
     // Properly map the overall score
     overallProjectScore: dbReport.overall_project_score || "N.A.",
     // Add the new fields
@@ -179,23 +179,23 @@ export const fetchTeamMembers = async () => {
   try {
     const { data, error } = await supabase
       .from('team_members')
-      .select('name');
+      .select('*');
 
     if (error) {
       throw error;
     }
 
-    const names = data.map(member => member.name);
-    return { names, error: null };
+    return { members: data, error: null };
   } catch (error) {
     console.error('Error fetching team members:', error);
     return { 
-      names: [
-        "John Smith", 
-        "Sarah Johnson", 
-        "Michael Davis", 
-        "Emily Wilson", 
-        "David Martinez"
+      members: [
+        { 
+          id: "sample-id-1", 
+          name: "John Smith", 
+          email: "john@example.com", 
+          role: "Project Manager" 
+        }
       ],
       error
     };
@@ -254,15 +254,17 @@ export const removeTeamMember = async (name: string) => {
 /**
  * Adds a project name to Supabase
  */
-export const addProjectName = async (name: string) => {
+export const addProjectName = async (name: string, clientName?: string, jiraId?: string, projectType?: string, projectStatus?: string, assignedPM?: string) => {
   try {
     const { error } = await supabase
       .from('projects')
       .insert({
         project_name: name,
-        // Add default values for type and status
-        project_type: 'Service',
-        project_status: 'Active'
+        client_name: clientName || null,
+        jira_id: jiraId || null,
+        project_type: projectType || 'Service',
+        project_status: projectStatus || 'Active',
+        assigned_pm: assignedPM || null
       });
 
     if (error) throw error;
@@ -279,6 +281,24 @@ export const addProjectName = async (name: string) => {
  */
 export const removeProjectName = async (name: string) => {
   try {
+    // First check if there are any project reports
+    const { data: reportData, error: reportError } = await supabase
+      .from('project_reports')
+      .select('project_id')
+      .eq('projects.project_name', name)
+      .limit(1);
+    
+    if (reportError) throw reportError;
+    
+    // If there are project reports linked to this project, we can't delete it
+    if (reportData && reportData.length > 0) {
+      return { 
+        success: false, 
+        error: new Error('Cannot delete project with linked reports. Delete the reports first.') 
+      };
+    }
+    
+    // Find the project by name
     const { data } = await supabase
       .from('projects')
       .select('id')
