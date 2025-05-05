@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -56,8 +57,10 @@ export function MonthlyReportsTable({ reports }: MonthlyReportsTableProps) {
     ];
     
     // Filter out N.A. values and convert score strings to numbers
+    // Fixed TypeScript error by checking values against a string array instead of specific enum types
     const validScores = scores.filter(score => 
-      score !== "N.A." && score !== "N/A" && score !== undefined
+      score !== undefined && 
+      !["N.A.", "N/A"].includes(score as string)
     );
     
     if (validScores.length === 0) return "N/A";
