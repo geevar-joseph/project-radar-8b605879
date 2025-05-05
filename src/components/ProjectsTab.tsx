@@ -73,6 +73,10 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
     }
   };
 
+  // Define sort handlers for the table
+  const handleSort = () => {}; // Empty function as placeholder
+  const getSortIndicator = () => null; // Empty function as placeholder
+
   return (
     <Card>
       <CardHeader>
@@ -88,9 +92,9 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
           <div className="flex justify-center py-4">Loading projects...</div>
         ) : (
           <ProjectsTable 
-            projectNames={projectNames}
             projects={projectsData.length > 0 ? projectsData : projects}
-            removeProjectName={handleRemoveProject}
+            handleSort={handleSort}
+            getSortIndicator={getSortIndicator}
           />
         )}
       </CardContent>
