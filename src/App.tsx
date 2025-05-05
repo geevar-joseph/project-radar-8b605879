@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import SubmitReport from "./pages/SubmitReport";
 import ProjectDetail from "./pages/ProjectDetail";
+import MonthlyReportDetail from "./pages/MonthlyReportDetail";
 import Projects from "./pages/Projects";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="projects" element={<Projects />} />
               <Route path="submit-report" element={<SubmitReport />} />
               <Route path="project/:id" element={<ProjectDetail />} />
+              <Route path="report/:reportId" element={<MonthlyReportDetail />} />
               <Route path="manage-options" element={<ManageOptions />} />
             </Route>
             
