@@ -4,8 +4,8 @@ import { Badge } from "./ui/badge";
 import { ScoreIndicator } from "./ScoreIndicator";
 
 interface StatusBadgeProps {
-  value: RatingValue | RiskLevel | FinancialHealth | CompletionStatus | TeamMorale | CustomerSatisfaction;
-  type: "risk" | "health" | "completion" | "morale" | "satisfaction" | "rating";
+  value: RatingValue | RiskLevel | FinancialHealth | CompletionStatus | TeamMorale | CustomerSatisfaction | string;
+  type: "risk" | "health" | "completion" | "morale" | "satisfaction" | "rating" | "score";
   className?: string;
 }
 
