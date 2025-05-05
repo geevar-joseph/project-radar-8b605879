@@ -1,6 +1,6 @@
+
 import { useState } from "react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ProjectReport, RiskLevel, FinancialHealth } from "@/types/project";
 import { formatDate } from "@/utils/formatters";
@@ -89,7 +89,12 @@ export function MonthlyReportsTable({ reports }: MonthlyReportsTableProps) {
       "Somewhat Dissatisfied": 2,
       "Neutral / Unclear": 2.5,
       "Satisfied": 3,
-      "Very Satisfied": 4
+      "Very Satisfied": 4,
+      "Burnt Out": 1,
+      "Moderate": 2,
+      "Partially": 2,
+      "Not completed": 1,
+      "Dissatisfied": 1
     };
     
     // Calculate the average score
@@ -97,7 +102,7 @@ export function MonthlyReportsTable({ reports }: MonthlyReportsTableProps) {
     let countedScores = 0;
     
     validScores.forEach(score => {
-      if (score && scoreMap[score]) {
+      if (score && typeof score === 'string' && scoreMap[score] !== undefined) {
         totalScore += scoreMap[score];
         countedScores++;
       }
