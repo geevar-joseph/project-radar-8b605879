@@ -26,12 +26,14 @@ interface ProjectTableRowProps {
   project: ProjectData;
   onEdit: (projectName: string) => void;
   onRemove: (projectName: string) => void;
+  isManageView?: boolean;
 }
 
 export const ProjectTableRow: React.FC<ProjectTableRowProps> = ({ 
   project, 
   onEdit, 
-  onRemove 
+  onRemove,
+  isManageView = false
 }) => {
   return (
     <TableRow key={project.name}>
@@ -57,14 +59,18 @@ export const ProjectTableRow: React.FC<ProjectTableRowProps> = ({
           <Badge variant="secondary">{getValidProjectStatus(project.status as ProjectStatus)}</Badge>
         ) : "—"}
       </TableCell>
-      <TableCell>{formatDate(project.submissionDate) || "—"}</TableCell>
-      <TableCell>{project.overallScore || "—"}</TableCell>
-      <TableCell>
-        <StatusBadge value={(project.riskLevel || 'N.A.') as RiskLevel} type="risk" />
-      </TableCell>
-      <TableCell>
-        <StatusBadge value={(project.financialHealth || 'N.A.') as FinancialHealth} type="health" />
-      </TableCell>
+      {!isManageView && (
+        <>
+          <TableCell>{formatDate(project.submissionDate) || "—"}</TableCell>
+          <TableCell>{project.overallScore || "—"}</TableCell>
+          <TableCell>
+            <StatusBadge value={(project.riskLevel || 'N.A.') as RiskLevel} type="risk" />
+          </TableCell>
+          <TableCell>
+            <StatusBadge value={(project.financialHealth || 'N.A.') as FinancialHealth} type="health" />
+          </TableCell>
+        </>
+      )}
       <TableCell className="text-right space-x-2 flex justify-end">
         <Button 
           variant="ghost" 

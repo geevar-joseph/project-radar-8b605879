@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
@@ -120,6 +119,7 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
             projects={projectsData.length > 0 ? projectsData : projects}
             handleSort={handleSort}
             getSortIndicator={getSortIndicator}
+            isManageView={true} // Set to true for Manage Options view
           />
         )}
       </CardContent>

@@ -12,9 +12,10 @@ interface ProjectsTableProps {
   projects: ProjectReport[] | any[];
   handleSort: (key: keyof ProjectReport) => void;
   getSortIndicator: (key: keyof ProjectReport) => string | null;
+  isManageView?: boolean; // New prop to determine which view we're in
 }
 
-export function ProjectsTable({ projects, handleSort, getSortIndicator }: ProjectsTableProps) {
+export function ProjectsTable({ projects, handleSort, getSortIndicator, isManageView = false }: ProjectsTableProps) {
   const [editingProject, setEditingProject] = useState<string | null>(null);
   
   const handleEdit = (projectName: string) => {
@@ -47,18 +48,22 @@ export function ProjectsTable({ projects, handleSort, getSortIndicator }: Projec
             <TableHead className="cursor-pointer" onClick={() => handleSort('projectStatus')}>
               Status {getSortIndicator('projectStatus')}
             </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort('reportingPeriod')}>
-              Last Report Date {getSortIndicator('reportingPeriod')}
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort('overallProjectScore')}>
-              Overall Score {getSortIndicator('overallProjectScore')}
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort('riskLevel')}>
-              Risk Level {getSortIndicator('riskLevel')}
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort('financialHealth')}>
-              Financials {getSortIndicator('financialHealth')}
-            </TableHead>
+            {!isManageView && (
+              <>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('reportingPeriod')}>
+                  Last Report Date {getSortIndicator('reportingPeriod')}
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('overallProjectScore')}>
+                  Overall Score {getSortIndicator('overallProjectScore')}
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('riskLevel')}>
+                  Risk Level {getSortIndicator('riskLevel')}
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('financialHealth')}>
+                  Financials {getSortIndicator('financialHealth')}
+                </TableHead>
+              </>
+            )}
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -85,12 +90,13 @@ export function ProjectsTable({ projects, handleSort, getSortIndicator }: Projec
                   }}
                   onEdit={() => handleEdit(projectName)}
                   onRemove={() => console.log("Remove not implemented")}
+                  isManageView={isManageView}
                 />
               );
             })
           ) : (
             <TableRow>
-              <TableCell colSpan={11} className="h-24 text-center">
+              <TableCell colSpan={isManageView ? 7 : 11} className="h-24 text-center">
                 No projects found
               </TableCell>
             </TableRow>

@@ -39,6 +39,7 @@ interface EditProjectModalProps {
 const formSchema = z.object({
   projectName: z.string().min(1, "Project name is required"),
   clientName: z.string().optional(),
+  jiraId: z.string().optional(), // Added JIRA ID
   projectType: z.string().optional(),
   projectStatus: z.string().optional(),
   assignedPM: z.string().optional(),
@@ -57,6 +58,7 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
     defaultValues: {
       projectName: projectName,
       clientName: currentProject?.clientName || "",
+      jiraId: currentProject?.jiraId || "", // Initialize JIRA ID field
       projectType: currentProject?.projectType || "",
       projectStatus: currentProject?.projectStatus || "",
       assignedPM: currentProject?.assignedPM || "",
@@ -69,6 +71,7 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
       form.reset({
         projectName: projectName,
         clientName: currentProject?.clientName || "",
+        jiraId: currentProject?.jiraId || "", // Include JIRA ID in reset
         projectType: currentProject?.projectType || "",
         projectStatus: currentProject?.projectStatus || "",
         assignedPM: currentProject?.assignedPM || "",
@@ -79,10 +82,11 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      // Ensure projectName is provided and not optional
+      // Include jiraId in the update
       await updateProjectDetails(projectName, {
-        projectName: values.projectName, // This is now explicitly defined
+        projectName: values.projectName,
         clientName: values.clientName,
+        jiraId: values.jiraId,
         projectType: values.projectType,
         projectStatus: values.projectStatus,
         assignedPM: values.assignedPM,
@@ -135,6 +139,21 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
                   <FormLabel>Client Name</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Added JIRA ID field */}
+            <FormField
+              control={form.control}
+              name="jiraId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>JIRA ID</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="PRJ-123" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -198,14 +217,23 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Assigned PM</FormLabel>
-                  <FormControl>
-                    <Input {...field} list="teamMembers" />
-                  </FormControl>
-                  <datalist id="teamMembers">
-                    {teamMembers.map((member) => (
-                      <option key={member} value={member} />
-                    ))}
-                  </datalist>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select project manager" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {teamMembers.map((member) => (
+                        <SelectItem key={member} value={member}>
+                          {member}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

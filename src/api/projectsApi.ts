@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -105,6 +104,7 @@ export const removeProjectName = async (name: string) => {
 export const updateProjectDetails = async (originalName: string, updateData: {
   projectName: string;
   clientName?: string;
+  jiraId?: string; // Added JIRA ID to updateData
   projectType?: string;
   projectStatus?: string;
   assignedPM?: string;
@@ -127,6 +127,7 @@ export const updateProjectDetails = async (originalName: string, updateData: {
       .update({
         project_name: updateData.projectName,
         client_name: updateData.clientName,
+        jira_id: updateData.jiraId, // Include JIRA ID in the update
         project_type: updateData.projectType,
         project_status: updateData.projectStatus,
         assigned_pm: updateData.assignedPM,
