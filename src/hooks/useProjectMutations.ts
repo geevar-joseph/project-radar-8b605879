@@ -144,16 +144,19 @@ export const useProjectMutations = (
   const updateProjectDetails = async (originalName: string, updateData: {
     projectName: string;
     clientName?: string;
-    jiraId?: string; // JIRA ID is explicitly included in the interface
+    jiraId?: string;
     projectType?: string;
     projectStatus?: string;
     assignedPM?: string;
   }) => {
     try {
+      console.log('Updating project details:', originalName, updateData);
+      
       const result = await apiUpdateProjectDetails(originalName, updateData);
       
       // Check if result exists before accessing its properties
       if (!result) {
+        console.error('No result returned from updateProjectDetails API call');
         toast({
           title: "Error",
           description: "Unexpected error while updating the project.",
@@ -163,6 +166,7 @@ export const useProjectMutations = (
       }
       
       if (!result.success) {
+        console.error('Update project error:', result.error);
         throw result.error || new Error("Failed to update project");
       }
 
@@ -173,7 +177,7 @@ export const useProjectMutations = (
             ...project,
             projectName: updateData.projectName,
             clientName: updateData.clientName || project.clientName,
-            jiraId: updateData.jiraId || project.jiraId, // Include JIRA ID in update
+            jiraId: updateData.jiraId || project.jiraId,
             projectType: (updateData.projectType as any) || project.projectType,
             projectStatus: (updateData.projectStatus as any) || project.projectStatus,
             assignedPM: updateData.assignedPM || project.assignedPM

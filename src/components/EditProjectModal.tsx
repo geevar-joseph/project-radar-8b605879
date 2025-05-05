@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -80,14 +81,16 @@ export const EditProjectModal = ({ open, onOpenChange, projectName }: EditProjec
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
+    
     try {
+      // Pass the correct data structure to updateProjectDetails
       const result = await updateProjectDetails(projectName, {
         projectName: values.projectName,
-        clientName: values.clientName,
-        jiraId: values.jiraId,
-        projectType: values.projectType,
-        projectStatus: values.projectStatus,
-        assignedPM: values.assignedPM,
+        clientName: values.clientName || "",
+        jiraId: values.jiraId || "",
+        projectType: values.projectType || "",
+        projectStatus: values.projectStatus || "",
+        assignedPM: values.assignedPM || "",
       });
       
       if (result) {

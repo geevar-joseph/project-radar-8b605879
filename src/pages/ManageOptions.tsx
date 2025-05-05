@@ -21,11 +21,16 @@ const ManageOptions = () => {
   const loadingInProgress = useRef(false);
   const { toast } = useToast();
 
-  // Load data only once when component mounts
+  // Load data when component mounts and ensure we have fresh data
   useEffect(() => {
-    if (!initialLoadDone.current && loadProjects && !loadingInProgress.current) {
+    if (loadProjects && !loadingInProgress.current) {
       loadingInProgress.current = true;
+      
       loadProjects()
+        .then(() => {
+          console.log("Projects loaded successfully in ManageOptions");
+          initialLoadDone.current = true;
+        })
         .catch(error => {
           console.error("Error loading projects data:", error);
           toast({
@@ -35,20 +40,22 @@ const ManageOptions = () => {
           });
         })
         .finally(() => {
-          initialLoadDone.current = true;
           loadingInProgress.current = false;
         });
     }
   }, [loadProjects, toast]);
 
-  // Refresh data when switching tabs, but only if we haven't loaded already
+  // Refresh data when switching tabs
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     
-    // Only reload if there was an error previously or we're switching tabs
-    if (isError && !loadingInProgress.current) {
+    // Reload data when switching tabs to ensure we have the latest
+    if (!loadingInProgress.current) {
       loadingInProgress.current = true;
       loadProjects()
+        .then(() => {
+          console.log("Projects reloaded after tab change");
+        })
         .catch(error => {
           console.error("Error reloading projects data:", error);
           toast({
