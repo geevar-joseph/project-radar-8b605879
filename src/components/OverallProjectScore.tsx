@@ -25,12 +25,14 @@ export function OverallProjectScore({ score, doingWell, needsAttention }: Overal
     <div className="space-y-4">
       {/* Row 1 - Overall Score Display */}
       <div className="flex items-center gap-4">
+        <h4 className="text-sm font-medium whitespace-nowrap">Overall Project Score</h4>
         <div className="w-full max-w-md">
           <div className="flex justify-between items-center mb-1">
-            <span className="text-sm font-medium">Overall Project Score</span>
+            <span className="text-xs text-gray-500">0</span>
             <span className="text-sm font-medium">
               {score !== null ? score.toFixed(2) : "0.00"} / 4
             </span>
+            <span className="text-xs text-gray-500">4</span>
           </div>
           <Progress 
             value={progressPercentage} 
