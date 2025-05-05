@@ -3,7 +3,7 @@ import React from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, X } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { formatDate, getValidProjectStatus, getValidProjectType } from "@/utils/formatters";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ProjectType, ProjectStatus, RiskLevel, FinancialHealth } from "@/types/project";
@@ -88,7 +88,7 @@ export const ProjectTableRow: React.FC<ProjectTableRowProps> = ({
             size="icon"
             onClick={() => onRemove(project.name)}
           >
-            <X className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         </TableCell>
       )}

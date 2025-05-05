@@ -1,120 +1,149 @@
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { AddProjectModal } from "@/components/AddProjectModal";
 import { ProjectsHeader } from "@/components/ProjectsHeader";
-import { ProjectsTable } from "@/components/ProjectsTable";
 import { ProjectsFiltering } from "@/components/ProjectsFiltering";
+import { ProjectsTable } from "@/components/ProjectsTable";
 import { ProjectPagination } from "@/components/ProjectPagination";
-import { ratingToValueMap, ProjectReport } from "@/types/project";
+import { ProjectSearchBar } from "@/components/ProjectSearchBar";
+import { ProjectReport } from "@/types/project";
 
 const Projects = () => {
-  const { projects } = useProjectContext();
-  const [addModalOpen, setAddModalOpen] = useState(false);
+  // Initialize sorting by client name
+  const [sortField, setSortField] = useState<keyof ProjectReport>("clientName");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [filteredProjects, setFilteredProjects] = useState<ProjectReport[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  // Calculate overall project score for each project
-  const projectsWithScores = useMemo(() => {
-    return projects.map(project => {
-      // Improved score calculation that's consistent with the detail page
-      const calculateScore = (project: ProjectReport) => {
-        try {
-          // Check if there's already a valid score (checking both N/A formats)
-          if (project.overallProjectScore && 
-              project.overallProjectScore !== "N/A" && 
-              project.overallProjectScore !== "N.A." &&
-              !isNaN(Number(project.overallProjectScore))) {
-            return project.overallProjectScore;
-          }
-          
-          // Get all rating values
-          const ratings = [
-            project.projectManagerEvaluation ? ratingToValueMap[project.projectManagerEvaluation] : null,
-            project.frontEndQuality ? ratingToValueMap[project.frontEndQuality] : null,
-            project.backEndQuality ? ratingToValueMap[project.backEndQuality] : null,
-            project.testingQuality ? ratingToValueMap[project.testingQuality] : null,
-            project.designQuality ? ratingToValueMap[project.designQuality] : null
-          ];
-          
-          // Filter out null values
-          const validRatings = ratings.filter(r => r !== null && !isNaN(Number(r))) as number[];
-          
-          if (validRatings.length === 0) return "0.0";
-          
-          // Calculate average and format to one decimal place
-          const average = validRatings.reduce((a, b) => a + b, 0) / validRatings.length;
-          return average.toFixed(1);
-        } catch (error) {
-          console.error("Error calculating score for project:", project.projectName, error);
-          return "0.0"; // Return a default value instead of N/A
-        }
-      };
-      
-      return {
-        ...project,
-        overallProjectScore: calculateScore(project)
-      };
-    });
-  }, [projects]);
-
-  const { 
-    paginatedProjects, 
-    pageCount,
-    handleSort,
-    getSortIndicator 
-  } = ProjectsFiltering({
-    projects: projectsWithScores,
-    searchTerm,
-    currentPage,
-    itemsPerPage
+  const [projectsPerPage] = useState(10);
+  const [filterCriteria, setFilterCriteria] = useState<{
+    reportingPeriods: string[];
+    projectTypes: string[];
+    projectStatuses: string[];
+    riskLevels: string[];
+  }>({
+    reportingPeriods: [],
+    projectTypes: [],
+    projectStatuses: [],
+    riskLevels: []
   });
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  const { projects, loadProjects } = useProjectContext();
+
+  useEffect(() => {
+    if (loadProjects) {
+      loadProjects();
+    }
+  }, [loadProjects]);
+
+  // Apply filtering
+  useEffect(() => {
+    let result = [...projects];
+    
+    // Apply search term
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(project => 
+        project.projectName.toLowerCase().includes(term) || 
+        (project.clientName && project.clientName.toLowerCase().includes(term)) ||
+        (project.assignedPM && project.assignedPM.toLowerCase().includes(term))
+      );
+    }
+    
+    // Apply filter criteria
+    if (filterCriteria.reportingPeriods.length > 0) {
+      result = result.filter(project => filterCriteria.reportingPeriods.includes(project.reportingPeriod));
+    }
+    
+    if (filterCriteria.projectTypes.length > 0) {
+      result = result.filter(project => filterCriteria.projectTypes.includes(project.projectType));
+    }
+    
+    if (filterCriteria.projectStatuses.length > 0) {
+      result = result.filter(project => filterCriteria.projectStatuses.includes(project.projectStatus));
+    }
+    
+    if (filterCriteria.riskLevels.length > 0) {
+      result = result.filter(project => filterCriteria.riskLevels.includes(project.riskLevel));
+    }
+    
+    // Apply sorting - default to client name
+    result.sort((a, b) => {
+      const fieldA = a[sortField] || '';
+      const fieldB = b[sortField] || '';
+      
+      if (typeof fieldA === 'string' && typeof fieldB === 'string') {
+        return sortDirection === 'asc' 
+          ? fieldA.localeCompare(fieldB)
+          : fieldB.localeCompare(fieldA);
+      }
+      
+      // For numeric fields if we add them later
+      return sortDirection === 'asc'
+        ? Number(fieldA) - Number(fieldB)
+        : Number(fieldB) - Number(fieldA);
+    });
+    
+    setFilteredProjects(result);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [projects, searchTerm, filterCriteria, sortField, sortDirection]);
+
+  // Get current projects based on pagination
+  const indexOfLastProject = currentPage * projectsPerPage;
+  const indexOfFirstProject = indexOfLastProject - projectsPerPage;
+  const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
+
+  // Change page
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  const handleSearch = (term: string) => {
+    setSearchTerm(term);
+  };
+
+  const handleFilterChange = (filters: any) => {
+    setFilterCriteria(filters);
+  };
+  
+  const handleSort = (field: keyof ProjectReport) => {
+    // If clicking the same field, toggle direction
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // New field, default to ascending
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+  
+  const getSortIndicator = (field: keyof ProjectReport) => {
+    if (field !== sortField) return null;
+    return sortDirection === 'asc' ? '↑' : '↓';
   };
 
   return (
-    <div className="container mx-auto py-6 max-w-7xl">
+    <div className="container mx-auto py-10 space-y-6">
       <ProjectsHeader 
-        onAddProject={() => setAddModalOpen(true)} 
-        showAddButton={false} // Hide Add Project button
+        title="Project Reports" 
+        totalProjects={filteredProjects.length} 
       />
       
-      <div className="mb-6 relative">
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search projects by name or JIRA ID..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1); // Reset page when search changes
-            }}
-            className="pl-10 w-full"
-          />
-        </div>
+      <div className="flex flex-col md:flex-row gap-4 justify-between">
+        <ProjectSearchBar onSearch={handleSearch} />
+        <ProjectsFiltering onChange={handleFilterChange} />
       </div>
-
+      
       <ProjectsTable 
-        projects={paginatedProjects}
+        projects={currentProjects} 
         handleSort={handleSort}
         getSortIndicator={getSortIndicator}
-        isManageView={false} // Ensure we're not in manage view
       />
       
-      {pageCount > 1 && (
-        <ProjectPagination
-          currentPage={currentPage}
-          pageCount={pageCount}
-          onPageChange={handlePageChange}
-        />
-      )}
-      
-      <AddProjectModal open={addModalOpen} onOpenChange={setAddModalOpen} />
+      <ProjectPagination 
+        currentPage={currentPage}
+        totalProjects={filteredProjects.length}
+        projectsPerPage={projectsPerPage}
+        paginate={paginate}
+      />
     </div>
   );
 };
