@@ -72,20 +72,25 @@ export const ProjectTableRow: React.FC<ProjectTableRowProps> = ({
         </>
       )}
       <TableCell className="text-right space-x-2 flex justify-end">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => onEdit(project.name)}
-        >
-          <Edit className="h-4 w-4" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => onRemove(project.name)}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        {/* Only show action buttons in manage view */}
+        {isManageView && (
+          <>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => onEdit(project.name)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => onRemove(project.name)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </>
+        )}
       </TableCell>
     </TableRow>
   );
