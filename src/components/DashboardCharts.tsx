@@ -13,7 +13,8 @@ import {
   YAxis, 
   Tooltip, 
   Legend, 
-  CartesianGrid 
+  CartesianGrid,
+  LabelList 
 } from "recharts";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -25,15 +26,16 @@ interface KPIData {
   name: string;
   value: number;
   color: string;
-  fullName: string; // Added full name for consistency
+  fullName: string;
+  label: string;
 }
 
 interface DepartmentData {
   name: string;
   score: number;
   color: string;
-  fullName: string; // Added full name for consistency
-  label: string; // Abbreviated label
+  fullName: string;
+  label: string;
 }
 
 // Helper function to determine color based on score
@@ -47,28 +49,66 @@ export function DashboardCharts() {
   const { getFilteredProjects, selectedPeriod } = useProjectContext();
   const filteredProjects = getFilteredProjects(selectedPeriod);
   
-  // Calculate low-performing KPIs - Updated to show only the specified metrics
-  const calculateProjectHealthIndicators = (): KPIData[] => {
+  // Calculate underperforming KPIs (score <= 2)
+  const calculateUnderperformingKPIs = (): KPIData[] => {
     const kpiFields = [
-      { field: "overallProjectScore", name: "Overall Score", color: "#60a5fa", fullName: "Overall Project Score", poorValues: ["Fair", "Poor"] },
-      { field: "riskLevel", name: "Risk Level", color: "#ef4444", fullName: "Risk Level", poorValues: ["Medium", "High"] },
-      { field: "financialHealth", name: "Financial Health", color: "#8b5cf6", fullName: "Financial Health", poorValues: ["On Watch", "At Risk"] },
-      { field: "completionOfPlannedWork", name: "Work Completion", color: "#f97316", fullName: "Completion of Planned Work", poorValues: ["Partially", "Not completed"] },
-      { field: "teamMorale", name: "Team Morale", color: "#14b8a6", fullName: "Team Morale", poorValues: ["Low"] }
+      { field: "overallProjectScore", name: "OS", fullName: "Overall Score", label: "OS" },
+      { field: "riskLevel", name: "Risk Level", fullName: "Risk Level", label: "RL" },
+      { field: "financialHealth", name: "Financial Health", fullName: "Financial Health", label: "FH" },
+      { field: "completionOfPlannedWork", name: "Work Completion", fullName: "Completion of Planned Work", label: "CP" },
+      { field: "teamMorale", name: "Team Morale", fullName: "Team Morale", label: "TM" },
+      { field: "customerSatisfaction", name: "Customer Satisfaction", fullName: "Customer Satisfaction", label: "CS" }
     ];
     
-    return kpiFields.map(kpi => {
-      const lowPerforming = filteredProjects.filter(project => 
-        kpi.poorValues.includes(project[kpi.field as keyof ProjectReport] as string)
-      ).length;
+    // Helper functions to convert string values to numeric for comparison
+    const getKpiValue = (project: ProjectReport, field: string): number => {
+      switch (field) {
+        case "riskLevel":
+          return project.riskLevel === "High" || project.riskLevel === "Critical" ? 1 : 
+                 project.riskLevel === "Medium" ? 2 : 4;
+        case "financialHealth":
+          return project.financialHealth === "At Risk" || project.financialHealth === "Critical" ? 1 : 
+                 project.financialHealth === "On Watch" ? 2 : 4;
+        case "completionOfPlannedWork":
+          return project.completionOfPlannedWork === "Not completed" ? 1 : 
+                 project.completionOfPlannedWork === "Partially" ? 2 : 
+                 project.completionOfPlannedWork === "Mostly" ? 3 : 4;
+        case "teamMorale":
+          return project.teamMorale === "Low" || project.teamMorale === "Burnt Out" ? 1 :
+                 project.teamMorale === "Moderate" ? 3 : 4;
+        case "customerSatisfaction":
+          return project.customerSatisfaction === "Dissatisfied" ? 1 :
+                 project.customerSatisfaction === "Neutral / Unclear" ? 2 :
+                 project.customerSatisfaction === "Satisfied" ? 3 : 4;
+        case "overallProjectScore":
+          return project.overallProjectScore === "Poor" ? 1 :
+                 project.overallProjectScore === "Fair" ? 2 :
+                 project.overallProjectScore === "Good" ? 3 : 4;
+        default:
+          return 0;
+      }
+    };
+    
+    // Count underperforming KPIs (score <= 2)
+    const kpiCounts = kpiFields.map(kpi => {
+      const count = filteredProjects.filter(project => {
+        const value = getKpiValue(project, kpi.field);
+        return value <= 2 && value > 0; // Only count if <= 2 (Poor or Fair) and not 0 (N.A.)
+      }).length;
       
       return {
         name: kpi.name,
+        label: kpi.label,
         fullName: kpi.fullName,
-        value: lowPerforming,
-        color: kpi.color
+        value: count,
+        color: "#ef4444" // Consistent red color for all underperforming KPIs
       };
-    }).filter(kpi => kpi.value > 0);  // Only keep KPIs with issues
+    });
+    
+    // Sort by count (descending) and filter out those with zero count
+    return kpiCounts
+      .filter(kpi => kpi.value > 0)
+      .sort((a, b) => b.value - a.value);
   };
   
   // Calculate department performance - Updated with full names and abbreviations
@@ -78,7 +118,6 @@ export function DashboardCharts() {
       { field: "backEndQuality", name: "BE", fullName: "Back-End Team Quality", label: "BE" },
       { field: "testingQuality", name: "TE", fullName: "Testing Team Quality", label: "TE" },
       { field: "designQuality", name: "DE", fullName: "Design Team Quality", label: "DE" },
-      { field: "projectManagerEvaluation", name: "PM", fullName: "Project Manager Self-Evaluation", label: "PM" },
       { field: "completionOfPlannedWork", name: "CP", fullName: "Completion of Planned Work", label: "CP" },
       { field: "teamMorale", name: "TM", fullName: "Team Morale", label: "TM" },
       { field: "customerSatisfaction", name: "CS", fullName: "Customer Satisfaction", label: "CS" }
@@ -117,7 +156,7 @@ export function DashboardCharts() {
     });
   };
   
-  const kpiData = calculateProjectHealthIndicators();
+  const kpiData = calculateUnderperformingKPIs();
   const departmentData = calculateDepartmentPerformance();
   
   // Filter out departmentData with no score (0) for display in the chart
@@ -135,21 +174,6 @@ export function DashboardCharts() {
     if (score > 0) return "Poor";
     return "No Data";
   };
-
-  // Calculate overall average from all valid department scores
-  const calculateOverallScore = (data: DepartmentData[]): number => {
-    const validScores = data.filter(item => item.score > 0);
-    if (validScores.length === 0) return 0;
-    const sum = validScores.reduce((acc, item) => acc + item.score, 0);
-    return parseFloat((sum / validScores.length).toFixed(1));
-  };
-
-  // Get the overall score for the summary panel
-  const overallScore = calculateOverallScore(validDepartmentData);
-
-  // Get top performers and areas needing improvement
-  const topPerformers = [...validDepartmentData].sort((a, b) => b.score - a.score).slice(0, 3);
-  const improvementAreas = [...validDepartmentData].sort((a, b) => a.score - b.score).slice(0, 3);
 
   const chartConfig = {
     excellent: { color: "#10b981" }, // green
@@ -179,52 +203,82 @@ export function DashboardCharts() {
     return [value, name];
   };
 
+  // Custom tooltip formatter for KPI chart
+  const kpiTooltipFormatter = (value: number, name: string, props: any) => {
+    const item = kpiData.find(k => k.label === name);
+    if (item) {
+      return [
+        <div className="flex flex-col">
+          <span>{`${item.fullName}: ${value} projects`}</span>
+        </div>,
+        ''
+      ];
+    }
+    return [value, name];
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      {/* Left Column: Project Health Indicators */}
+      {/* Left Column: Underperforming KPIs Bar Chart */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Project Health Indicators</CardTitle>
+          <CardTitle className="text-lg font-medium">Most Common Underperforming KPIs</CardTitle>
         </CardHeader>
         <CardContent>
           {hasKpiData ? (
             <div className="h-[300px] flex justify-center items-center">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={kpiData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {kpiData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value, name, props) => {
-                      const item = kpiData.find(k => k.name === name);
-                      return [`${value} Projects`, item?.fullName || name];
-                    }} 
-                  />
-                  <Legend 
-                    formatter={(value, entry, index) => {
-                      const item = kpiData.find(k => k.name === value);
+                <BarChart
+                  data={kpiData}
+                  layout="vertical"
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                  <XAxis type="number" />
+                  <YAxis 
+                    dataKey="label" 
+                    type="category" 
+                    tick={(props) => {
+                      const { x, y, payload } = props;
+                      const item = kpiData.find(k => k.label === payload.value);
                       return (
-                        <span title={item?.fullName || value}>{value}</span>
+                        <g transform={`translate(${x},${y})`}>
+                          <text
+                            x={-5}
+                            y={0}
+                            dy={4}
+                            textAnchor="end"
+                            fill="#666"
+                            fontSize={12}
+                          >
+                            <title>{item?.fullName || payload.value}</title>
+                            {payload.value}
+                          </text>
+                        </g>
                       );
                     }}
                   />
-                </PieChart>
+                  <Tooltip 
+                    formatter={kpiTooltipFormatter}
+                    labelFormatter={(label) => {
+                      const item = kpiData.find(k => k.label === label);
+                      return item?.fullName || label;
+                    }}
+                  />
+                  <Bar 
+                    dataKey="value" 
+                    name="Count" 
+                    fill="#ef4444"
+                    radius={[0, 4, 4, 0]}
+                  >
+                    <LabelList dataKey="value" position="right" />
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
             <div className="h-[300px] flex justify-center items-center flex-col">
-              <p className="text-muted-foreground">No health indicators with issues for this period</p>
+              <p className="text-muted-foreground">No underperforming KPIs for this period</p>
               <p className="text-sm text-muted-foreground">All project health metrics are positive</p>
             </div>
           )}
