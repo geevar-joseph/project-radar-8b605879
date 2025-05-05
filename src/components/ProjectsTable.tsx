@@ -40,8 +40,12 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
         if (project && typeof project === 'object') {
           if ('projectName' in project) {
             projectName = project.projectName;
-          } else if ('project_name' in project && project.project_name) {
-            projectName = project.project_name as string;
+          } else if ('project_name' in project) {
+            // Type safety check
+            const projectNameValue = project.project_name;
+            if (typeof projectNameValue === 'string') {
+              projectName = projectNameValue;
+            }
           }
         }
         
@@ -63,8 +67,8 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
             const currentDateValue = project.updated_at;
             
             if (existingDateValue && currentDateValue) {
-              const existingDate = new Date(existingDateValue as string);
-              const currentDate = new Date(currentDateValue as string);
+              const existingDate = new Date(String(existingDateValue));
+              const currentDate = new Date(String(currentDateValue));
               
               if (currentDate > existingDate) {
                 projectMap.set(projectName, project);
@@ -75,8 +79,8 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
             const currentDateValue = project.submission_date;
             
             if (existingDateValue && currentDateValue) {
-              const existingDate = new Date(existingDateValue as string);
-              const currentDate = new Date(currentDateValue as string);
+              const existingDate = new Date(String(existingDateValue));
+              const currentDate = new Date(String(currentDateValue));
               
               if (currentDate > existingDate) {
                 projectMap.set(projectName, project);
@@ -129,9 +133,9 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>JIRA ID</TableHead>
             <TableHead>Project Name</TableHead>
             <TableHead>Client</TableHead>
-            <TableHead>JIRA ID</TableHead>
             <TableHead>Project Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Assigned PM</TableHead>
@@ -145,9 +149,9 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
             
             return (
               <TableRow key={projectName}>
+                <TableCell>{project.jiraId || "—"}</TableCell>
                 <TableCell className="font-medium">{project.name}</TableCell>
                 <TableCell>{project.client || "—"}</TableCell>
-                <TableCell>{project.jiraId || "—"}</TableCell>
                 <TableCell>
                   {project.type ? (
                     <Badge variant="outline">{project.type}</Badge>

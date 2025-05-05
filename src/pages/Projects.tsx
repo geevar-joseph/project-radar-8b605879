@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectReport } from "@/types/project";
@@ -78,7 +77,6 @@ const Projects = () => {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
-      day: '2-digit',
     }).format(date);
   };
 
@@ -99,14 +97,14 @@ const Projects = () => {
           <TableCaption>A list of all projects (latest reports only)</TableCaption>
           <TableHeader>
             <TableRow>
+              <TableHead className="cursor-pointer">
+                JIRA ID
+              </TableHead>
               <TableHead className="w-[150px] cursor-pointer" onClick={() => handleSort('projectName')}>
                 Project Name {getSortIndicator('projectName')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('clientName')}>
-                Client Name {getSortIndicator('clientName')}
-              </TableHead>
-              <TableHead className="cursor-pointer">
-                JIRA ID
+                Client {getSortIndicator('clientName')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('projectType')}>
                 Type {getSortIndicator('projectType')}
@@ -114,14 +112,8 @@ const Projects = () => {
               <TableHead className="cursor-pointer" onClick={() => handleSort('projectStatus')}>
                 Status {getSortIndicator('projectStatus')}
               </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort('assignedPM')}>
-                Assigned PM {getSortIndicator('assignedPM')}
-              </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('reportingPeriod')}>
-                Reporting Period {getSortIndicator('reportingPeriod')}
-              </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort('submissionDate')}>
-                Last Updated {getSortIndicator('submissionDate')}
+                Last Report Date {getSortIndicator('reportingPeriod')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('overallProjectScore' as keyof ProjectReport)}>
                 Overall Score {getSortIndicator('overallProjectScore' as keyof ProjectReport)}
@@ -130,22 +122,22 @@ const Projects = () => {
                 Risk Level {getSortIndicator('riskLevel')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('financialHealth')}>
-                Budget Status {getSortIndicator('financialHealth')}
+                Financials {getSortIndicator('financialHealth')}
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedProjects.map((project) => (
               <TableRow key={`${project.projectName}-${project.reportingPeriod}`} className="hover:bg-muted/50">
+                <TableCell>
+                  {project.jiraId || "N/A"}
+                </TableCell>
                 <TableCell className="font-medium">
                   <a href={`/project/${project.id}`} className="hover:underline text-primary">
                     {project.projectName}
                   </a>
                 </TableCell>
-                <TableCell>{project.clientName}</TableCell>
-                <TableCell>
-                  {project.jiraId || "N/A"}
-                </TableCell>
+                <TableCell>{project.clientName || "N/A"}</TableCell>
                 <TableCell>
                   <Badge variant="outline">
                     {project.projectType || "N/A"}
@@ -156,11 +148,6 @@ const Projects = () => {
                     {project.projectStatus || "N/A"}
                   </Badge>
                 </TableCell>
-                <TableCell className="flex items-center gap-1">
-                  <User className="h-3.5 w-3.5" /> 
-                  {project.assignedPM || "N/A"}
-                </TableCell>
-                <TableCell>{project.reportingPeriod}</TableCell>
                 <TableCell>{formatDate(project.submissionDate)}</TableCell>
                 <TableCell>
                   {project.overallProjectScore || "N/A"}
