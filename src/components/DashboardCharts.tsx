@@ -1,4 +1,3 @@
-
 import { useProjectContext } from "@/context/ProjectContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ratingToValueMap, ProjectReport } from "@/types/project";
@@ -51,6 +50,13 @@ const getCountColor = (count: number): string => {
   if (count >= 3) return "#EF4444"; // Medium Red for 3-4 projects
   return "#F97316"; // Light Red/Orange for 1-2 projects
 };
+
+// Define color legend items
+const colorTierLegend = [
+  { color: "#B91C1C", label: "Critical (5+ projects)", value: 5 },
+  { color: "#EF4444", label: "Warning (3-4 projects)", value: 3 },
+  { color: "#F97316", label: "Caution (1-2 projects)", value: 1 }
+];
 
 export function DashboardCharts() {
   const { getFilteredProjects, selectedPeriod } = useProjectContext();
@@ -248,66 +254,82 @@ export function DashboardCharts() {
         </CardHeader>
         <CardContent>
           {hasKpiData ? (
-            <div className="h-[300px] flex justify-center items-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={kpiData}
-                  layout="vertical"
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                  <XAxis
-                    type="number"
-                    label={{ 
-                      value: "# of Projects Rated Poor or At Risk", 
-                      position: "insideBottom", 
-                      offset: -5,
-                      fontSize: 12
-                    }}
-                  />
-                  <YAxis 
-                    dataKey="label" 
-                    type="category" 
-                    tick={(props) => {
-                      const { x, y, payload } = props;
-                      const item = kpiData.find(k => k.label === payload.value);
-                      return (
-                        <g transform={`translate(${x},${y})`}>
-                          <text
-                            x={-5}
-                            y={0}
-                            dy={4}
-                            textAnchor="end"
-                            fill="#666"
-                            fontSize={12}
-                          >
-                            <title>{item?.fullName || payload.value}</title>
-                            {payload.value}
-                          </text>
-                        </g>
-                      );
-                    }}
-                  />
-                  <Tooltip 
-                    formatter={kpiTooltipFormatter}
-                    labelFormatter={(label) => {
-                      const item = kpiData.find(k => k.label === label);
-                      return item?.fullName || label;
-                    }}
-                  />
-                  <Bar 
-                    dataKey="value" 
-                    name="Count" 
-                    radius={[0, 4, 4, 0]}
+            <>
+              <div className="h-[300px] flex justify-center items-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={kpiData}
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
-                    {kpiData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                    <LabelList dataKey="value" position="right" />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                    <XAxis
+                      type="number"
+                      label={{ 
+                        value: "# of Projects Rated Poor or At Risk", 
+                        position: "insideBottom", 
+                        offset: -5,
+                        fontSize: 12
+                      }}
+                    />
+                    <YAxis 
+                      dataKey="label" 
+                      type="category" 
+                      tick={(props) => {
+                        const { x, y, payload } = props;
+                        const item = kpiData.find(k => k.label === payload.value);
+                        return (
+                          <g transform={`translate(${x},${y})`}>
+                            <text
+                              x={-5}
+                              y={0}
+                              dy={4}
+                              textAnchor="end"
+                              fill="#666"
+                              fontSize={12}
+                            >
+                              <title>{item?.fullName || payload.value}</title>
+                              {payload.value}
+                            </text>
+                          </g>
+                        );
+                      }}
+                    />
+                    <Tooltip 
+                      formatter={kpiTooltipFormatter}
+                      labelFormatter={(label) => {
+                        const item = kpiData.find(k => k.label === label);
+                        return item?.fullName || label;
+                      }}
+                    />
+                    <Bar 
+                      dataKey="value" 
+                      name="Count" 
+                      radius={[0, 4, 4, 0]}
+                    >
+                      {kpiData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                      <LabelList dataKey="value" position="right" />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Color Legend */}
+              <div className="flex justify-center mt-2">
+                <div className="flex items-center gap-4">
+                  {colorTierLegend.map((item) => (
+                    <div key={item.color} className="flex items-center gap-1.5">
+                      <div 
+                        className="w-3 h-3 rounded-sm"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-xs text-muted-foreground">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
           ) : (
             <div className="h-[300px] flex justify-center items-center flex-col">
               <p className="text-muted-foreground">No underperforming KPIs for this period</p>
