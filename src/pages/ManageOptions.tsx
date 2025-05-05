@@ -5,9 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProjectsTab } from "@/components/ProjectsTab";
 import { TeamMembersTab } from "@/components/TeamMembersTab";
 import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 const ManageOptions = () => {
   const [activeTab, setActiveTab] = useState("projects");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { 
     projectNames, 
     teamMembers, 
@@ -74,6 +77,31 @@ const ManageOptions = () => {
     };
   }, [loadProjects]);
 
+  // Manual refresh function
+  const handleRefresh = async () => {
+    if (!loadingInProgress.current && loadProjects) {
+      setIsRefreshing(true);
+      loadingInProgress.current = true;
+      try {
+        await loadProjects();
+        toast({
+          title: "Data refreshed",
+          description: "The latest data has been loaded.",
+        });
+      } catch (error) {
+        console.error("Error refreshing data:", error);
+        toast({
+          title: "Refresh failed",
+          description: "Failed to refresh data. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        loadingInProgress.current = false;
+        setIsRefreshing(false);
+      }
+    }
+  };
+
   // Ensure data is fresh when switching tabs
   const handleTabChange = async (value: string) => {
     setActiveTab(value);
@@ -99,7 +127,19 @@ const ManageOptions = () => {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-8">Manage Options</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Manage Options</h1>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-1"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
       
       <Tabs 
         defaultValue="projects" 
