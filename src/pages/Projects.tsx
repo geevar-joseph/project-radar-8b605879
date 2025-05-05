@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectReport } from "@/types/project";
@@ -6,7 +7,16 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AddProjectModal } from "@/components/AddProjectModal";
-import { User } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious
+} from "@/components/ui/pagination";
 
 const Projects = () => {
   const { projects } = useProjectContext();
@@ -18,6 +28,9 @@ const Projects = () => {
     direction: 'ascending'
   });
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Group projects by project name and get the latest report for each project
   const latestProjectReports = useMemo(() => {
@@ -44,6 +57,18 @@ const Projects = () => {
     });
   }, [projects]);
 
+  // Filter projects based on search term
+  const filteredProjects = useMemo(() => {
+    return latestProjectReports.filter((project) => {
+      return (
+        project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (project.clientName && project.clientName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (project.jiraId && project.jiraId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (project.projectType && project.projectType.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    });
+  }, [latestProjectReports, searchTerm]);
+
   const handleSort = (key: keyof ProjectReport) => {
     let direction: 'ascending' | 'descending' = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -52,7 +77,7 @@ const Projects = () => {
     setSortConfig({ key, direction });
   };
 
-  const sortedProjects = [...latestProjectReports].sort((a, b) => {
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
     if (!sortConfig.key) return 0;
     
     const aValue = a[sortConfig.key];
@@ -66,6 +91,13 @@ const Projects = () => {
     }
     return 0;
   });
+
+  // Pagination logic
+  const pageCount = Math.ceil(sortedProjects.length / itemsPerPage);
+  const paginatedProjects = sortedProjects.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const getSortIndicator = (key: keyof ProjectReport) => {
     if (sortConfig.key !== key) return null;
@@ -81,7 +113,7 @@ const Projects = () => {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6 max-w-7xl"> {/* Increased max width */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">Projects</h1>
@@ -92,7 +124,22 @@ const Projects = () => {
         <Button onClick={() => setAddModalOpen(true)}>Add New Project</Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="mb-6 relative">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search projects by name, client, JIRA ID or type..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // Reset page when search changes
+            }}
+            className="pl-10 w-full"
+          />
+        </div>
+      </div>
+
+      <div className="rounded-md border w-full overflow-x-auto">
         <Table>
           <TableCaption>A list of all projects (latest reports only)</TableCaption>
           <TableHeader>
@@ -100,7 +147,7 @@ const Projects = () => {
               <TableHead className="cursor-pointer">
                 JIRA ID
               </TableHead>
-              <TableHead className="w-[150px] cursor-pointer" onClick={() => handleSort('projectName')}>
+              <TableHead className="cursor-pointer" onClick={() => handleSort('projectName')}>
                 Project Name {getSortIndicator('projectName')}
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort('clientName')}>
@@ -127,42 +174,101 @@ const Projects = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedProjects.map((project) => (
-              <TableRow key={`${project.projectName}-${project.reportingPeriod}`} className="hover:bg-muted/50">
-                <TableCell>
-                  {project.jiraId || "N/A"}
-                </TableCell>
-                <TableCell className="font-medium">
-                  <a href={`/project/${project.id}`} className="hover:underline text-primary">
-                    {project.projectName}
-                  </a>
-                </TableCell>
-                <TableCell>{project.clientName || "N/A"}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">
-                    {project.projectType || "N/A"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary">
-                    {project.projectStatus || "N/A"}
-                  </Badge>
-                </TableCell>
-                <TableCell>{formatDate(project.submissionDate)}</TableCell>
-                <TableCell>
-                  {project.overallProjectScore || "N/A"}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge value={project.riskLevel} type="risk" />
-                </TableCell>
-                <TableCell>
-                  <StatusBadge value={project.financialHealth} type="health" />
+            {paginatedProjects.length > 0 ? (
+              paginatedProjects.map((project) => (
+                <TableRow key={`${project.projectName}-${project.reportingPeriod}`} className="hover:bg-muted/50">
+                  <TableCell>
+                    {project.jiraId || "N/A"}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <a href={`/project/${project.id}`} className="hover:underline text-primary">
+                      {project.projectName}
+                    </a>
+                  </TableCell>
+                  <TableCell>{project.clientName || "N/A"}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {project.projectType || "N/A"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">
+                      {project.projectStatus || "N/A"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{formatDate(project.submissionDate)}</TableCell>
+                  <TableCell>
+                    {project.overallProjectScore || "N/A"}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge value={project.riskLevel} type="risk" />
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge value={project.financialHealth} type="health" />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={9} className="h-24 text-center">
+                  No projects found
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>
+      
+      {/* Pagination */}
+      {pageCount > 1 && (
+        <div className="py-4">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: pageCount }).map((_, i) => {
+                const pageNumber = i + 1;
+                // Display first page, last page, current page and pages around current
+                if (
+                  pageNumber === 1 || 
+                  pageNumber === pageCount || 
+                  (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                ) {
+                  return (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        isActive={currentPage === pageNumber}
+                        onClick={() => setCurrentPage(pageNumber)}
+                      >
+                        {pageNumber}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                } else if (
+                  (pageNumber === currentPage - 2 && currentPage > 3) || 
+                  (pageNumber === currentPage + 2 && currentPage < pageCount - 2)
+                ) {
+                  // Add ellipsis for skipped pages
+                  return <PaginationItem key={i}><PaginationEllipsis /></PaginationItem>;
+                }
+                return null;
+              })}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, pageCount))}
+                  className={currentPage === pageCount ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
       
       <AddProjectModal open={addModalOpen} onOpenChange={setAddModalOpen} />
     </div>

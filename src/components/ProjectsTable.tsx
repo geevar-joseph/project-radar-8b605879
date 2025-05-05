@@ -3,9 +3,19 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { X, Edit, User } from "lucide-react";
+import { X, Edit, User, Search } from "lucide-react";
 import { ProjectReport } from "@/types/project";
 import { EditProjectModal } from "./EditProjectModal";
+import { Input } from "@/components/ui/input";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious, 
+  PaginationEllipsis 
+} from "@/components/ui/pagination";
 
 // Define a unified project data structure that handles multiple sources
 type ProjectData = {
@@ -26,6 +36,9 @@ interface ProjectsTableProps {
 
 export const ProjectsTable = ({ projectNames, projects, removeProjectName }: ProjectsTableProps) => {
   const [editingProject, setEditingProject] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   
   // Group projects by name and get the latest data
   const latestProjectsData = useMemo(() => {
@@ -40,12 +53,8 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
         if (project && typeof project === 'object') {
           if ('projectName' in project) {
             projectName = project.projectName;
-          } else if ('project_name' in project) {
-            // Type safety check
-            const projectNameValue = project.project_name;
-            if (typeof projectNameValue === 'string') {
-              projectName = projectNameValue;
-            }
+          } else if ('project_name' in project && project.project_name) {
+            projectName = project.project_name as string;
           }
         }
         
@@ -128,66 +137,162 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
     };
   };
 
+  // Filter project names based on search
+  const filteredProjectNames = useMemo(() => {
+    return projectNames.filter(name => {
+      const projectData = normalizeProjectData(name);
+      return (
+        name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (projectData.client && projectData.client.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (projectData.jiraId && projectData.jiraId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (projectData.type && projectData.type.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    });
+  }, [projectNames, searchTerm]);
+
+  // Pagination logic
+  const pageCount = Math.ceil(filteredProjectNames.length / itemsPerPage);
+  const paginatedProjectNames = filteredProjectNames.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>JIRA ID</TableHead>
-            <TableHead>Project Name</TableHead>
-            <TableHead>Client</TableHead>
-            <TableHead>Project Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Assigned PM</TableHead>
-            <TableHead>Overall Score</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {projectNames.map(projectName => {
-            const project = normalizeProjectData(projectName);
-            
-            return (
-              <TableRow key={projectName}>
-                <TableCell>{project.jiraId || "—"}</TableCell>
-                <TableCell className="font-medium">{project.name}</TableCell>
-                <TableCell>{project.client || "—"}</TableCell>
-                <TableCell>
-                  {project.type ? (
-                    <Badge variant="outline">{project.type}</Badge>
-                  ) : "—"}
-                </TableCell>
-                <TableCell>
-                  {project.status ? (
-                    <Badge variant="secondary">{project.status}</Badge>
-                  ) : "—"}
-                </TableCell>
-                <TableCell className="flex items-center gap-1">
-                  <User className="h-3.5 w-3.5" />
-                  {project.pm || "—"}
-                </TableCell>
-                <TableCell>{project.overallScore || "—"}</TableCell>
-                <TableCell className="text-right space-x-2 flex justify-end">
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => setEditingProject(projectName)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => removeProjectName(projectName)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+    <div>
+      <div className="mb-6 relative">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search projects by name, client, JIRA ID or type..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // Reset page when search changes
+            }}
+            className="pl-10 w-full"
+          />
+        </div>
+      </div>
+      
+      <div className="overflow-x-auto w-full">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>JIRA ID</TableHead>
+              <TableHead>Project Name</TableHead>
+              <TableHead>Client</TableHead>
+              <TableHead>Project Type</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Assigned PM</TableHead>
+              <TableHead>Overall Score</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedProjectNames.length > 0 ? (
+              paginatedProjectNames.map(projectName => {
+                const project = normalizeProjectData(projectName);
+                
+                return (
+                  <TableRow key={projectName}>
+                    <TableCell>{project.jiraId || "—"}</TableCell>
+                    <TableCell className="font-medium">{project.name}</TableCell>
+                    <TableCell>{project.client || "—"}</TableCell>
+                    <TableCell>
+                      {project.type ? (
+                        <Badge variant="outline">{project.type}</Badge>
+                      ) : "—"}
+                    </TableCell>
+                    <TableCell>
+                      {project.status ? (
+                        <Badge variant="secondary">{project.status}</Badge>
+                      ) : "—"}
+                    </TableCell>
+                    <TableCell className="flex items-center gap-1">
+                      <User className="h-3.5 w-3.5" />
+                      {project.pm || "—"}
+                    </TableCell>
+                    <TableCell>{project.overallScore || "—"}</TableCell>
+                    <TableCell className="text-right space-x-2 flex justify-end">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => setEditingProject(projectName)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => removeProjectName(projectName)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
+                  No projects found
                 </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      {pageCount > 1 && (
+        <div className="py-4">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: pageCount }).map((_, i) => {
+                const pageNumber = i + 1;
+                // Display first page, last page, current page and pages around current
+                if (
+                  pageNumber === 1 || 
+                  pageNumber === pageCount || 
+                  (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                ) {
+                  return (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        isActive={currentPage === pageNumber}
+                        onClick={() => setCurrentPage(pageNumber)}
+                      >
+                        {pageNumber}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                } else if (
+                  (pageNumber === currentPage - 2 && currentPage > 3) || 
+                  (pageNumber === currentPage + 2 && currentPage < pageCount - 2)
+                ) {
+                  // Add ellipsis for skipped pages
+                  return <PaginationItem key={i}><PaginationEllipsis /></PaginationItem>;
+                }
+                return null;
+              })}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, pageCount))}
+                  className={currentPage === pageCount ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       {/* Edit Project Modal */}
       {editingProject && (
