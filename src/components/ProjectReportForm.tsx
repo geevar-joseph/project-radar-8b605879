@@ -417,46 +417,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
     />
   );
 
-  const renderCompletionStatusField = () => (
-    <FormField
-      control={form.control}
-      name="completionOfPlannedWork"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Completion of Planned Work</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select completion status">
-                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as CompletionStatus} />}
-                  {(!field.value || field.value === "N.A.") && "Select completion status"}
-                </SelectValue>
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              <SelectItem value="All completed">
-                <ScoreIndicator value="All completed" />
-              </SelectItem>
-              <SelectItem value="Mostly">
-                <ScoreIndicator value="Mostly" />
-              </SelectItem>
-              <SelectItem value="Partially">
-                <ScoreIndicator value="Partially" />
-              </SelectItem>
-              <SelectItem value="Not completed">
-                <ScoreIndicator value="Not completed" />
-              </SelectItem>
-              <SelectItem value="N.A.">
-                <ScoreIndicator value="N.A." />
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-
+  // Updated Team Morale field with descriptions
   const renderTeamMoraleField = () => (
     <FormField
       control={form.control}
@@ -475,19 +436,90 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
             </FormControl>
             <SelectContent>
               <SelectItem value="High">
-                <ScoreIndicator value="High" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="High" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Team is energized and highly motivated</span>
+                </div>
               </SelectItem>
               <SelectItem value="Moderate">
-                <ScoreIndicator value="Moderate" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Moderate" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Team is generally positive but not exceptional</span>
+                </div>
               </SelectItem>
               <SelectItem value="Low">
-                <ScoreIndicator value="Low" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Low" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Team shows signs of discouragement</span>
+                </div>
               </SelectItem>
               <SelectItem value="Burnt Out">
-                <ScoreIndicator value="Burnt Out" />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Burnt Out" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Team is exhausted and morale is critically low</span>
+                </div>
               </SelectItem>
               <SelectItem value="N.A.">
-                <ScoreIndicator value="N.A." />
+                <div className="flex flex-col">
+                  <ScoreIndicator value="N.A." />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Unable to assess team morale</span>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+
+  // Updated Completion of Planned Work field with descriptions
+  const renderCompletionStatusField = () => (
+    <FormField
+      control={form.control}
+      name="completionOfPlannedWork"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Completion of Planned Work</FormLabel>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select completion status">
+                  {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as CompletionStatus} />}
+                  {(!field.value || field.value === "N.A.") && "Select completion status"}
+                </SelectValue>
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              <SelectItem value="All completed">
+                <div className="flex flex-col">
+                  <ScoreIndicator value="All completed" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">100% of planned deliverables completed</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="Mostly">
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Mostly" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">75-99% of planned deliverables completed</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="Partially">
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Partially" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">40-74% of planned deliverables completed</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="Not completed">
+                <div className="flex flex-col">
+                  <ScoreIndicator value="Not completed" />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">Less than 40% of planned work completed</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="N.A.">
+                <div className="flex flex-col">
+                  <ScoreIndicator value="N.A." />
+                  <span className="text-xs text-gray-500 ml-6 mt-0.5">No planned work to measure</span>
+                </div>
               </SelectItem>
             </SelectContent>
           </Select>
@@ -500,11 +532,13 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {/* Project Details Card */}
         <Card>
           <CardHeader>
             <CardTitle>Project Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Project Name Field */}
             <FormField
               control={form.control}
               name="projectName"
@@ -530,6 +564,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               )}
             />
             
+            {/* Submitted By Field */}
             <FormField
               control={form.control}
               name="submittedBy"
@@ -555,6 +590,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               )}
             />
             
+            {/* Reporting Period Field */}
             <FormField
               control={form.control}
               name="reportingPeriod"
@@ -585,6 +621,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           </CardContent>
         </Card>
         
+        {/* Overall Project Health Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Overall Project Health</CardTitle>
@@ -599,6 +636,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           </CardContent>
         </Card>
         
+        {/* Team KPIs Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Team KPIs</CardTitle>
@@ -607,11 +645,12 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {renderTeamMoraleField()}
-              {renderCompletionStatusField()} {/* Moved from Project Health to Team KPIs */}
+              {renderCompletionStatusField()}
             </div>
           </CardContent>
         </Card>
         
+        {/* Departmental Performance Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Departmental Performance</CardTitle>
@@ -628,6 +667,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           </CardContent>
         </Card>
         
+        {/* Additional Information Card */}
         <Card>
           <CardHeader>
             <CardTitle>Additional Information</CardTitle>
@@ -725,6 +765,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
           </CardContent>
         </Card>
         
+        {/* Form Actions */}
         <div className="flex justify-end gap-2">
           <Button 
             variant="outline" 
