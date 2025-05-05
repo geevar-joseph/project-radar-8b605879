@@ -139,7 +139,7 @@ export const useProjectMutations = (
   const updateProjectDetails = async (originalName: string, updateData: {
     projectName: string;
     clientName?: string;
-    jiraId?: string; // Added JIRA ID to updateData
+    jiraId?: string; // JIRA ID is explicitly included in the interface
     projectType?: string;
     projectStatus?: string;
     assignedPM?: string;
