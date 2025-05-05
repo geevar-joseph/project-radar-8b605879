@@ -42,16 +42,17 @@ export function ScoreIndicator({ value, className }: ScoreIndicatorProps) {
       case 'Neutral / Unclear':
         return {
           count: 4,
-          activeCount: 2,
+          activeCount: 3, // Changed from 2 to 3 for Medium risk level and On Watch financial health
           color: 'bg-amber-400'
         };
       
-      // Orange/At Risk ratings
+      // Orange/At Risk ratings - Added this specific case for Low team morale and High risk level
       case 'At Risk': // For financial health
       case 'High': // For risk level
+      case 'Low': // For team morale, "Low" is negative
         return {
           count: 4,
-          activeCount: 1.5,
+          activeCount: 2, // Changed from 1.5 to 2 for High risk level and Low team morale
           color: 'bg-orange-400'
         };
       
