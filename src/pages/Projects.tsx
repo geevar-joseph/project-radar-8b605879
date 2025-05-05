@@ -1,6 +1,7 @@
+
 import { useState, useMemo } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
-import { ProjectReport } from "@/types/project";
+import { ProjectReport, ProjectType, ProjectStatus } from "@/types/project";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -110,6 +111,22 @@ const Projects = () => {
     }).format(date);
   };
 
+  // Function to ensure project type is valid
+  const getValidProjectType = (type: string | undefined): ProjectType | "N/A" => {
+    if (type === "Service" || type === "Product") {
+      return type;
+    }
+    return "N/A";
+  };
+
+  // Function to ensure project status is valid
+  const getValidProjectStatus = (status: string | undefined): ProjectStatus | "N/A" => {
+    if (status === "Active" || status === "Inactive" || status === "Support") {
+      return status;
+    }
+    return "N/A";
+  };
+
   return (
     <div className="container mx-auto py-6 max-w-7xl"> {/* Increased max width */}
       <div className="flex justify-between items-center mb-8">
@@ -190,12 +207,12 @@ const Projects = () => {
                   <TableCell>{project.assignedPM || "N/A"}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {project.projectType || "N/A"}
+                      {getValidProjectType(project.projectType)}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">
-                      {project.projectStatus || "N/A"}
+                      {getValidProjectStatus(project.projectStatus)}
                     </Badge>
                   </TableCell>
                   <TableCell>{formatDate(project.submissionDate)}</TableCell>
