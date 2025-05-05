@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ScoreIndicator } from "./ScoreIndicator";
 import { Save } from "lucide-react";
 import { KPIScoreMeter } from "./KPIScoreMeter";
+import { OverallProjectScore } from "./OverallProjectScore";
 import { 
   RatingValue, 
   RiskLevel, 
@@ -64,6 +64,11 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
   const [projectHealthScore, setProjectHealthScore] = useState<number | null>(null);
   const [teamKPIsScore, setTeamKPIsScore] = useState<number | null>(null);
   const [departmentalScore, setDepartmentalScore] = useState<number | null>(null);
+  
+  // Add a new state for overall project score
+  const [overallProjectScore, setOverallProjectScore] = useState<number | null>(null);
+  const [doingWellKPIs, setDoingWellKPIs] = useState<string[]>([]);
+  const [needsAttentionKPIs, setNeedsAttentionKPIs] = useState<string[]>([]);
 
   // Generate the last 3 months options (current month and previous 2 months)
   const reportingPeriodOptions = useMemo(() => {
@@ -151,6 +156,107 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
       : null;
     
     setDepartmentalScore(deptAverage);
+    
+    // Calculate Overall Project Score (average of all scores)
+    const allScores = [healthAverage, teamAverage, deptAverage].filter(score => score !== null) as number[];
+    const overallAverage = allScores.length > 0 
+      ? allScores.reduce((sum, score) => sum + score, 0) / allScores.length 
+      : null;
+    
+    setOverallProjectScore(overallAverage);
+    
+    // Identify doing well and needs attention areas
+    const doingWell: string[] = [];
+    const needsAttention: string[] = [];
+    
+    // Check risk level
+    if (riskToValueMap[formValues.riskLevel] !== null) {
+      if (riskToValueMap[formValues.riskLevel] >= 3) {
+        doingWell.push('Risk Management');
+      } else if (riskToValueMap[formValues.riskLevel] !== null && riskToValueMap[formValues.riskLevel] <= 2) {
+        needsAttention.push('Risk Management');
+      }
+    }
+    
+    // Check financial health
+    if (financialToValueMap[formValues.financialHealth] !== null) {
+      if (financialToValueMap[formValues.financialHealth] >= 3) {
+        doingWell.push('Financial Health');
+      } else if (financialToValueMap[formValues.financialHealth] !== null && financialToValueMap[formValues.financialHealth] <= 2) {
+        needsAttention.push('Financial Health');
+      }
+    }
+    
+    // Check customer satisfaction
+    if (satisfactionToValueMap[formValues.customerSatisfaction] !== null) {
+      if (satisfactionToValueMap[formValues.customerSatisfaction] >= 3) {
+        doingWell.push('Customer Satisfaction');
+      } else if (satisfactionToValueMap[formValues.customerSatisfaction] !== null && satisfactionToValueMap[formValues.customerSatisfaction] <= 2) {
+        needsAttention.push('Customer Satisfaction');
+      }
+    }
+    
+    // Check team morale
+    if (moraleToValueMap[formValues.teamMorale] !== null) {
+      if (moraleToValueMap[formValues.teamMorale] >= 3) {
+        doingWell.push('Team Morale');
+      } else if (moraleToValueMap[formValues.teamMorale] !== null && moraleToValueMap[formValues.teamMorale] <= 2) {
+        needsAttention.push('Team Morale');
+      }
+    }
+    
+    // Check completion status
+    if (completionToValueMap[formValues.completionOfPlannedWork] !== null) {
+      if (completionToValueMap[formValues.completionOfPlannedWork] >= 3) {
+        doingWell.push('Work Completion');
+      } else if (completionToValueMap[formValues.completionOfPlannedWork] !== null && completionToValueMap[formValues.completionOfPlannedWork] <= 2) {
+        needsAttention.push('Work Completion');
+      }
+    }
+    
+    // Check departmental quality scores
+    if (ratingToValueMap[formValues.projectManagerEvaluation] !== null) {
+      if (ratingToValueMap[formValues.projectManagerEvaluation] >= 3) {
+        doingWell.push('Project Management');
+      } else if (ratingToValueMap[formValues.projectManagerEvaluation] !== null && ratingToValueMap[formValues.projectManagerEvaluation] <= 2) {
+        needsAttention.push('Project Management');
+      }
+    }
+    
+    if (ratingToValueMap[formValues.frontEndQuality] !== null) {
+      if (ratingToValueMap[formValues.frontEndQuality] >= 3) {
+        doingWell.push('Front-End Quality');
+      } else if (ratingToValueMap[formValues.frontEndQuality] !== null && ratingToValueMap[formValues.frontEndQuality] <= 2) {
+        needsAttention.push('Front-End Quality');
+      }
+    }
+    
+    if (ratingToValueMap[formValues.backEndQuality] !== null) {
+      if (ratingToValueMap[formValues.backEndQuality] >= 3) {
+        doingWell.push('Back-End Quality');
+      } else if (ratingToValueMap[formValues.backEndQuality] !== null && ratingToValueMap[formValues.backEndQuality] <= 2) {
+        needsAttention.push('Back-End Quality');
+      }
+    }
+    
+    if (ratingToValueMap[formValues.testingQuality] !== null) {
+      if (ratingToValueMap[formValues.testingQuality] >= 3) {
+        doingWell.push('Testing Quality');
+      } else if (ratingToValueMap[formValues.testingQuality] !== null && ratingToValueMap[formValues.testingQuality] <= 2) {
+        needsAttention.push('Testing Quality');
+      }
+    }
+    
+    if (ratingToValueMap[formValues.designQuality] !== null) {
+      if (ratingToValueMap[formValues.designQuality] >= 3) {
+        doingWell.push('Design Quality');
+      } else if (ratingToValueMap[formValues.designQuality] !== null && ratingToValueMap[formValues.designQuality] <= 2) {
+        needsAttention.push('Design Quality');
+      }
+    }
+    
+    setDoingWellKPIs(doingWell);
+    setNeedsAttentionKPIs(needsAttention);
   }, [formValues]);
   
   function onSubmit(data: FormValues) {
@@ -665,6 +771,20 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               {renderScoreField('designQuality', 'Design Team Quality')}
               {renderScoreField('projectManagerEvaluation', 'Project Manager Self-Evaluation')}
             </div>
+          </CardContent>
+        </Card>
+        
+        {/* Overall Project Score Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Overall Project Score</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <OverallProjectScore 
+              score={overallProjectScore}
+              doingWell={doingWellKPIs}
+              needsAttention={needsAttentionKPIs}
+            />
           </CardContent>
         </Card>
         
