@@ -70,7 +70,7 @@ export function ProjectsTable({ projects, handleSort, getSortIndicator }: Projec
                     {getValidProjectStatus(project.projectStatus)}
                   </Badge>
                 </TableCell>
-                <TableCell>{formatDate(project.submissionDate)}</TableCell>
+                <TableCell>{formatDate(project.submissionDate) || "N/A"}</TableCell>
                 <TableCell>
                   {project.overallProjectScore || "N/A"}
                 </TableCell>

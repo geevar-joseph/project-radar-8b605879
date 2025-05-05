@@ -1,49 +1,49 @@
 
-import { ProjectStatus, ProjectType } from "@/types/project";
+import { format, isValid, parseISO } from 'date-fns';
+import { ProjectStatus, ProjectType } from '@/types/project';
 
 /**
- * Format a date string to a readable format
- * Returns 'N/A' for invalid dates
+ * Formats a date string to a more readable format
  */
-export const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) {
-    return 'N/A';
-  }
+export function formatDate(dateString: string | undefined): string {
+  if (!dateString) return 'N/A';
   
   try {
-    const date = new Date(dateString);
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      return 'N/A';
-    }
-    
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-    }).format(date);
+    const date = typeof dateString === 'string' ? parseISO(dateString) : dateString;
+    if (!isValid(date)) return 'N/A';
+    return format(date, 'MMM d, yyyy');
   } catch (error) {
     console.error('Error formatting date:', error);
     return 'N/A';
   }
-};
+}
 
 /**
- * Ensure project type is valid
+ * Get valid project type value or return default
  */
-export const getValidProjectType = (type: string | undefined): ProjectType | "N/A" => {
-  if (type === "Service" || type === "Product") {
+export function getValidProjectType(type: ProjectType | undefined): ProjectType {
+  if (typeof type === 'object' && type !== null) {
+    return 'Service'; // Default if type is an object but invalid
+  }
+  
+  if (type && (type === 'Service' || type === 'Product')) {
     return type;
   }
-  return "N/A";
-};
+  
+  return 'Service'; // Default
+}
 
 /**
- * Ensure project status is valid
+ * Get valid project status value or return default
  */
-export const getValidProjectStatus = (status: string | undefined): ProjectStatus | "N/A" => {
-  if (status === "Active" || status === "Inactive" || status === "Support") {
+export function getValidProjectStatus(status: ProjectStatus | undefined): ProjectStatus {
+  if (typeof status === 'object' && status !== null) {
+    return 'Active'; // Default if status is an object but invalid
+  }
+  
+  if (status && (status === 'Active' || status === 'Inactive' || status === 'Support')) {
     return status;
   }
-  return "N/A";
-};
+  
+  return 'Active'; // Default
+}
