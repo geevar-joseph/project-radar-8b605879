@@ -26,15 +26,30 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
   const fetchProjectsData = async () => {
     setIsLoading(true);
     try {
+      // Join with team_members table to get the PM's name instead of ID
       const { data, error } = await supabase
         .from('projects')
-        .select('*');
+        .select(`
+          *,
+          team_members (
+            id,
+            name
+          )
+        `);
       
       if (error) {
         throw error;
       }
       
-      setProjectsData(data);
+      // Map the data to include the PM's name
+      const mappedData = data.map(project => {
+        return {
+          ...project,
+          assigned_pm: project.team_members ? project.team_members.name : project.assigned_pm
+        };
+      });
+      
+      setProjectsData(mappedData);
     } catch (error) {
       console.error('Error fetching projects data:', error);
     } finally {
