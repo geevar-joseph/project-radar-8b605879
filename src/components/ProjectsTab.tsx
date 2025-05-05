@@ -180,6 +180,7 @@ export const ProjectsTab = ({ projectNames, projects, removeProjectName }: Proje
             handleSort={handleSort}
             getSortIndicator={getSortIndicator}
             isManageView={true} // Set to true for Manage Options view
+            onRemove={handleDeleteConfirm} // Pass the delete confirmation handler
           />
         )}
       </CardContent>

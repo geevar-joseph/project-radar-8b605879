@@ -13,9 +13,16 @@ interface ProjectsTableProps {
   handleSort: (key: string) => void;
   getSortIndicator: (key: string) => string | null;
   isManageView?: boolean; // New prop to determine which view we're in
+  onRemove?: (projectName: string) => void; // Add this prop to handle project removal
 }
 
-export function ProjectsTable({ projects, handleSort, getSortIndicator, isManageView = false }: ProjectsTableProps) {
+export function ProjectsTable({ 
+  projects, 
+  handleSort, 
+  getSortIndicator, 
+  isManageView = false,
+  onRemove 
+}: ProjectsTableProps) {
   const [editingProject, setEditingProject] = useState<string | null>(null);
   
   const handleEdit = (projectName: string) => {
@@ -92,7 +99,7 @@ export function ProjectsTable({ projects, handleSort, getSortIndicator, isManage
                     submissionDate: project.submissionDate || project.updated_at
                   }}
                   onEdit={() => handleEdit(projectName)}
-                  onRemove={() => console.log("Remove not implemented")}
+                  onRemove={() => onRemove && onRemove(projectName)} // Pass the removal function with project name
                   isManageView={isManageView}
                 />
               );
