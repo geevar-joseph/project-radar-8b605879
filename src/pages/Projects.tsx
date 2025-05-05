@@ -21,28 +21,34 @@ const Projects = () => {
   const projectsWithScores = useMemo(() => {
     return projects.map(project => {
       // Return early if project already has a score
-      if (project.overallProjectScore) {
+      if (project.overallProjectScore && project.overallProjectScore !== "N/A") {
         return project;
       }
       
       // Calculate score based on all KPIs
       const calculateScore = (project: ProjectReport) => {
-        const ratings = [
-          ratingToValueMap[project.projectManagerEvaluation],
-          ratingToValueMap[project.frontEndQuality],
-          ratingToValueMap[project.backEndQuality],
-          ratingToValueMap[project.testingQuality],
-          ratingToValueMap[project.designQuality]
-        ];
-        
-        // Filter out null values
-        const validRatings = ratings.filter(r => r !== null) as number[];
-        
-        if (validRatings.length === 0) return "N/A";
-        
-        // Calculate average and format to one decimal place
-        const average = validRatings.reduce((a, b) => a + b, 0) / validRatings.length;
-        return average.toFixed(1);
+        try {
+          // Get all rating values
+          const ratings = [
+            project.projectManagerEvaluation ? ratingToValueMap[project.projectManagerEvaluation] : null,
+            project.frontEndQuality ? ratingToValueMap[project.frontEndQuality] : null,
+            project.backEndQuality ? ratingToValueMap[project.backEndQuality] : null,
+            project.testingQuality ? ratingToValueMap[project.testingQuality] : null,
+            project.designQuality ? ratingToValueMap[project.designQuality] : null
+          ];
+          
+          // Filter out null values
+          const validRatings = ratings.filter(r => r !== null && !isNaN(Number(r))) as number[];
+          
+          if (validRatings.length === 0) return "0.0";
+          
+          // Calculate average and format to one decimal place
+          const average = validRatings.reduce((a, b) => a + b, 0) / validRatings.length;
+          return average.toFixed(1);
+        } catch (error) {
+          console.error("Error calculating score for project:", project.projectName, error);
+          return "0.0"; // Return a default value instead of N/A
+        }
       };
       
       return {

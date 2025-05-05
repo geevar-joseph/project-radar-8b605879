@@ -64,7 +64,8 @@ export function ProjectsTable({ projects, handleSort, getSortIndicator, isManage
                 </TableHead>
               </>
             )}
-            <TableHead>Actions</TableHead>
+            {/* Only show Actions column in manage view */}
+            {isManageView && <TableHead>Actions</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
