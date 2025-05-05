@@ -216,7 +216,13 @@ const MonthlyReportDetail = () => {
   );
 
   // Create rating display component with color indicators
-  const RatingDisplay = ({ value, type }: { value: string; type: string }) => (
+  const RatingDisplay = ({ 
+    value, 
+    type 
+  }: { 
+    value: string; 
+    type: "risk" | "health" | "completion" | "morale" | "satisfaction" | "rating" | "score"
+  }) => (
     <div className="flex items-center">
       <ScoreIndicator value={value} type={type} />
       <span className="ml-2">{value}</span>
