@@ -62,7 +62,7 @@ export const useProjectMutations = (
           assignedPM
         );
         
-        if (!result.success) throw result.error;
+        if (!result || !result.success) throw result?.error || new Error("Failed to add project");
         
         setProjectNames([...projectNames, name]);
         
@@ -151,7 +151,7 @@ export const useProjectMutations = (
       }
       
       if (!result.success) {
-        throw result.error;
+        throw result.error || new Error("Failed to update project");
       }
 
       // Update local state - find and update the project in projects array

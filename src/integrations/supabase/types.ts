@@ -101,6 +101,7 @@ export type Database = {
           client_name: string | null
           created_at: string
           id: string
+          jira_id: string | null
           project_name: string
           project_status: string | null
           project_type: string | null
@@ -111,6 +112,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           id?: string
+          jira_id?: string | null
           project_name: string
           project_status?: string | null
           project_type?: string | null
@@ -121,6 +123,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           id?: string
+          jira_id?: string | null
           project_name?: string
           project_status?: string | null
           project_type?: string | null
