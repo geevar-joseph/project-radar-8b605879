@@ -27,6 +27,8 @@ export interface ProjectReport {
   projectType?: ProjectType;
   projectStatus?: ProjectStatus;
   assignedPM?: string;
+  jiraId?: string;
+  overallProjectScore?: string;
   // New fields
   notes?: string;
   keyAchievements?: string;

@@ -40,7 +40,7 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
         if (project && typeof project === 'object') {
           if ('projectName' in project) {
             projectName = project.projectName;
-          } else if ('project_name' in project) {
+          } else if ('project_name' in project && project.project_name) {
             projectName = project.project_name as string;
           }
         }
@@ -54,9 +54,6 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
           projectMap.set(projectName, project);
         } else {
           // Determine if this project is newer based on reporting_period or updated_at/submission_date
-          let existingDate: Date | null = null;
-          let currentDate: Date | null = null;
-          
           if ('reporting_period' in existingProject && 'reporting_period' in project) {
             if (project.reporting_period > existingProject.reporting_period) {
               projectMap.set(projectName, project);
@@ -66,8 +63,8 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
             const currentDateValue = project.updated_at;
             
             if (existingDateValue && currentDateValue) {
-              existingDate = new Date(existingDateValue);
-              currentDate = new Date(currentDateValue);
+              const existingDate = new Date(existingDateValue as string);
+              const currentDate = new Date(currentDateValue as string);
               
               if (currentDate > existingDate) {
                 projectMap.set(projectName, project);
@@ -78,8 +75,8 @@ export const ProjectsTable = ({ projectNames, projects, removeProjectName }: Pro
             const currentDateValue = project.submission_date;
             
             if (existingDateValue && currentDateValue) {
-              existingDate = new Date(existingDateValue);
-              currentDate = new Date(currentDateValue);
+              const existingDate = new Date(existingDateValue as string);
+              const currentDate = new Date(currentDateValue as string);
               
               if (currentDate > existingDate) {
                 projectMap.set(projectName, project);
