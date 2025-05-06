@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectCard } from "@/components/ProjectCard";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { Check, AlertTriangle, XOctagon, Clock } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -13,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { MissingReportsBlock } from "@/components/MissingReportsBlock";
 import { ComplianceTable } from "@/components/ComplianceTable";
 import { formatPeriod } from "@/utils/formatPeriods";
+import { SearchableSelect } from "@/components/SearchableSelect";
 
 const Dashboard = () => {
   const { 
@@ -26,26 +26,14 @@ const Dashboard = () => {
   const periods = getUniqueReportingPeriods();
   const projects = getFilteredProjects(selectedPeriod);
   
-  useEffect(() => {
-    // Select the latest period by default if no period is selected
-    if (periods.length > 0 && (!selectedPeriod || selectedPeriod === "N/A")) {
-      // Sort periods in descending order to get the latest one
-      const sortedPeriods = [...periods].filter(p => p !== "N/A").sort((a, b) => {
-        const [yearA, monthA] = a.split('-').map(Number);
-        const [yearB, monthB] = b.split('-').map(Number);
-        // Only compare if both are valid format
-        if (!isNaN(yearA) && !isNaN(monthA) && !isNaN(yearB) && !isNaN(monthB)) {
-          return yearB - yearA || monthB - monthA;
-        }
-        return 0;
-      });
-      
-      if (sortedPeriods.length > 0) {
-        setSelectedPeriod(sortedPeriods[0]);
-      }
-    }
-  }, [periods, selectedPeriod, setSelectedPeriod]);
-
+  // Format periods for the searchable select component
+  const periodOptions = periods
+    .filter(period => period !== "N/A")
+    .map(period => ({
+      value: period,
+      label: formatPeriod(period)
+    }));
+  
   // Calculate project statistics based on risk levels
   const totalProjects = projects.length;
   const projectsDoingWell = projects.filter(p => 
@@ -78,17 +66,15 @@ const Dashboard = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
-          <div className="w-48">
-            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Period" />
-              </SelectTrigger>
-              <SelectContent>
-                {periods.filter(period => period !== "N/A").map((period) => (
-                  <SelectItem key={period} value={period}>{formatPeriod(period)}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div>
+            <SearchableSelect
+              value={selectedPeriod || ""}
+              onValueChange={setSelectedPeriod}
+              placeholder="Select Period"
+              options={periodOptions}
+              emptyMessage="No periods found"
+              width="w-[200px]"
+            />
           </div>
           
           <Button asChild>

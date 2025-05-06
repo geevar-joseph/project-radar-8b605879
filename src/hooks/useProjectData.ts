@@ -114,6 +114,14 @@ export const useProjectData = () => {
       console.log('Combined Formatted Data (Deduplicated):', formattedReports);
       setProjects(formattedReports);
       setIsError(false);
+      
+      // Now auto-select the latest period if none is selected
+      const periods = getUniqueReportingPeriods(formattedReports);
+      if (periods.length > 0 && (!selectedPeriod || selectedPeriod === "N/A")) {
+        // Get the latest period
+        const latestPeriod = periods[0]; // Since periods are already sorted in descending order
+        setSelectedPeriod(latestPeriod);
+      }
     } catch (error) {
       console.error('Error loading projects data:', error);
       // Only show the error toast once, not repeatedly
@@ -140,9 +148,38 @@ export const useProjectData = () => {
     return projects.find(project => project.id === id);
   };
 
-  const getUniqueReportingPeriods = () => {
-    const periods = [...new Set(projects.map(p => p.reportingPeriod))];
-    return periods.sort((a, b) => b.localeCompare(a)); // Sort descending
+  /**
+   * Get all unique reporting periods from the projects
+   * @param projectData Optional parameter to extract periods from specific data
+   * @returns Sorted array of reporting periods in descending order (latest first)
+   */
+  const getUniqueReportingPeriods = (projectData: ProjectReport[] = projects) => {
+    // Extract all periods including duplicates
+    const allPeriods = projectData
+      .map(p => p.reportingPeriod)
+      .filter(period => period !== "N/A" && period !== undefined);
+    
+    // Filter out duplicates by creating a Set and convert back to array
+    const uniquePeriods = [...new Set(allPeriods)];
+    
+    // Sort the periods in descending order (newest first)
+    return uniquePeriods.sort((a, b) => {
+      // If either is not in YYYY-MM format, compare strings directly
+      if (!/^\d{4}-\d{2}$/.test(a) || !/^\d{4}-\d{2}$/.test(b)) {
+        return b.localeCompare(a);
+      }
+
+      // Parse years and months for proper date comparison
+      const [yearA, monthA] = a.split('-').map(Number);
+      const [yearB, monthB] = b.split('-').map(Number);
+      
+      // First compare years (in descending order)
+      if (yearA !== yearB) {
+        return yearB - yearA;
+      } 
+      // If years are the same, compare months (in descending order)
+      return monthB - monthA;
+    });
   };
 
   const getFilteredProjects = (period?: string) => {
