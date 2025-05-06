@@ -78,7 +78,7 @@ export const useTeamMembers = () => {
     }
   };
 
-  const updateTeamMember = async (originalName: string, name: string, email: string, role: string) => {
+  const updateTeamMember = async (originalName: string, name: string, email: string, role: string, assignedProjects?: string[]) => {
     try {
       const { success, error } = await apiUpdateTeamMember(originalName, name, email, role);
       

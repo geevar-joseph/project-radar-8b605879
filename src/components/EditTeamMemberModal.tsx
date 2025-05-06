@@ -91,7 +91,7 @@ export const EditTeamMemberModal = ({ open, onOpenChange, teamMember }: EditTeam
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      await updateTeamMember(teamMember.name, values.name, values.email, values.role);
+      await updateTeamMember(teamMember.name, values.name, values.email, values.role, assignedProjects);
       toast({
         title: "Team Member Updated",
         description: `${values.name} has been updated successfully.`,

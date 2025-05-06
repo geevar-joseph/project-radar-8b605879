@@ -35,7 +35,7 @@ interface ProjectContextType {
     projectStatus?: string;
     assignedPM?: string;
   }) => Promise<boolean>;
-  updateTeamMember: (originalName: string, name: string, email: string, role: string) => Promise<boolean>;
+  updateTeamMember: (originalName: string, name: string, email: string, role: string, assignedProjects?: string[]) => Promise<boolean>;
   isLoading: boolean;
   isError: boolean;
   loadProjects: () => Promise<void>;

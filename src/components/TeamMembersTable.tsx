@@ -68,6 +68,7 @@ export const TeamMembersTable = ({ teamMembers, removeTeamMember }: TeamMembersT
                   variant="ghost" 
                   size="icon"
                   onClick={() => removeTeamMember(member.name)}
+                  className="text-destructive hover:bg-destructive/10"
                 >
                   <Trash className="h-4 w-4" />
                 </Button>

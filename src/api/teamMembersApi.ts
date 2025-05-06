@@ -83,7 +83,7 @@ export const removeTeamMember = async (name: string) => {
 /**
  * Updates team member details in Supabase
  */
-export const updateTeamMember = async (originalName: string, name: string, email: string, role: string) => {
+export const updateTeamMember = async (originalName: string, name: string, email: string, role: string, assignedProjects?: string[]) => {
   try {
     // Find the team member by name
     const { data } = await supabase
