@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectReport } from "@/types/project";
 import { mapToProjectReport } from "./mappers";
@@ -31,6 +32,73 @@ export const fetchProjectReports = async () => {
   } catch (error) {
     console.error('Error fetching project reports:', error);
     return { reportsData: [], error };
+  }
+};
+
+/**
+ * Fetches reports for a specific project from Supabase
+ */
+export const fetchProjectReportsByProject = async (projectId: string) => {
+  try {
+    const { data: reportsData, error: reportsError } = await supabase
+      .from('project_reports')
+      .select(`
+        *, 
+        projects (
+          *,
+          team_members (
+            id,
+            name
+          )
+        )
+      `)
+      .eq('project_id', projectId)
+      .order('reporting_period', { ascending: true });
+
+    if (reportsError) {
+      throw reportsError;
+    }
+    
+    console.log(`Reports for project ${projectId} from API:`, reportsData.length);
+    return { reportsData, error: null };
+  } catch (error) {
+    console.error(`Error fetching reports for project ${projectId}:`, error);
+    return { reportsData: [], error };
+  }
+};
+
+/**
+ * Fetches reports for a specific period from Supabase
+ */
+export const fetchProjectReportsByPeriod = async (period: string) => {
+  try {
+    const { data: reportsData, error: reportsError } = await supabase
+      .from('project_reports')
+      .select(`
+        *, 
+        projects (
+          *,
+          team_members (
+            id,
+            name
+          )
+        )
+      `)
+      .eq('reporting_period', period);
+
+    if (reportsError) {
+      throw reportsError;
+    }
+    
+    console.log(`Reports for period ${period} from API:`, reportsData.length);
+    
+    // Map to ProjectReport objects
+    const projectReports = reportsData.map(report => mapToProjectReport(report));
+    
+    return { projectReports, error: null };
+  } catch (error) {
+    console.error(`Error fetching reports for period ${period}:`, error);
+    return { projectReports: [], error };
   }
 };
 

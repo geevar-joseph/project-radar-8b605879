@@ -204,6 +204,18 @@ export const useProjectData = () => {
   };
 
   /**
+   * Sync version of getFilteredProjects - filters the local projects array 
+   * This is used by components that haven't been updated to handle async results
+   */
+  const getFilteredProjectsSync = (period?: string) => {
+    // If no period specified, return all latest project reports
+    if (!period) return projects;
+    
+    // Filter local projects by period
+    return projects.filter(project => project.reportingPeriod === period);
+  };
+
+  /**
    * Get filtered projects based on reporting period
    * This now queries the database directly for the specified period
    */
@@ -264,6 +276,7 @@ export const useProjectData = () => {
     loadAllPeriods,
     getProject,
     getUniqueReportingPeriods,
-    getFilteredProjects
+    getFilteredProjects,
+    getFilteredProjectsSync
   };
 };
