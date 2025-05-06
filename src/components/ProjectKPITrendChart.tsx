@@ -101,7 +101,6 @@ const calculateOverallScore = (report: ProjectReport): number => {
     "Healthy": 4,
     "On Watch": 3,
     "At Risk": 2,
-    "Critical": 1,
     // Completion status
     "Completely": 4,
     "All completed": 4,
@@ -117,7 +116,6 @@ const calculateOverallScore = (report: ProjectReport): number => {
     "Very Dissatisfied": 0.5,
     // Team morale
     "High": 4,
-    "Good": 3.5,
     "Moderate": 3,
     "Low": 2,
     "Burnt Out": 1,
