@@ -11,7 +11,7 @@ interface ProjectContextType {
   addProject: (project: ProjectReport) => void;
   getProject: (id: string) => ProjectReport | undefined;
   getUniqueReportingPeriods: () => string[];
-  getFilteredProjects: (period?: string) => ProjectReport[];
+  getFilteredProjects: (period?: string) => Promise<ProjectReport[]>;
   selectedPeriod: string | undefined;
   setSelectedPeriod: (period: string | undefined) => void;
   availablePeriods: string[];

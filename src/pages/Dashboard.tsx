@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectCard } from "@/components/ProjectCard";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { MissingReportsBlock } from "@/components/MissingReportsBlock";
 import { ComplianceTable } from "@/components/ComplianceTable";
 import { formatPeriod } from "@/utils/formatPeriods";
 import { SearchableSelect } from "@/components/SearchableSelect";
+import { ProjectReport } from "@/types/project";
 
 const Dashboard = () => {
   const { 
@@ -24,12 +25,30 @@ const Dashboard = () => {
     loadAllPeriods
   } = useProjectContext();
   
+  const [filteredProjects, setFilteredProjects] = useState<ProjectReport[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
   // Load all available periods when dashboard mounts
   useEffect(() => {
     loadAllPeriods();
   }, []);
   
-  const projects = getFilteredProjects(selectedPeriod);
+  // Load filtered projects whenever the selected period changes
+  useEffect(() => {
+    const loadFilteredProjects = async () => {
+      setIsLoading(true);
+      try {
+        const projects = await getFilteredProjects(selectedPeriod);
+        setFilteredProjects(projects);
+      } catch (error) {
+        console.error("Error loading filtered projects:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadFilteredProjects();
+  }, [selectedPeriod]);
   
   // Format periods for the searchable select component
   const periodOptions = availablePeriods
@@ -40,21 +59,21 @@ const Dashboard = () => {
     }));
   
   // Calculate project statistics based on risk levels
-  const totalProjects = projects.length;
-  const projectsDoingWell = projects.filter(p => 
+  const totalProjects = projectNames.length; // Use projectNames.length for total projects count
+  const projectsDoingWell = filteredProjects.filter(p => 
     p.riskLevel === "Low"
   );
-  const projectsNeedingAttention = projects.filter(p => 
+  const projectsNeedingAttention = filteredProjects.filter(p => 
     p.riskLevel === "Medium"
   );
-  const projectsAtRisk = projects.filter(p => 
+  const projectsAtRisk = filteredProjects.filter(p => 
     p.riskLevel === "High" || p.riskLevel === "Critical"
   );
   
   // Calculate pending projects (projects that don't have reports for the selected period)
   const pendingProjects = selectedPeriod 
     ? projectNames.filter(name => 
-        !projects.some(p => p.projectName === name && p.reportingPeriod === selectedPeriod)
+        !filteredProjects.some(p => p.projectName === name)
       ).length
     : 0;
 
@@ -152,107 +171,114 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Block 2: Categorized Project List */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-        {/* Column 1: Projects Doing Well */}
-        <div className="border-t-4 border-green-500 bg-green-50 dark:bg-green-900/10 rounded-lg p-3 flex flex-col">
-          <h2 className="font-semibold text-lg mb-3 flex items-center">
-            <Check className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
-            Projects Doing Well ({projectsDoingWell.length})
-          </h2>
-          <Separator className="mb-3" />
-          
-          <ScrollArea className="flex-grow h-[320px]">
-            <div className="space-y-2 pr-2">
-              {projectsDoingWell.length === 0 ? (
-                <div className="text-center py-6 text-sm text-muted-foreground">
-                  <p>No projects in this category</p>
-                </div>
-              ) : (
-                projectsDoingWell.map(project => (
-                  <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 hover:shadow-md transition-shadow">
-                    <Link to={`/project/${project.id}`} className="font-medium hover:underline block">
-                      {project.projectName}
-                    </Link>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-muted-foreground">
-                        {project.assignedPM || 'Unassigned'}
-                      </span>
-                      <StatusBadge value={project.riskLevel} type="risk" />
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </ScrollArea>
+      {/* Show loading state when filtering */}
+      {isLoading ? (
+        <div className="text-center py-6">
+          <p className="text-muted-foreground">Loading projects...</p>
         </div>
-        
-        {/* Column 2: Projects Needing Attention */}
-        <div className="border-t-4 border-amber-500 bg-amber-50 dark:bg-amber-900/10 rounded-lg p-3 flex flex-col">
-          <h2 className="font-semibold text-lg mb-3 flex items-center">
-            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-2" />
-            Projects Needing Attention ({projectsNeedingAttention.length})
-          </h2>
-          <Separator className="mb-3" />
-          
-          <ScrollArea className="flex-grow h-[320px]">
-            <div className="space-y-2 pr-2">
-              {projectsNeedingAttention.length === 0 ? (
-                <div className="text-center py-6 text-sm text-muted-foreground">
-                  <p>No projects in this category</p>
-                </div>
-              ) : (
-                projectsNeedingAttention.map(project => (
-                  <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 hover:shadow-md transition-shadow">
-                    <Link to={`/project/${project.id}`} className="font-medium hover:underline block">
-                      {project.projectName}
-                    </Link>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-muted-foreground">
-                        {project.assignedPM || 'Unassigned'}
-                      </span>
-                      <StatusBadge value={project.riskLevel} type="risk" />
-                    </div>
+      ) : (
+        // Block 2: Categorized Project List
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          {/* Column 1: Projects Doing Well */}
+          <div className="border-t-4 border-green-500 bg-green-50 dark:bg-green-900/10 rounded-lg p-3 flex flex-col">
+            <h2 className="font-semibold text-lg mb-3 flex items-center">
+              <Check className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
+              Projects Doing Well ({projectsDoingWell.length})
+            </h2>
+            <Separator className="mb-3" />
+            
+            <ScrollArea className="flex-grow h-[320px]">
+              <div className="space-y-2 pr-2">
+                {projectsDoingWell.length === 0 ? (
+                  <div className="text-center py-6 text-sm text-muted-foreground">
+                    <p>No projects in this category</p>
                   </div>
-                ))
-              )}
-            </div>
-          </ScrollArea>
-        </div>
-        
-        {/* Column 3: Projects At Risk */}
-        <div className="border-t-4 border-red-500 bg-red-50 dark:bg-red-900/10 rounded-lg p-3 flex flex-col">
-          <h2 className="font-semibold text-lg mb-3 flex items-center">
-            <XOctagon className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
-            Projects At Risk ({projectsAtRisk.length})
-          </h2>
-          <Separator className="mb-3" />
-          
-          <ScrollArea className="flex-grow h-[320px]">
-            <div className="space-y-2 pr-2">
-              {projectsAtRisk.length === 0 ? (
-                <div className="text-center py-6 text-sm text-muted-foreground">
-                  <p>No projects in this category</p>
-                </div>
-              ) : (
-                projectsAtRisk.map(project => (
-                  <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 hover:shadow-md transition-shadow">
-                    <Link to={`/project/${project.id}`} className="font-medium hover:underline block">
-                      {project.projectName}
-                    </Link>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-xs text-muted-foreground">
-                        {project.assignedPM || 'Unassigned'}
-                      </span>
-                      <StatusBadge value={project.riskLevel} type="risk" />
+                ) : (
+                  projectsDoingWell.map(project => (
+                    <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 hover:shadow-md transition-shadow">
+                      <Link to={`/project/${project.id}`} className="font-medium hover:underline block">
+                        {project.projectName}
+                      </Link>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-muted-foreground">
+                          {project.assignedPM || 'Unassigned'}
+                        </span>
+                        <StatusBadge value={project.riskLevel} type="risk" />
+                      </div>
                     </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+          
+          {/* Column 2: Projects Needing Attention */}
+          <div className="border-t-4 border-amber-500 bg-amber-50 dark:bg-amber-900/10 rounded-lg p-3 flex flex-col">
+            <h2 className="font-semibold text-lg mb-3 flex items-center">
+              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-2" />
+              Projects Needing Attention ({projectsNeedingAttention.length})
+            </h2>
+            <Separator className="mb-3" />
+            
+            <ScrollArea className="flex-grow h-[320px]">
+              <div className="space-y-2 pr-2">
+                {projectsNeedingAttention.length === 0 ? (
+                  <div className="text-center py-6 text-sm text-muted-foreground">
+                    <p>No projects in this category</p>
                   </div>
-                ))
-              )}
-            </div>
-          </ScrollArea>
+                ) : (
+                  projectsNeedingAttention.map(project => (
+                    <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 hover:shadow-md transition-shadow">
+                      <Link to={`/project/${project.id}`} className="font-medium hover:underline block">
+                        {project.projectName}
+                      </Link>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-muted-foreground">
+                          {project.assignedPM || 'Unassigned'}
+                        </span>
+                        <StatusBadge value={project.riskLevel} type="risk" />
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+          
+          {/* Column 3: Projects At Risk */}
+          <div className="border-t-4 border-red-500 bg-red-50 dark:bg-red-900/10 rounded-lg p-3 flex flex-col">
+            <h2 className="font-semibold text-lg mb-3 flex items-center">
+              <XOctagon className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
+              Projects At Risk ({projectsAtRisk.length})
+            </h2>
+            <Separator className="mb-3" />
+            
+            <ScrollArea className="flex-grow h-[320px]">
+              <div className="space-y-2 pr-2">
+                {projectsAtRisk.length === 0 ? (
+                  <div className="text-center py-6 text-sm text-muted-foreground">
+                    <p>No projects in this category</p>
+                  </div>
+                ) : (
+                  projectsAtRisk.map(project => (
+                    <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 hover:shadow-md transition-shadow">
+                      <Link to={`/project/${project.id}`} className="font-medium hover:underline block">
+                        {project.projectName}
+                      </Link>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-muted-foreground">
+                          {project.assignedPM || 'Unassigned'}
+                        </span>
+                        <StatusBadge value={project.riskLevel} type="risk" />
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
         </div>
-      </div>
+      )}
       
       {/* Block 3: KPI and Department Charts */}
       <DashboardCharts />
@@ -267,7 +293,7 @@ const Dashboard = () => {
       </div>
       
       {/* Fallback for no projects */}
-      {projects.length === 0 && (
+      {!isLoading && filteredProjects.length === 0 && (
         <div className="text-center py-10">
           <p className="text-muted-foreground mb-4">No project reports found for this period.</p>
           <Button asChild>

@@ -15,13 +15,17 @@ import { formatPeriod } from "@/utils/formatPeriods";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { getProject, projects } = useProjectContext();
+  const { getProject, projects, loadAllPeriods } = useProjectContext();
   const navigate = useNavigate();
   const [projectReports, setProjectReports] = useState<ProjectReport[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   
   const project = getProject(id || "");
 
   useEffect(() => {
+    // Load all available periods to ensure we have the complete list
+    loadAllPeriods();
+    
     if (project) {
       // We need to check database directly to get all reports, not just filter by name
       fetchAllProjectReports(project.projectName);
@@ -29,6 +33,7 @@ const ProjectDetail = () => {
   }, [project]);
   
   const fetchAllProjectReports = async (projectName: string) => {
+    setIsLoading(true);
     try {
       // First find the project in the database by name
       const { data: projectData, error: projectError } = await supabase
@@ -44,6 +49,7 @@ const ProjectDetail = () => {
           p.projectName === projectName
         );
         setProjectReports(reportsFromState);
+        setIsLoading(false);
         return;
       }
       
@@ -69,8 +75,11 @@ const ProjectDetail = () => {
           p.projectName === projectName
         );
         setProjectReports(reportsFromState);
+        setIsLoading(false);
         return;
       }
+      
+      console.log(`Found ${reportsData.length} reports for project: ${projectName}`);
       
       // Map the reports to match our ProjectReport type with proper type casting
       const mappedReports: ProjectReport[] = reportsData.map(report => ({
@@ -118,6 +127,8 @@ const ProjectDetail = () => {
         p.projectName === projectName
       );
       setProjectReports(reportsFromState);
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -180,40 +191,48 @@ const ProjectDetail = () => {
         </div>
       </div>
       
-      {/* KPI Chart Section */}
-      {projectReports.length > 0 ? (
-        <Card className="mb-8">
-          <CardHeader className="pb-2">
-            <CardTitle>Project KPI Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProjectKPIChart project={projectReports[0]} />
-          </CardContent>
-        </Card>
+      {isLoading ? (
+        <div className="text-center py-10">
+          <p>Loading project data...</p>
+        </div>
       ) : (
-        <Card className="mb-8">
-          <CardHeader className="pb-2">
-            <CardTitle>Project KPI Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex h-[300px] items-center justify-center">
-              <p className="text-muted-foreground">No performance data available for this project.</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {/* Monthly Reports Table Section */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Monthly Reports History</h2>
-        {projectReports.length > 0 ? (
-          <MonthlyReportsTable reports={projectReports} />
-        ) : (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6 text-center">
-            <p className="text-muted-foreground">No monthly reports found for this project.</p>
+        <>
+          {/* KPI Chart Section */}
+          {projectReports.length > 0 ? (
+            <Card className="mb-8">
+              <CardHeader className="pb-2">
+                <CardTitle>Project KPI Performance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ProjectKPIChart project={projectReports[0]} />
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="mb-8">
+              <CardHeader className="pb-2">
+                <CardTitle>Project KPI Performance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex h-[300px] items-center justify-center">
+                  <p className="text-muted-foreground">No performance data available for this project.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Monthly Reports Table Section */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-4">Monthly Reports History</h2>
+            {projectReports.length > 0 ? (
+              <MonthlyReportsTable reports={projectReports} />
+            ) : (
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6 text-center">
+                <p className="text-muted-foreground">No monthly reports found for this project.</p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 };

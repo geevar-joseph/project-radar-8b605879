@@ -4,6 +4,7 @@ import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import { sampleProjects } from "@/data/mockData";
 import { fetchProjects, fetchProjectReports, fetchAllReportingPeriods, mapToProjectReport } from "@/api/projectApi";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Hook for fetching and managing project data
@@ -202,9 +203,51 @@ export const useProjectData = () => {
     });
   };
 
-  const getFilteredProjects = (period?: string) => {
+  /**
+   * Get filtered projects based on reporting period
+   * This now queries the database directly for the specified period
+   */
+  const getFilteredProjects = async (period?: string) => {
+    // If no period specified, return all latest project reports
     if (!period) return projects;
-    return projects.filter(project => project.reportingPeriod === period);
+    
+    try {
+      // Query the database directly for projects with reports for this period
+      const { data, error } = await supabase
+        .from('project_reports')
+        .select(`
+          *,
+          projects (
+            *,
+            team_members (
+              id,
+              name
+            )
+          )
+        `)
+        .eq('reporting_period', period);
+      
+      if (error) {
+        console.error('Error fetching filtered projects:', error);
+        // Fallback to filtering the cached data
+        return projects.filter(project => project.reportingPeriod === period);
+      }
+      
+      if (!data || data.length === 0) {
+        console.log(`No reports found for period ${period}, falling back to cached data`);
+        return projects.filter(project => project.reportingPeriod === period);
+      }
+      
+      // Map the database results to ProjectReport objects
+      const periodReports: ProjectReport[] = data.map(report => mapToProjectReport(report));
+      console.log(`Found ${periodReports.length} reports for period ${period}`);
+      
+      return periodReports;
+    } catch (error) {
+      console.error('Error in getFilteredProjects:', error);
+      // Fallback to filtering the cached data
+      return projects.filter(project => project.reportingPeriod === period);
+    }
   };
 
   return {
