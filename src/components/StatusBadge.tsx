@@ -30,11 +30,12 @@ export function StatusBadge({ value, type, className, showIcon = true }: StatusB
     );
   }
   
-  // Don't show the icon for some badge types if showIcon is false
+  // For risk, health, completion, morale, satisfaction, and rating types
+  // Only show the icon with ScoreIndicator, as it already includes the text value
   return (
     <Badge variant="outline" className={`flex items-center gap-1 border-0 px-1 py-0.5 ${className || ''}`}>
       {showIcon && <ScoreIndicator value={value} type={type} />}
-      {value}
+      {/* Do not display the value text separately as it's already in ScoreIndicator */}
     </Badge>
   );
 }
