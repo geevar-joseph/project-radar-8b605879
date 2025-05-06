@@ -1,4 +1,3 @@
-
 import { useProjectContext } from "@/context/ProjectContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProjectReport, ratingToValueMap } from "@/types/project";
@@ -83,20 +82,19 @@ export function ProjectStats() {
         </CardContent>
       </Card>
       
-      {/* Updated chart sizes with better height and margins */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">Risk Distribution</CardTitle>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <ResponsiveContainer width="100%" height={120}> {/* Increased height from 100 to 120 */}
+          <ResponsiveContainer width="100%" height={120}>
             <PieChart margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
               <Pie
                 data={healthData}
                 cx="50%"
                 cy="50%"
-                innerRadius={30} 
-                outerRadius={50} 
+                innerRadius={30}
+                outerRadius={50}
                 paddingAngle={5}
                 dataKey="value"
               >
