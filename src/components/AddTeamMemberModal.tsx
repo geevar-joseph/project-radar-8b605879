@@ -8,9 +8,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { generateSecurePassword } from "@/utils/password";
 
 interface AddTeamMemberModalProps {
   open: boolean;
@@ -26,7 +23,6 @@ export const AddTeamMemberModal = ({ open, onOpenChange }: AddTeamMemberModalPro
   const [projectSearch, setProjectSearch] = useState("");
   const [showProjectDropdown, setShowProjectDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
   const filteredProjects = projectNames.filter(
     (project) => 
@@ -34,89 +30,26 @@ export const AddTeamMemberModal = ({ open, onOpenChange }: AddTeamMemberModalPro
       project.toLowerCase().includes(projectSearch.toLowerCase())
   );
 
-  const sendWelcomeEmail = async (email: string, name: string, tempPassword: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('send-welcome-email', {
-        body: { email, name, tempPassword }
-      });
-
-      if (error) {
-        console.error('Error sending welcome email:', error);
-        return false;
-      }
-
-      console.log('Welcome email sent:', data);
-      return true;
-    } catch (err) {
-      console.error('Exception sending welcome email:', err);
-      return false;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!fullName || !email || !role) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields.",
-        variant: "destructive"
-      });
-      return;
+      return; // Don't submit if required fields are missing
     }
 
     setIsSubmitting(true);
     
     try {
-      // Generate a secure temporary password
-      const tempPassword = generateSecurePassword();
-
-      // Create the team member with the temporary password
-      const { data, error } = await supabase
-        .from('team_members')
-        .insert({
-          name: fullName,
-          email: email,
-          role: role,
-          temp_password: tempPassword,
-          force_password_change: true
-        })
-        .select();
-
-      if (error) {
-        throw error;
-      }
-
-      // Send welcome email with temp password
-      const emailSent = await sendWelcomeEmail(email, fullName, tempPassword);
+      await addTeamMember(fullName, email, role);
       
-      if (!emailSent) {
-        toast({
-          title: "Warning",
-          description: "User created but failed to send welcome email. Please contact them manually.",
-          variant: "destructive"
-        });
-      }
-
       // Reset form and close modal
       setFullName("");
       setEmail("");
       setRole("");
       setAssignedProjects([]);
-      
-      toast({
-        title: "Team Member Added",
-        description: `${fullName} has been added successfully. A welcome email has been sent with login details.`,
-      });
-      
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error adding team member:", error);
-      toast({
-        title: "Error",
-        description: error.message || "There was an error adding the team member.",
-        variant: "destructive"
-      });
     } finally {
       setIsSubmitting(false);
     }
@@ -138,7 +71,7 @@ export const AddTeamMemberModal = ({ open, onOpenChange }: AddTeamMemberModalPro
           <DialogHeader>
             <DialogTitle>Add New Team Member</DialogTitle>
             <DialogDescription>
-              Enter the details for the new team member. A temporary password will be generated and emailed to them.
+              Enter the details for the new team member.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">

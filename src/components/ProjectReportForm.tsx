@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,7 +29,6 @@ import { ScoreIndicator } from "./ScoreIndicator";
 import { KPIScoreMeter } from "./KPIScoreMeter";
 import { OverallProjectScore } from "./OverallProjectScore";
 import { useState, useEffect, useMemo } from "react";
-import { TeamMember } from "@/hooks/useTeamMembers";
 import { 
   RatingValue, 
   RiskLevel, 
@@ -110,16 +110,11 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
     return options;
   }, []);
   
-  // Get team member names from teamMembers objects for use in the form
-  const teamMemberNames = useMemo(() => {
-    return teamMembers.map(member => member.name);
-  }, [teamMembers]);
-  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       projectName: projectNames[0] || "",
-      submittedBy: teamMemberNames[0] || "",
+      submittedBy: teamMembers[0] || "",
       reportingPeriod: reportingPeriodOptions[0]?.value || "",
       riskLevel: "N.A.",
       financialHealth: "N.A.",
@@ -783,23 +778,23 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
                         <CommandList>
                           <CommandEmpty>No team member found.</CommandEmpty>
                           <CommandGroup className="max-h-[200px] overflow-y-auto">
-                            {teamMemberNames.map((memberName) => (
+                            {teamMembers.map((member) => (
                               <CommandItem
-                                key={memberName}
-                                value={memberName}
+                                key={member}
+                                value={member}
                                 onSelect={() => {
-                                  form.setValue("submittedBy", memberName);
+                                  form.setValue("submittedBy", member);
                                 }}
                               >
                                 <Check
                                   className={cn(
                                     "mr-2 h-4 w-4",
-                                    memberName === field.value
+                                    member === field.value
                                       ? "opacity-100"
                                       : "opacity-0"
                                   )}
                                 />
-                                {memberName}
+                                {member}
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -811,56 +806,220 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
                 </FormItem>
               )}
             />
-
-            {/* Reporting Period Field - Modified to remove ScoreIndicator since "period" is not a valid type */}
+            
+            {/* Reporting Period Field - Keep validation logic */}
             <FormField
               control={form.control}
               name="reportingPeriod"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Reporting Period</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={(value) => {
+                    field.onChange(value);
+                  }} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select reporting period" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="N.A.">
-                        No reporting period selected
-                      </SelectItem>
-                      {reportingPeriodOptions.map((option) => (
+                      {reportingPeriodOptions.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormDescription>
+                    {periodExists && (
+                      <div className="text-amber-600 font-medium flex items-center mt-1">
+                        ⚠️ A report for "{selectedProject}" already exists for this period
+                      </div>
+                    )}
+                    {!periodExists && "Select the month and year for this report"}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+        
+        {/* Overall Project Health Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Overall Project Health</CardTitle>
+            <KPIScoreMeter score={projectHealthScore} label="Project Health Score" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderRiskLevelField()}
+              {renderFinancialHealthField()}
+              {renderCustomerSatisfactionField()}
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Team KPIs Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Team KPIs</CardTitle>
+            <KPIScoreMeter score={teamKPIsScore} label="Team KPIs Score" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderTeamMoraleField()}
+              {renderCompletionStatusField()}
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Departmental Performance Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Departmental Performance</CardTitle>
+            <KPIScoreMeter score={departmentalScore} label="Departmental Score" />
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderScoreField('frontEndQuality', 'Front-End Team Quality')}
+              {renderScoreField('backEndQuality', 'Back-End Team Quality')}
+              {renderScoreField('testingQuality', 'Testing Team Quality')}
+              {renderScoreField('designQuality', 'Design Team Quality')}
+              {renderScoreField('projectManagerEvaluation', 'Project Manager Self-Evaluation')}
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Overall Project Score Card - UPDATED TO HAVE INLINE SCORE METER */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Overall Project Score</CardTitle>
+            <KPIScoreMeter score={overallProjectScore} label="Overall Score" />
+          </CardHeader>
+          <CardContent>
+            <OverallProjectScore 
+              score={overallProjectScore}
+              doingWell={doingWellKPIs}
+              needsAttention={needsAttentionKPIs}
+            />
+          </CardContent>
+        </Card>
+        
+        {/* Additional Information Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Additional Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="keyAchievements"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Key Achievements</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="List key milestones and achievements from this reporting period"
+                      className="min-h-24"
+                      {...field} 
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Show warning if report already exists */}
-            {periodExists && (
-              <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded">
-                <span className="font-medium">Warning:</span>
-                <span className="ml-2">A report already exists for {selectedProject} in this period.</span>
-              </div>
-            )}
+            <FormField
+              control={form.control}
+              name="primaryChallenges"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Primary Challenges</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Describe any major challenges or blockers faced during this period"
+                      className="min-h-24"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="nextSteps"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Next Steps</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Outline planned tasks and milestones for the next reporting period"
+                      className="min-h-24"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="followUpActions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Follow-up Actions</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="List any actions needed from management or other teams"
+                      className="min-h-24"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional Notes</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Any other comments or information to include in the report"
+                      className="min-h-24"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </CardContent>
         </Card>
-
-        {/* ... keep existing code (remaining cards and form fields) */}
-
-        {/* Form Action Buttons */}
-        <div className="flex justify-between">
+        
+        {/* Form Actions */}
+        <div className="flex justify-end gap-2">
           <Button 
+            variant="outline" 
             type="button" 
-            variant="outline"
+            onClick={() => navigate('/')}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="secondary" 
+            type="button" 
             onClick={saveDraft}
           >
-            <Save className="mr-2 h-4 w-4" /> Save Draft
+            <Save className="mr-1 h-4 w-4" />
+            Save Draft
           </Button>
           <Button type="submit">Submit Report</Button>
         </div>

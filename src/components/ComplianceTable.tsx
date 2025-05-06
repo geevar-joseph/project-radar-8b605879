@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TeamMember } from '@/hooks/useTeamMembers';
 
 export const ComplianceTable = () => {
   const { projects, teamMembers } = useProjectContext();
@@ -30,7 +29,7 @@ export const ComplianceTable = () => {
     return teamMembers.map(pm => {
       // Get all projects assigned to this PM
       const pmProjects = [...new Set(
-        projects.filter(p => p.assignedPM === pm.name).map(p => p.projectName)
+        projects.filter(p => p.assignedPM === pm).map(p => p.projectName)
       )];
       
       // For each period, determine submission status
@@ -38,7 +37,7 @@ export const ComplianceTable = () => {
         // Check if PM has any projects in this period
         const projectsInPeriod = projects.filter(p => 
           p.reportingPeriod === period && 
-          p.assignedPM === pm.name
+          p.assignedPM === pm
         );
         
         if (projectsInPeriod.length === 0) {
@@ -72,7 +71,7 @@ export const ComplianceTable = () => {
       }, 0) / periodStatuses.filter(s => s.status !== 'N/A').length * 100 || 0;
       
       return {
-        pmName: pm.name,
+        pmName: pm,
         periodStatuses,
         complianceScore: Math.round(complianceScore)
       };

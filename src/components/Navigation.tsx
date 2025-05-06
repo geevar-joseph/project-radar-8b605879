@@ -1,59 +1,101 @@
 
-import { useState, useEffect } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { LeftSidebar } from "./LeftSidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Link, useNavigate, Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext";
-import { LogOut, UserCircle, Menu } from "lucide-react";
+import { 
+  SidebarProvider, 
+  Sidebar, 
+  SidebarContent, 
+  SidebarHeader, 
+  SidebarFooter,
+  SidebarMenu, 
+  SidebarMenuItem, 
+  SidebarMenuButton,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarInset
+} from "@/components/ui/sidebar";
+import { LayoutDashboard, FileText, Settings, LogOut, FolderOpen } from "lucide-react";
 
 export function Navigation() {
-  const { user, signOut } = useAuth();
-  
-  const handleLogout = async () => {
-    await signOut();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // In a real implementation, this would clear auth tokens
+    console.log("Logging out");
+    navigate("/login");
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full">
-        <LeftSidebar />
-        <div className="flex-1">
-          <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden">
-            <div className="container flex h-14 max-w-screen-2xl items-center">
-              <SidebarTrigger />
-              <div className="flex flex-1 items-center justify-between">
-                <Link to="/" className="flex items-center">
-                  <span className="text-lg font-bold ml-2">Project Manager</span>
-                </Link>
-
-                {user ? (
-                  <div className="flex items-center gap-2">
-                    <UserCircle className="h-6 w-6 hidden sm:block" />
-                    <span className="text-sm mr-2 hidden sm:block">{user.email}</span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="h-4 w-4 mr-1" />
-                      Logout
-                    </Button>
-                  </div>
-                ) : (
-                  <Link to="/login">
-                    <Button variant="outline" size="sm">
-                      Login
-                    </Button>
-                  </Link>
-                )}
-              </div>
+        <Sidebar>
+          <SidebarHeader className="border-b border-border">
+            <div className="px-4 py-4">
+              <h2 className="font-bold text-xl">Project Radar</h2>
             </div>
-          </header>
-          <main className="flex-1 p-4 md:p-6">
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Main</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip="Dashboard">
+                      <Link to="/dashboard">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip="Projects">
+                      <Link to="/projects">
+                        <FolderOpen className="mr-2 h-4 w-4" />
+                        <span>Projects</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip="Submit Report">
+                      <Link to="/submit-report">
+                        <FileText className="mr-2 h-4 w-4" />
+                        <span>Submit Report</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            
+            <SidebarGroup>
+              <SidebarGroupLabel>Admin</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip="Manage Options">
+                      <Link to="/manage-options">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Manage Projects & Users</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+          <SidebarFooter className="border-t border-border p-4">
+            <Button variant="outline" className="w-full" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </SidebarFooter>
+        </Sidebar>
+        <SidebarInset>
+          <div className="p-6 h-full overflow-auto">
             <Outlet />
-          </main>
-        </div>
+          </div>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );

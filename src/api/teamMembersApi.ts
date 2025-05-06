@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { generateSecurePassword } from "@/utils/password";
 
 /**
  * Fetches team members from Supabase
@@ -37,31 +36,15 @@ export const fetchTeamMembers = async () => {
  */
 export const addTeamMember = async (name: string, email: string, role: string) => {
   try {
-    // Generate a secure temporary password
-    const tempPassword = generateSecurePassword();
-
-    // Insert the team member with temporary password
     const { error } = await supabase
       .from('team_members')
       .insert({
         name,
         email,
-        role,
-        temp_password: tempPassword,
-        force_password_change: true
+        role
       });
 
     if (error) throw error;
-
-    // Send welcome email with login credentials
-    try {
-      await supabase.functions.invoke('send-welcome-email', {
-        body: { email, name, tempPassword }
-      });
-    } catch (emailError) {
-      console.error('Failed to send welcome email:', emailError);
-      // Continue with success even if email fails
-    }
     
     return { success: true, error: null };
   } catch (error) {
@@ -75,10 +58,9 @@ export const addTeamMember = async (name: string, email: string, role: string) =
  */
 export const removeTeamMember = async (name: string) => {
   try {
-    // Get the team member to get their auth_user_id
     const { data } = await supabase
       .from('team_members')
-      .select('id, auth_user_id')
+      .select('id')
       .eq('name', name)
       .single();
     
@@ -97,16 +79,13 @@ export const removeTeamMember = async (name: string) => {
       throw projectUpdateError;
     }
     
-    // Delete the team member
-    const { error: deleteError } = await supabase
+    // Now it's safe to delete the team member
+    const { error } = await supabase
       .from('team_members')
       .delete()
       .eq('id', data.id);
 
-    if (deleteError) throw deleteError;
-
-    // If there is an auth user associated, delete them from auth.users
-    // Note: This will be handled by a cascade delete due to the foreign key relationship
+    if (error) throw error;
 
     return { success: true, error: null };
   } catch (error) {
