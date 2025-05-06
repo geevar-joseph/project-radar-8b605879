@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { formatDate } from "@/utils/formatters";
-import { riskToColorMap, healthToColorMap, ratingToValueMap } from "@/types/project";
+import { ratingToValueMap, riskToColorMap, healthToColorMap } from "@/types/project";
 import { useNavigate } from "react-router-dom";
 
 // Define the project data structure specifically for table rows

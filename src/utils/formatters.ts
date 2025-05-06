@@ -41,7 +41,7 @@ export function getValidProjectStatus(status: ProjectStatus | undefined): Projec
     return 'Active'; // Default if status is an object but invalid
   }
   
-  if (status && (status === 'Active' || status === 'Inactive' || status === 'Support')) {
+  if (status && (status === 'Active' || status === 'Completed' || status === 'On Hold' || status === 'Cancelled')) {
     return status;
   }
   

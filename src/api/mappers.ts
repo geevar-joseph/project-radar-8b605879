@@ -1,5 +1,5 @@
 
-import { ProjectReport } from "@/types/project";
+import { ProjectReport, RatingValue } from "@/types/project";
 
 /**
  * Maps data from Supabase format to our application format
@@ -13,6 +13,13 @@ export const mapToProjectReport = (dbReport: any): ProjectReport => {
   } else if (dbReport.team_members) {
     pmName = dbReport.team_members.name;
   }
+
+  // Default to "N.A." if overall_project_score is not provided
+  const overallScore = dbReport.overall_project_score || "N.A.";
+  // Make sure the overall score is a valid RatingValue
+  const validOverallScore = ["Excellent", "Good", "Fair", "Poor", "N.A."].includes(overallScore) 
+    ? overallScore as RatingValue 
+    : "N.A." as RatingValue;
 
   return {
     id: dbReport.id,
@@ -35,8 +42,8 @@ export const mapToProjectReport = (dbReport: any): ProjectReport => {
     projectStatus: dbReport.project_status || dbReport.projects?.project_status || undefined,
     assignedPM: pmName || "",
     jiraId: dbReport.jira_id || dbReport.projects?.jira_id || "",
-    // Properly map the overall score
-    overallProjectScore: dbReport.overall_project_score || "N.A.",
+    // Properly map the overall score as a RatingValue
+    overallProjectScore: validOverallScore,
     // Add the new fields
     notes: dbReport.notes || "",
     keyAchievements: dbReport.key_achievements || "",

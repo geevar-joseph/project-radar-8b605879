@@ -71,13 +71,13 @@ export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) 
       // Excellent ratings - 4 dots
       case 'Excellent':
       case 'Healthy':
-      case 'All completed':
+      case 'Completely':
       case 'Very Satisfied':
-      case 'High': // High morale or High risk
+      case 'High': // High morale
         return {
           count: 4,
-          activeCount: type === "risk" ? 2 : 4, // High risk = 2 dots, High morale = 4 dots
-          color: type === "risk" ? 'bg-orange-400' : 'bg-emerald-500'
+          activeCount: type === "risk" && value === "High" ? 2 : 4, // High risk = 2 dots, High morale = 4 dots
+          color: type === "risk" && value === "High" ? 'bg-orange-400' : 'bg-emerald-500'
         };
       
       // Good ratings - 3 dots
@@ -98,7 +98,6 @@ export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) 
       case 'Partially': // For completion
       case 'Neutral / Unclear': // For satisfaction
       case 'At Risk': // For financial health
-      case 'High': // For risk level (when it means high risk)
         return {
           count: 4,
           activeCount: 2,
@@ -111,6 +110,7 @@ export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) 
       case 'Critical': // For risk level and financial health
       case 'Burnt Out': // For team morale
       case 'Dissatisfied':
+      case 'Very Dissatisfied':
         return {
           count: 4,
           activeCount: 1,

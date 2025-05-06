@@ -296,6 +296,15 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
   function onSubmit(data: FormValues) {
     const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     
+    // Find the appropriate overall score based on the calculated value
+    let scoreRating: RatingValue = "N.A.";
+    if (overallProjectScore !== null) {
+      if (overallProjectScore >= 3.5) scoreRating = "Excellent";
+      else if (overallProjectScore >= 2.5) scoreRating = "Good";
+      else if (overallProjectScore >= 1.5) scoreRating = "Fair";
+      else scoreRating = "Poor";
+    }
+    
     // Ensure all required fields are present
     const newProject = {
       id: uuidv4(),
@@ -313,6 +322,8 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
       backEndQuality: data.backEndQuality,
       testingQuality: data.testingQuality,
       designQuality: data.designQuality,
+      // Add the calculated overall score
+      overallProjectScore: scoreRating,
       // Add the new fields
       notes: data.notes,
       keyAchievements: data.keyAchievements,

@@ -17,6 +17,7 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Good",
     testingQuality: "Good",
     designQuality: "Excellent",
+    overallProjectScore: "Excellent",
     submissionDate: "2025-04-30",
     clientName: "Acme Corp",
     projectType: "Service",
@@ -38,6 +39,7 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Fair",
     testingQuality: "Fair",
     designQuality: "Good",
+    overallProjectScore: "Good",
     submissionDate: "2025-04-28",
     clientName: "TechStart Inc.",
     projectType: "Service",
@@ -59,10 +61,11 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Poor",
     testingQuality: "Poor",
     designQuality: "Fair",
+    overallProjectScore: "Poor",
     submissionDate: "2025-04-25",
     clientName: "Global Industries",
     projectType: "Service",
-    projectStatus: "Inactive",
+    projectStatus: "On Hold", // Changed from "Inactive" to "On Hold"
     assignedPM: "Alice Johnson"
   },
   {
@@ -72,7 +75,7 @@ export const sampleProjects: ProjectReport[] = [
     reportingPeriod: "2025-03",
     riskLevel: "Low",
     financialHealth: "Healthy",
-    completionOfPlannedWork: "All completed",
+    completionOfPlannedWork: "Completely", // Changed from "All completed" to "Completely"
     teamMorale: "High",
     customerSatisfaction: "Very Satisfied",
     projectManagerEvaluation: "Excellent",
@@ -80,10 +83,11 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Excellent", 
     testingQuality: "Good",
     designQuality: "Excellent",
+    overallProjectScore: "Excellent",
     submissionDate: "2025-03-31",
     clientName: "DataViz Corp",
     projectType: "Product",
-    projectStatus: "Support",
+    projectStatus: "Active", // Changed from "Support" to "Active"
     assignedPM: "Michael Brown"
   },
   {
@@ -101,6 +105,7 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Excellent",
     testingQuality: "Excellent",
     designQuality: "N.A.",
+    overallProjectScore: "Good",
     submissionDate: "2025-03-29",
     clientName: "SecureBank",
     projectType: "Service",
@@ -123,6 +128,7 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Fair",
     testingQuality: "Fair",
     designQuality: "Good",
+    overallProjectScore: "Fair",
     submissionDate: "2025-03-31",
     clientName: "Acme Corp",
     projectType: "Service",
@@ -144,6 +150,7 @@ export const sampleProjects: ProjectReport[] = [
     backEndQuality: "Poor",
     testingQuality: "Fair",
     designQuality: "Good",
+    overallProjectScore: "Poor",
     submissionDate: "2025-02-28",
     clientName: "Acme Corp",
     projectType: "Service",
