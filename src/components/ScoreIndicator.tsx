@@ -58,6 +58,7 @@ export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) 
       case 'All completed':
       case 'Very Satisfied':
       case 'Low': // For risk level (low risk = high score)
+      case 'High': // For team morale (high morale = high score)
         return {
           count: 4,
           activeCount: 4,
@@ -82,18 +83,11 @@ export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) 
       case 'Partially': // For completion
       case 'Neutral / Unclear': // For satisfaction
       case 'At Risk': // For financial health
+      case 'Low': // For team morale (when it means low morale)
         return {
           count: 4,
           activeCount: 2,
           color: 'bg-amber-400'
-        };
-
-      // High risk level (less desirable) - 2 dots in orange
-      case 'High': 
-        return {
-          count: 4,
-          activeCount: 2,
-          color: 'bg-orange-400'
         };
         
       // Poor/Critical ratings - 1 dot
