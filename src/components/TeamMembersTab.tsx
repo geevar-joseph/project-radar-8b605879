@@ -10,14 +10,14 @@ import { useTeamMembers, TeamMember } from "@/hooks/useTeamMembers";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TeamMembersTabProps {
-  teamMembers: TeamMember[]; // Updated type
+  teamMembers: TeamMember[];
   projects: ProjectReport[];
   removeTeamMember: (name: string) => void;
 }
 
 export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: TeamMembersTabProps) => {
   const [isAddTeamMemberModalOpen, setIsAddTeamMemberModalOpen] = useState(false);
-  const [teamMembersData, setTeamMembersData] = useState<TeamMember[]>([]);
+  const [teamMembersData, setTeamMembersData] = useState<(TeamMember & { assignedProjects: string[] })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { loadTeamMembers } = useTeamMembers();
@@ -69,7 +69,7 @@ export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: Team
     } catch (error) {
       console.error('Error fetching team members data:', error);
       
-      // Fallback to creating mock data from the teamMembers prop
+      // Fallback to creating data from the teamMembers prop with guaranteed assignedProjects
       const fallbackData = teamMembers.map((member, index) => ({
         ...member,
         id: member.id || `U${1000 + index}`,
@@ -82,7 +82,7 @@ export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: Team
         ),
       }));
       
-      setTeamMembersData(fallbackData);
+      setTeamMembersData(fallbackData as (TeamMember & { assignedProjects: string[] })[]);
     } finally {
       setIsLoading(false);
     }
