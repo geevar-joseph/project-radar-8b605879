@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -170,9 +169,6 @@ export const EditTeamMemberModal = ({ open, onOpenChange, teamMember, refreshTea
                     <SelectContent>
                       <SelectItem value="Admin">Admin</SelectItem>
                       <SelectItem value="Project Manager">Project Manager</SelectItem>
-                      <SelectItem value="Developer">Developer</SelectItem>
-                      <SelectItem value="Designer">Designer</SelectItem>
-                      <SelectItem value="QA Engineer">QA Engineer</SelectItem>
                       <SelectItem value="Viewer">Viewer</SelectItem>
                     </SelectContent>
                   </Select>
