@@ -51,18 +51,33 @@ export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) 
 
   // Now handle the general cases using the 4-dot system for all indicator types
   const getDotsConfig = () => {
+    if (type === "risk" && value === "Low") {
+      return {
+        count: 4,
+        activeCount: 4,
+        color: 'bg-emerald-500'
+      };
+    }
+
+    if (type === "morale" && value === "Low") {
+      return {
+        count: 4,
+        activeCount: 2,
+        color: 'bg-orange-400'
+      };
+    }
+
     switch (value) {
       // Excellent ratings - 4 dots
       case 'Excellent':
       case 'Healthy':
       case 'All completed':
       case 'Very Satisfied':
-      case 'Low': // For risk level (low risk = high score)
-      case 'High': // For team morale (high morale = high score)
+      case 'High': // High morale or High risk
         return {
           count: 4,
-          activeCount: 4,
-          color: 'bg-emerald-500'
+          activeCount: type === "risk" ? 2 : 4, // High risk = 2 dots, High morale = 4 dots
+          color: type === "risk" ? 'bg-orange-400' : 'bg-emerald-500'
         };
       
       // Good ratings - 3 dots
@@ -83,12 +98,11 @@ export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) 
       case 'Partially': // For completion
       case 'Neutral / Unclear': // For satisfaction
       case 'At Risk': // For financial health
-      case 'High': // For risk level
-      case 'Low': // For team morale (when it means low morale)
+      case 'High': // For risk level (when it means high risk)
         return {
           count: 4,
           activeCount: 2,
-          color: value === 'Low' ? 'bg-orange-400' : 'bg-amber-400'
+          color: 'bg-amber-400'
         };
         
       // Poor/Critical ratings - 1 dot
