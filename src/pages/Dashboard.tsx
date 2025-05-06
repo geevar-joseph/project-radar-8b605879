@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectCard } from "@/components/ProjectCard";
 import { Button } from "@/components/ui/button";
@@ -7,18 +7,16 @@ import { Link } from "react-router-dom";
 import { Check, AlertTriangle, XOctagon, Clock } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { DashboardCharts } from "@/components/DashboardCharts";
-import { ProjectStats } from "@/components/ProjectStats";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { MissingReportsBlock } from "@/components/MissingReportsBlock";
 import { ComplianceTable } from "@/components/ComplianceTable";
 import { formatPeriod } from "@/utils/formatPeriods";
 import { SearchableSelect } from "@/components/SearchableSelect";
-import { ProjectReport } from "@/types/project";
 
 const Dashboard = () => {
   const { 
-    getFilteredProjectsSync,
+    getFilteredProjects,
     availablePeriods,
     selectedPeriod, 
     setSelectedPeriod,
@@ -26,237 +24,259 @@ const Dashboard = () => {
     loadAllPeriods
   } = useProjectContext();
   
-  const filteredProjects = getFilteredProjectsSync(selectedPeriod);
-  
   // Load all available periods when dashboard mounts
   useEffect(() => {
     loadAllPeriods();
   }, []);
   
-  // High risk projects are those with "High" or "Critical" risk level
-  const highRiskProjects = filteredProjects.filter(
-    p => p.riskLevel === "High" || p.riskLevel === "Critical"
+  const projects = getFilteredProjects(selectedPeriod);
+  
+  // Format periods for the searchable select component
+  const periodOptions = availablePeriods
+    .filter(period => period !== "N/A")
+    .map(period => ({
+      value: period,
+      label: formatPeriod(period)
+    }));
+  
+  // Calculate project statistics based on risk levels
+  const totalProjects = projects.length;
+  const projectsDoingWell = projects.filter(p => 
+    p.riskLevel === "Low"
+  );
+  const projectsNeedingAttention = projects.filter(p => 
+    p.riskLevel === "Medium"
+  );
+  const projectsAtRisk = projects.filter(p => 
+    p.riskLevel === "High" || p.riskLevel === "Critical"
   );
   
-  // Projects with financial health issues
-  const financialIssueProjects = filteredProjects.filter(
-    p => p.financialHealth === "At Risk" || p.financialHealth === "Critical"
-  );
-  
-  // Projects with low team morale
-  const lowMoraleProjects = filteredProjects.filter(
-    p => p.teamMorale === "Low" || p.teamMorale === "Burnt Out"
-  );
-  
-  // Total number of projects in the system (based on project names)
-  const totalProjects = projectNames.length;
-  
-  // Projects missing reports for the selected period
-  const missingReportsCount = totalProjects - filteredProjects.length;
-  
+  // Calculate pending projects (projects that don't have reports for the selected period)
+  const pendingProjects = selectedPeriod 
+    ? projectNames.filter(name => 
+        !projects.some(p => p.projectName === name && p.reportingPeriod === selectedPeriod)
+      ).length
+    : 0;
+
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="container mx-auto py-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Project Dashboard</h1>
-          <p className="text-muted-foreground">Overview of all projects and their health</p>
+          <h1 className="text-3xl font-bold">Project Reports Dashboard</h1>
+          <p className="text-muted-foreground">
+            {selectedPeriod 
+              ? `Viewing data for ${formatPeriod(selectedPeriod)}` 
+              : "Viewing all project data"}
+          </p>
         </div>
         
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          <div className="w-full md:w-64">
+        <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
+          <div>
             <SearchableSelect
-              options={availablePeriods.map(period => ({
-                label: formatPeriod(period),
-                value: period
-              }))}
-              value={selectedPeriod || ''}
-              onValueChange={value => setSelectedPeriod(value as string)}
-              placeholder="Select period..."
-              label="Reporting Period"
+              value={selectedPeriod || ""}
+              onValueChange={setSelectedPeriod}
+              placeholder="Select Period"
+              options={periodOptions}
+              emptyMessage="No periods found"
+              width="w-[200px]"
             />
           </div>
           
-          <Button variant="outline" asChild>
-            <Link to="/submit-report">Submit Report</Link>
+          <Button asChild>
+            <Link to="/submit-report">
+              Submit New Report
+            </Link>
           </Button>
         </div>
       </div>
       
-      {/* Projects stats section */}
-      <ProjectStats />
-      
-      {/* KPI Charts and Analysis */}
-      <DashboardCharts />
-      
-      {/* Project Status Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="border rounded-md p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="font-medium">High Risk Projects</h3>
-              <p className="text-3xl font-semibold mt-2">{highRiskProjects.length}</p>
-            </div>
-            <div className="bg-red-100 p-2 rounded-full">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-            </div>
+      {/* Block 1: Summary Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        {/* Total Projects Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
+          <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-3 mr-4">
+            <span className="text-blue-600 dark:text-blue-400 text-lg">
+              {totalProjects}
+            </span>
           </div>
-          {highRiskProjects.length > 0 ? (
-            <ScrollArea className="h-52 mt-4">
-              <div className="space-y-2">
-                {highRiskProjects.map(project => (
-                  <div key={project.id} className="flex items-center justify-between border-b pb-2">
-                    <Link to={`/project/${project.id}`} className="text-sm font-medium hover:underline">
-                      {project.projectName}
-                    </Link>
-                    <StatusBadge value={project.riskLevel} type="risk" />
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-              <Check className="h-8 w-8 mb-2 text-green-500" />
-              <p>No high risk projects</p>
-            </div>
-          )}
+          <div>
+            <h3 className="font-semibold text-lg">Total Projects</h3>
+            <p className="text-sm text-muted-foreground">
+              {selectedPeriod ? `For ${formatPeriod(selectedPeriod)}` : "All periods"}
+            </p>
+          </div>
         </div>
         
-        <div className="border rounded-md p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="font-medium">Financial Issues</h3>
-              <p className="text-3xl font-semibold mt-2">{financialIssueProjects.length}</p>
-            </div>
-            <div className="bg-amber-100 p-2 rounded-full">
-              <XOctagon className="h-5 w-5 text-amber-600" />
-            </div>
+        {/* Pending Projects Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
+          <div className="rounded-full bg-orange-100 dark:bg-orange-900/30 p-3 mr-4">
+            <Clock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
           </div>
-          {financialIssueProjects.length > 0 ? (
-            <ScrollArea className="h-52 mt-4">
-              <div className="space-y-2">
-                {financialIssueProjects.map(project => (
-                  <div key={project.id} className="flex items-center justify-between border-b pb-2">
-                    <Link to={`/project/${project.id}`} className="text-sm font-medium hover:underline">
-                      {project.projectName}
-                    </Link>
-                    <StatusBadge value={project.financialHealth} type="health" />
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-              <Check className="h-8 w-8 mb-2 text-green-500" />
-              <p>No financial issues</p>
-            </div>
-          )}
+          <div>
+            <h3 className="font-semibold text-lg">{pendingProjects}</h3>
+            <p className="text-sm text-muted-foreground">Pending</p>
+          </div>
         </div>
         
-        <div className="border rounded-md p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="font-medium">Low Team Morale</h3>
-              <p className="text-3xl font-semibold mt-2">{lowMoraleProjects.length}</p>
-            </div>
-            <div className="bg-blue-100 p-2 rounded-full">
-              <Clock className="h-5 w-5 text-blue-600" />
-            </div>
+        {/* Projects Doing Well Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
+          <div className="rounded-full bg-green-100 dark:bg-green-900/30 p-3 mr-4">
+            <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
           </div>
-          {lowMoraleProjects.length > 0 ? (
-            <ScrollArea className="h-52 mt-4">
-              <div className="space-y-2">
-                {lowMoraleProjects.map(project => (
-                  <div key={project.id} className="flex items-center justify-between border-b pb-2">
-                    <Link to={`/project/${project.id}`} className="text-sm font-medium hover:underline">
-                      {project.projectName}
-                    </Link>
-                    <StatusBadge value={project.teamMorale} type="morale" />
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-              <Check className="h-8 w-8 mb-2 text-green-500" />
-              <p>No morale issues</p>
-            </div>
-          )}
+          <div>
+            <h3 className="font-semibold text-lg">{projectsDoingWell.length}</h3>
+            <p className="text-sm text-muted-foreground">Doing Well</p>
+          </div>
+        </div>
+        
+        {/* Projects Needing Attention Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
+          <div className="rounded-full bg-amber-100 dark:bg-amber-900/30 p-3 mr-4">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">{projectsNeedingAttention.length}</h3>
+            <p className="text-sm text-muted-foreground">Needing Attention</p>
+          </div>
+        </div>
+        
+        {/* Projects At Risk Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg border p-4 flex items-center shadow-sm">
+          <div className="rounded-full bg-red-100 dark:bg-red-900/30 p-3 mr-4">
+            <XOctagon className="h-5 w-5 text-red-600 dark:text-red-400" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">{projectsAtRisk.length}</h3>
+            <p className="text-sm text-muted-foreground">At Risk</p>
+          </div>
         </div>
       </div>
       
-      {/* Missing Reports */}
-      {missingReportsCount > 0 && selectedPeriod && (
-        <div className="mb-8 p-6 border rounded-md bg-amber-50">
-          <h2 className="text-xl font-bold text-amber-900 mb-4">Missing Reports: {missingReportsCount}</h2>
-          <p className="text-amber-800 mb-4">
-            There are {missingReportsCount} projects that have not submitted reports for the period {selectedPeriod}.
-          </p>
+      {/* Block 2: Categorized Project List */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        {/* Column 1: Projects Doing Well */}
+        <div className="border-t-4 border-green-500 bg-green-50 dark:bg-green-900/10 rounded-lg p-3 flex flex-col">
+          <h2 className="font-semibold text-lg mb-3 flex items-center">
+            <Check className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
+            Projects Doing Well ({projectsDoingWell.length})
+          </h2>
+          <Separator className="mb-3" />
           
-          <ScrollArea className="h-32">
-            <div className="space-y-1">
-              {projectNames
-                .filter(name => !filteredProjects.some(p => p.projectName === name))
-                .map((name, index) => (
-                  <div key={index} className="text-sm text-amber-800 p-1 border-b border-amber-200">
-                    {name}
+          <ScrollArea className="flex-grow h-[320px]">
+            <div className="space-y-2 pr-2">
+              {projectsDoingWell.length === 0 ? (
+                <div className="text-center py-6 text-sm text-muted-foreground">
+                  <p>No projects in this category</p>
+                </div>
+              ) : (
+                projectsDoingWell.map(project => (
+                  <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 hover:shadow-md transition-shadow">
+                    <Link to={`/project/${project.id}`} className="font-medium hover:underline block">
+                      {project.projectName}
+                    </Link>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-muted-foreground">
+                        {project.assignedPM || 'Unassigned'}
+                      </span>
+                      <StatusBadge value={project.riskLevel} type="risk" />
+                    </div>
                   </div>
-                ))}
+                ))
+              )}
             </div>
           </ScrollArea>
-          
-          <div className="mt-4">
-            <Button variant="default" asChild>
-              <Link to="/submit-report">Submit Missing Reports</Link>
-            </Button>
-          </div>
         </div>
-      )}
-      
-      {/* Compliance Table */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4">Project Compliance</h2>
-        <div className="border rounded-md overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-muted">
-              <tr>
-                <th className="p-3 text-left font-medium">Project</th>
-                <th className="p-3 text-left font-medium">Last Report</th>
-                <th className="p-3 text-left font-medium">Status</th>
-                <th className="p-3 text-left font-medium">Risk Level</th>
-                <th className="p-3 text-left font-medium">Financial Health</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProjects.map((project) => (
-                <tr key={project.id} className="border-t">
-                  <td className="p-3">
-                    <Link to={`/project/${project.id}`} className="font-medium hover:underline">
+        
+        {/* Column 2: Projects Needing Attention */}
+        <div className="border-t-4 border-amber-500 bg-amber-50 dark:bg-amber-900/10 rounded-lg p-3 flex flex-col">
+          <h2 className="font-semibold text-lg mb-3 flex items-center">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-2" />
+            Projects Needing Attention ({projectsNeedingAttention.length})
+          </h2>
+          <Separator className="mb-3" />
+          
+          <ScrollArea className="flex-grow h-[320px]">
+            <div className="space-y-2 pr-2">
+              {projectsNeedingAttention.length === 0 ? (
+                <div className="text-center py-6 text-sm text-muted-foreground">
+                  <p>No projects in this category</p>
+                </div>
+              ) : (
+                projectsNeedingAttention.map(project => (
+                  <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 hover:shadow-md transition-shadow">
+                    <Link to={`/project/${project.id}`} className="font-medium hover:underline block">
                       {project.projectName}
                     </Link>
-                  </td>
-                  <td className="p-3 text-sm">{project.reportingPeriod}</td>
-                  <td className="p-3">
-                    <StatusBadge value={project.projectStatus} type="status" />
-                  </td>
-                  <td className="p-3">
-                    <StatusBadge value={project.riskLevel} type="risk" />
-                  </td>
-                  <td className="p-3">
-                    <StatusBadge value={project.financialHealth} type="health" />
-                  </td>
-                </tr>
-              ))}
-              {filteredProjects.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-muted-foreground">
-                    No project reports found for this period
-                  </td>
-                </tr>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-muted-foreground">
+                        {project.assignedPM || 'Unassigned'}
+                      </span>
+                      <StatusBadge value={project.riskLevel} type="risk" />
+                    </div>
+                  </div>
+                ))
               )}
-            </tbody>
-          </table>
+            </div>
+          </ScrollArea>
+        </div>
+        
+        {/* Column 3: Projects At Risk */}
+        <div className="border-t-4 border-red-500 bg-red-50 dark:bg-red-900/10 rounded-lg p-3 flex flex-col">
+          <h2 className="font-semibold text-lg mb-3 flex items-center">
+            <XOctagon className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
+            Projects At Risk ({projectsAtRisk.length})
+          </h2>
+          <Separator className="mb-3" />
+          
+          <ScrollArea className="flex-grow h-[320px]">
+            <div className="space-y-2 pr-2">
+              {projectsAtRisk.length === 0 ? (
+                <div className="text-center py-6 text-sm text-muted-foreground">
+                  <p>No projects in this category</p>
+                </div>
+              ) : (
+                projectsAtRisk.map(project => (
+                  <div key={project.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 hover:shadow-md transition-shadow">
+                    <Link to={`/project/${project.id}`} className="font-medium hover:underline block">
+                      {project.projectName}
+                    </Link>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-xs text-muted-foreground">
+                        {project.assignedPM || 'Unassigned'}
+                      </span>
+                      <StatusBadge value={project.riskLevel} type="risk" />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
         </div>
       </div>
+      
+      {/* Block 3: KPI and Department Charts */}
+      <DashboardCharts />
+      
+      {/* Block 4: New Reporting Accountability Section - HIDDEN */}
+      <div className="hidden">
+        <h2 className="text-2xl font-semibold mt-10 mb-4">Reporting Accountability</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+          <MissingReportsBlock selectedPeriod={selectedPeriod} />
+          <ComplianceTable />
+        </div>
+      </div>
+      
+      {/* Fallback for no projects */}
+      {projects.length === 0 && (
+        <div className="text-center py-10">
+          <p className="text-muted-foreground mb-4">No project reports found for this period.</p>
+          <Button asChild>
+            <Link to="/submit-report">
+              Submit Your First Report
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

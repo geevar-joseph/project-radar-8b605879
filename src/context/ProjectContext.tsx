@@ -11,8 +11,7 @@ interface ProjectContextType {
   addProject: (project: ProjectReport) => void;
   getProject: (id: string) => ProjectReport | undefined;
   getUniqueReportingPeriods: () => string[];
-  getFilteredProjects: (period?: string) => Promise<ProjectReport[]>;
-  getFilteredProjectsSync: (period?: string) => ProjectReport[];
+  getFilteredProjects: (period?: string) => ProjectReport[];
   selectedPeriod: string | undefined;
   setSelectedPeriod: (period: string | undefined) => void;
   availablePeriods: string[];
@@ -30,7 +29,7 @@ interface ProjectContextType {
   updateProjectDetails: (originalName: string, updateData: {
     projectName: string;
     clientName?: string;
-    jiraId?: string; 
+    jiraId?: string; // Add jiraId to the updateData interface
     projectType?: string;
     projectStatus?: string;
     assignedPM?: string;
@@ -57,7 +56,6 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     getProject,
     getUniqueReportingPeriods,
     getFilteredProjects,
-    getFilteredProjectsSync,
     addProjectName,
     removeProjectName,
     updateProjectDetails,
@@ -81,7 +79,6 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       getProject, 
       getUniqueReportingPeriods,
       getFilteredProjects,
-      getFilteredProjectsSync,
       selectedPeriod,
       setSelectedPeriod,
       availablePeriods,

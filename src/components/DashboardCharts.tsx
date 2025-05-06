@@ -59,8 +59,8 @@ const colorTierLegend = [
 ];
 
 export function DashboardCharts() {
-  const { getFilteredProjectsSync, selectedPeriod } = useProjectContext();
-  const filteredProjects = getFilteredProjectsSync(selectedPeriod);
+  const { getFilteredProjects, selectedPeriod } = useProjectContext();
+  const filteredProjects = getFilteredProjects(selectedPeriod);
   
   // Calculate underperforming KPIs with custom thresholds
   const calculateUnderperformingKPIs = (): KPIData[] => {

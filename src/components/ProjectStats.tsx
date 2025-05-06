@@ -5,8 +5,8 @@ import { ProjectReport, ratingToValueMap } from "@/types/project";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 
 export function ProjectStats() {
-  const { getFilteredProjectsSync, selectedPeriod } = useProjectContext();
-  const filteredProjects = getFilteredProjectsSync(selectedPeriod);
+  const { getFilteredProjects, selectedPeriod } = useProjectContext();
+  const filteredProjects = getFilteredProjects(selectedPeriod);
   
   // Calculate stats
   const totalProjects = filteredProjects.length;

@@ -1,11 +1,10 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectReport } from "@/types/project";
 import { mapToProjectReport } from "./mappers";
 
 /**
  * Fetches all project reports from Supabase
- * Returns all reports, not just the latest for each project
+ * Returns the latest report for each project
  */
 export const fetchProjectReports = async () => {
   try {
@@ -27,78 +26,32 @@ export const fetchProjectReports = async () => {
       throw reportsError;
     }
     
-    console.log('All reports from API:', reportsData.length);
-    return { reportsData, error: null };
+    // Create a map to store the latest report for each project
+    const latestReportsByProject = new Map<string, any>();
+      
+    // Process reports to find the latest for each project
+    if (reportsData && reportsData.length > 0) {
+      reportsData.forEach(report => {
+        const projectId = report.project_id;
+        if (!projectId) return;
+        
+        // If we don't have this project yet, or this report is newer
+        const existingReport = latestReportsByProject.get(projectId);
+        if (!existingReport || 
+            (new Date(report.submission_date) > new Date(existingReport.submission_date))) {
+          latestReportsByProject.set(projectId, report);
+        }
+      });
+    }
+    
+    // Convert map back to array of latest reports only
+    const dedupedReports = Array.from(latestReportsByProject.values());
+    console.log('Deduplicated reports from API:', dedupedReports.length);
+    
+    return { reportsData: dedupedReports, error: null };
   } catch (error) {
     console.error('Error fetching project reports:', error);
     return { reportsData: [], error };
-  }
-};
-
-/**
- * Fetches reports for a specific project from Supabase
- */
-export const fetchProjectReportsByProject = async (projectId: string) => {
-  try {
-    const { data: reportsData, error: reportsError } = await supabase
-      .from('project_reports')
-      .select(`
-        *, 
-        projects (
-          *,
-          team_members (
-            id,
-            name
-          )
-        )
-      `)
-      .eq('project_id', projectId)
-      .order('reporting_period', { ascending: true });
-
-    if (reportsError) {
-      throw reportsError;
-    }
-    
-    console.log(`Reports for project ${projectId} from API:`, reportsData.length);
-    return { reportsData, error: null };
-  } catch (error) {
-    console.error(`Error fetching reports for project ${projectId}:`, error);
-    return { reportsData: [], error };
-  }
-};
-
-/**
- * Fetches reports for a specific period from Supabase
- */
-export const fetchProjectReportsByPeriod = async (period: string) => {
-  try {
-    const { data: reportsData, error: reportsError } = await supabase
-      .from('project_reports')
-      .select(`
-        *, 
-        projects (
-          *,
-          team_members (
-            id,
-            name
-          )
-        )
-      `)
-      .eq('reporting_period', period);
-
-    if (reportsError) {
-      throw reportsError;
-    }
-    
-    console.log(`Reports for period ${period} from API:`, reportsData.length);
-    
-    // Map the database results to ProjectReport objects
-    const projectReports: ProjectReport[] = reportsData.map(report => mapToProjectReport(report));
-    
-    return { projectReports, error: null };
-  } catch (error) {
-    console.error(`Error fetching reports for period ${period}:`, error);
-    return { projectReports: [], error };
   }
 };
 
