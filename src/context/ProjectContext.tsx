@@ -30,7 +30,7 @@ interface ProjectContextType {
   updateProjectDetails: (originalName: string, updateData: {
     projectName: string;
     clientName?: string;
-    jiraId?: string; // Add jiraId to the updateData interface
+    jiraId?: string; 
     projectType?: string;
     projectStatus?: string;
     assignedPM?: string;

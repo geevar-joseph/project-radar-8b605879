@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart, 
   Bar, 
@@ -36,9 +37,14 @@ import { ProjectKPITrendChart } from './ProjectKPITrendChart';
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { formatPeriodForChart } from '@/utils/formatPeriods';
+import { SearchableSelect } from "@/components/SearchableSelect";
+import { formatPeriod } from '@/utils/formatPeriods';
 
 interface ProjectKPIChartProps {
   project: ProjectReport;
+  initialPeriod?: string;
+  setParentPeriod?: (period: string) => void;
+  availablePeriods?: string[];
 }
 
 // Helper function to convert rating to numeric value
@@ -48,10 +54,17 @@ const ratingToNumeric = (rating: RatingValue) => {
 
 type ChartViewType = 'bar' | 'radar' | 'line';
 
-export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => {
-  const { projects } = useProjectContext();
-  const [selectedPeriod, setSelectedPeriod] = useState<string>(project.reportingPeriod);
+export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ 
+  project, 
+  initialPeriod,
+  setParentPeriod,
+  availablePeriods: propAvailablePeriods
+}) => {
+  const { projects, availablePeriods: contextAvailablePeriods } = useProjectContext();
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(initialPeriod || project.reportingPeriod);
   const [chartView, setChartView] = useState<ChartViewType>('bar');
+  
+  const availablePeriods = propAvailablePeriods || contextAvailablePeriods;
   
   // Get all reports for the current project
   const projectReports = projects.filter(p => p.projectName === project.projectName);
@@ -62,8 +75,32 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
   // Get the selected report
   const selectedReport = projectReports.find(p => p.reportingPeriod === selectedPeriod) || project;
   
+  // Update local period when prop changes
+  useEffect(() => {
+    if (initialPeriod) {
+      setSelectedPeriod(initialPeriod);
+    }
+  }, [initialPeriod]);
+
+  // Handle period selection change
+  const handlePeriodChange = (newPeriod: string) => {
+    setSelectedPeriod(newPeriod);
+    // Update parent component's period if callback provided
+    if (setParentPeriod) {
+      setParentPeriod(newPeriod);
+    }
+  };
+  
+  // Format periods for the searchable select component
+  const periodOptions = availablePeriods
+    .filter(period => period !== "N/A")
+    .map(period => ({
+      value: period,
+      label: formatPeriod(period)
+    }));
+  
   // Use the utility function from formatPeriods.ts
-  const formatPeriod = (periodString: string) => {
+  const formatPeriodDisplay = (periodString: string) => {
     if (!periodString || periodString === 'N/A') {
       return 'N/A';
     }
@@ -267,6 +304,15 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
               <span className="hidden sm:inline">Trend</span>
             </ToggleGroupItem>
           </ToggleGroup>
+          
+          <SearchableSelect
+            value={selectedPeriod || ""}
+            onValueChange={handlePeriodChange}
+            placeholder="Select Period"
+            options={periodOptions}
+            emptyMessage="No periods found"
+            width="w-[200px]"
+          />
         </div>
         <ProjectKPITrendChart projectName={project.projectName} />
       </div>
@@ -291,21 +337,14 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
           </ToggleGroupItem>
         </ToggleGroup>
         
-        <Select 
-          value={selectedPeriod} 
-          onValueChange={setSelectedPeriod}
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Select period" />
-          </SelectTrigger>
-          <SelectContent>
-            {reportingPeriods.map((period) => (
-              <SelectItem key={period} value={period}>
-                {formatPeriod(period)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SearchableSelect
+          value={selectedPeriod || ""}
+          onValueChange={handlePeriodChange}
+          placeholder="Select Period"
+          options={periodOptions}
+          emptyMessage="No periods found"
+          width="w-[200px]"
+        />
       </div>
       
       <div className="grid md:grid-cols-2 gap-6">
@@ -490,7 +529,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
 
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Reporting Period</p>
-                  <p className="text-sm font-medium">{formatPeriod(selectedPeriod)}</p>
+                  <p className="text-sm font-medium">{formatPeriodDisplay(selectedPeriod)}</p>
                 </div>
               </div>
             </CardContent>
