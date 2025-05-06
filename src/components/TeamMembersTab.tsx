@@ -15,9 +15,12 @@ interface TeamMembersTabProps {
   removeTeamMember: (name: string) => void;
 }
 
+// Define a type for team members with assigned projects
+type TeamMemberWithAssignedProjects = TeamMember & { assignedProjects: string[] };
+
 export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: TeamMembersTabProps) => {
   const [isAddTeamMemberModalOpen, setIsAddTeamMemberModalOpen] = useState(false);
-  const [teamMembersData, setTeamMembersData] = useState<(TeamMember & { assignedProjects: string[] })[]>([]);
+  const [teamMembersData, setTeamMembersData] = useState<TeamMemberWithAssignedProjects[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { loadTeamMembers } = useTeamMembers();
@@ -82,7 +85,7 @@ export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: Team
         ),
       }));
       
-      setTeamMembersData(fallbackData as (TeamMember & { assignedProjects: string[] })[]);
+      setTeamMembersData(fallbackData as TeamMemberWithAssignedProjects[]);
     } finally {
       setIsLoading(false);
     }

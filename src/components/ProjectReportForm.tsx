@@ -773,4 +773,102 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
                           )}
                         >
                           {field.value || "Select team member"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-5
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0 z-50" align="start">
+                      <Command className="rounded-md border shadow-md">
+                        <CommandInput placeholder="Search team members..." />
+                        <CommandList>
+                          <CommandEmpty>No team member found.</CommandEmpty>
+                          <CommandGroup className="max-h-[200px] overflow-y-auto">
+                            {teamMemberNames.map((memberName) => (
+                              <CommandItem
+                                key={memberName}
+                                value={memberName}
+                                onSelect={() => {
+                                  form.setValue("submittedBy", memberName);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    memberName === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {memberName}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Reporting Period Field */}
+            <FormField
+              control={form.control}
+              name="reportingPeriod"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Reporting Period</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select reporting period">
+                          {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as string} type="period" />}
+                          {(!field.value || field.value === "N.A.") && "Select reporting period"}
+                        </SelectValue>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="N.A.">
+                        <ScoreIndicator value="N.A." type="period" />
+                        <span className="text-xs text-gray-500 ml-6 mt-0.5">No reporting period selected</span>
+                      </SelectItem>
+                      {reportingPeriodOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Show warning if report already exists */}
+            {periodExists && (
+              <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded">
+                <span className="font-medium">Warning:</span>
+                <span className="ml-2">A report already exists for {selectedProject} in this period.</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ... keep existing code (remaining cards and form fields) */}
+
+        {/* Form Action Buttons */}
+        <div className="flex justify-between">
+          <Button 
+            type="button" 
+            variant="outline"
+            onClick={saveDraft}
+          >
+            <Save className="mr-2 h-4 w-4" /> Save Draft
+          </Button>
+          <Button type="submit">Submit Report</Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
