@@ -3,30 +3,27 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trash, Edit } from "lucide-react";
+import { Trash, Edit, Key, Check, AlertTriangle } from "lucide-react";
 import { EditTeamMemberModal } from "./EditTeamMemberModal";
 import { useToast } from "@/components/ui/use-toast";
+import { TeamMember } from "@/hooks/useTeamMembers";
 
-interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
+interface TeamMemberWithAssignedProjects extends TeamMember {
   assignedProjects: string[];
 }
 
 interface TeamMembersTableProps {
-  teamMembers: TeamMember[];
+  teamMembers: TeamMemberWithAssignedProjects[];
   removeTeamMember: (name: string) => void;
   refreshTeamMembers: () => void;
 }
 
 export const TeamMembersTable = ({ teamMembers, removeTeamMember, refreshTeamMembers }: TeamMembersTableProps) => {
-  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [editingMember, setEditingMember] = useState<TeamMemberWithAssignedProjects | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const { toast } = useToast();
   
-  const handleDeleteTeamMember = async (member: TeamMember) => {
+  const handleDeleteTeamMember = async (member: TeamMemberWithAssignedProjects) => {
     try {
       setIsDeleting(member.id);
       await removeTeamMember(member.name);
@@ -52,6 +49,7 @@ export const TeamMembersTable = ({ teamMembers, removeTeamMember, refreshTeamMem
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Assigned Projects</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -63,6 +61,23 @@ export const TeamMembersTable = ({ teamMembers, removeTeamMember, refreshTeamMem
               <TableCell>{member.email}</TableCell>
               <TableCell>
                 <Badge variant="outline">{member.role}</Badge>
+              </TableCell>
+              <TableCell>
+                {member.auth_user_id ? (
+                  member.force_password_change ? (
+                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300 flex items-center gap-1">
+                      <Key className="h-3 w-3" /> Password Change Required
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300 flex items-center gap-1">
+                      <Check className="h-3 w-3" /> Active
+                    </Badge>
+                  )
+                ) : (
+                  <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" /> No Auth Account
+                  </Badge>
+                )}
               </TableCell>
               <TableCell>
                 {member.assignedProjects.length === 0 ? (

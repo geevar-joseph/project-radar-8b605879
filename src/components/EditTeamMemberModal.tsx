@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -18,12 +19,14 @@ import {
 } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Key } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useProjectContext } from "@/context/ProjectContext";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { generateSecurePassword } from "@/utils/password";
 
 interface TeamMember {
   id: string;
@@ -31,6 +34,8 @@ interface TeamMember {
   email: string;
   role: string;
   assignedProjects: string[];
+  auth_user_id?: string | null;
+  force_password_change?: boolean;
 }
 
 interface EditTeamMemberModalProps {
@@ -50,6 +55,7 @@ export const EditTeamMemberModal = ({ open, onOpenChange, teamMember, refreshTea
   const { projectNames, updateTeamMember } = useProjectContext();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [assignedProjects, setAssignedProjects] = useState<string[]>([]);
   const [projectSearch, setProjectSearch] = useState("");
   const [showProjectDropdown, setShowProjectDropdown] = useState(false);
@@ -111,6 +117,66 @@ export const EditTeamMemberModal = ({ open, onOpenChange, teamMember, refreshTea
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!teamMember.auth_user_id) {
+      toast({
+        title: "Error",
+        description: "This team member doesn't have an associated user account.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsResettingPassword(true);
+
+    try {
+      // Generate a new secure password
+      const newPassword = generateSecurePassword();
+      
+      // Update the auth user
+      await supabase.auth.admin.updateUserById(
+        teamMember.auth_user_id, 
+        { password: newPassword }
+      );
+      
+      // Update the team member record
+      await supabase
+        .from('team_members')
+        .update({ 
+          temp_password: newPassword,
+          force_password_change: true 
+        })
+        .eq('id', teamMember.id);
+        
+      // Send email with new credentials
+      await supabase.functions.invoke('send-welcome-email', {
+        body: { 
+          email: teamMember.email, 
+          name: teamMember.name, 
+          tempPassword: newPassword 
+        }
+      });
+      
+      toast({
+        title: "Password Reset",
+        description: "A new temporary password has been sent to the user's email.",
+      });
+      
+      // Refresh team members to update status
+      refreshTeamMembers();
+      
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem resetting the password.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsResettingPassword(false);
     }
   };
 
@@ -219,6 +285,24 @@ export const EditTeamMemberModal = ({ open, onOpenChange, teamMember, refreshTea
                 ))}
               </div>
             </div>
+
+            {teamMember.auth_user_id && (
+              <div className="pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleResetPassword}
+                  disabled={isResettingPassword}
+                >
+                  <Key className="mr-2 h-4 w-4" />
+                  {isResettingPassword ? "Resetting Password..." : "Reset Password"}
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1">
+                  This will generate a new temporary password and send it to the user's email
+                </p>
+              </div>
+            )}
 
             <DialogFooter className="pt-4">
               <Button

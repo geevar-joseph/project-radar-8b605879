@@ -1,102 +1,88 @@
-
-import { Link, useNavigate, Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { 
-  SidebarProvider, 
-  Sidebar, 
-  SidebarContent, 
-  SidebarHeader, 
-  SidebarFooter,
-  SidebarMenu, 
-  SidebarMenuItem, 
-  SidebarMenuButton,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarInset
-} from "@/components/ui/sidebar";
-import { LayoutDashboard, FileText, Settings, LogOut, FolderOpen } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { LogOut, UserCircle } from "lucide-react";
+
+const MainNav = () => {
+  const location = useLocation();
+  
+  const navItems = [
+    { name: "Dashboard", href: "/dashboard" },
+    { name: "Projects", href: "/projects" },
+    { name: "Submit Report", href: "/submit-report" },
+    { name: "Manage Options", href: "/manage-options" },
+  ];
+
+  return (
+    <div className="mr-4 hidden md:flex">
+      <Link to="/" className="mr-6 flex items-center space-x-2">
+        <span className="hidden font-bold sm:inline-block">
+          Project Manager
+        </span>
+      </Link>
+      <nav className="flex items-center space-x-6 text-sm font-medium">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.href}
+            to={item.href}
+            className={({ isActive }) =>
+              cn(
+                "transition-colors hover:text-foreground/80",
+                isActive ? "text-foreground" : "text-foreground/60"
+              )
+            }
+          >
+            {item.name}
+          </NavLink>
+        ))}
+      </nav>
+    </div>
+  );
+};
 
 export function Navigation() {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    // In a real implementation, this would clear auth tokens
-    console.log("Logging out");
-    navigate("/login");
+  const { user, signOut } = useAuth();
+  
+  const handleLogout = async () => {
+    await signOut();
   };
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full">
-        <Sidebar>
-          <SidebarHeader className="border-b border-border">
-            <div className="px-4 py-4">
-              <h2 className="font-bold text-xl">Project Radar</h2>
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Main</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip="Dashboard">
-                      <Link to="/dashboard">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip="Projects">
-                      <Link to="/projects">
-                        <FolderOpen className="mr-2 h-4 w-4" />
-                        <span>Projects</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip="Submit Report">
-                      <Link to="/submit-report">
-                        <FileText className="mr-2 h-4 w-4" />
-                        <span>Submit Report</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            
-            <SidebarGroup>
-              <SidebarGroupLabel>Admin</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip="Manage Options">
-                      <Link to="/manage-options">
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Manage Projects & Users</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter className="border-t border-border p-4">
-            <Button variant="outline" className="w-full" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
-          </SidebarFooter>
-        </Sidebar>
-        <SidebarInset>
-          <div className="p-6 h-full overflow-auto">
-            <Outlet />
+    <div className="flex flex-col min-h-screen">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 max-w-screen-2xl items-center">
+          <MainNav />
+          <div className="flex flex-1 items-center justify-end space-x-4">
+            <nav className="flex items-center space-x-2">
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <UserCircle className="h-6 w-6" />
+                  <span className="text-sm mr-2">{user.email}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4 mr-1" />
+                    Logout
+                  </Button>
+                </div>
+              ) : (
+                <Link to="/login" passHref>
+                  <Button variant="outline" size="sm">
+                    Login
+                  </Button>
+                </Link>
+              )}
+            </nav>
           </div>
-        </SidebarInset>
+        </div>
+      </header>
+      <div className="flex-1">
+        <Outlet />
       </div>
-    </SidebarProvider>
+    </div>
   );
 }

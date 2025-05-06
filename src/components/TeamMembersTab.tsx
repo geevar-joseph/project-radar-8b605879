@@ -6,16 +6,8 @@ import { Plus } from "lucide-react";
 import { TeamMembersTable } from "./TeamMembersTable";
 import { AddTeamMemberModal } from "./AddTeamMemberModal";
 import { ProjectReport } from "@/types/project";
-import { useProjectContext } from "@/context/ProjectContext";
+import { useTeamMembers, TeamMember } from "@/hooks/useTeamMembers";
 import { supabase } from "@/integrations/supabase/client";
-
-interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  assignedProjects: string[];
-}
 
 interface TeamMembersTabProps {
   teamMembers: string[];
@@ -28,6 +20,7 @@ export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: Team
   const [teamMembersData, setTeamMembersData] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const { loadTeamMembers } = useTeamMembers();
   
   // Add a function to trigger refresh
   const refreshTeamMembers = () => {
@@ -66,6 +59,8 @@ export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: Team
           name: member.name,
           email: member.email,
           role: member.role,
+          force_password_change: member.force_password_change,
+          auth_user_id: member.auth_user_id,
           assignedProjects: assignedProjects ? assignedProjects.map(p => p.project_name) : [],
         };
       }));
@@ -80,6 +75,8 @@ export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: Team
         name: name,
         email: `${name.toLowerCase().replace(/\s/g, '.')}@example.com`,
         role: index % 3 === 0 ? "Admin" : index % 3 === 1 ? "Project Manager" : "Viewer",
+        force_password_change: true,
+        auth_user_id: null,
         assignedProjects: Array.from(
           new Set(
             projects

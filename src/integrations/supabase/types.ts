@@ -141,27 +141,36 @@ export type Database = {
       }
       team_members: {
         Row: {
+          auth_user_id: string | null
           created_at: string
           email: string
+          force_password_change: boolean | null
           id: string
           name: string
           role: string
+          temp_password: string | null
           updated_at: string
         }
         Insert: {
+          auth_user_id?: string | null
           created_at?: string
           email: string
+          force_password_change?: boolean | null
           id?: string
           name: string
           role: string
+          temp_password?: string | null
           updated_at?: string
         }
         Update: {
+          auth_user_id?: string | null
           created_at?: string
           email?: string
+          force_password_change?: boolean | null
           id?: string
           name?: string
           role?: string
+          temp_password?: string | null
           updated_at?: string
         }
         Relationships: []
