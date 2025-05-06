@@ -38,6 +38,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { formatPeriodForChart } from '@/utils/formatPeriods';
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { formatPeriod } from '@/utils/formatPeriods';
+import { Tooltip as TooltipComponent, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProjectKPIChartProps {
   project: ProjectReport;
@@ -280,14 +281,18 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
     }
   ].filter(item => item.value > 0); // Only include items with values
 
-  // Calculate key performance stats for the summary panel - fix the calculation
+  // Get the overall score from the report, or calculate it if not available
+  const overallScore = ratingToNumeric(selectedReport.overallProjectScore);
+  
+  // Calculate key performance stats for the summary panel - show ALL KPIs instead of limiting to 3
   const validScores = chartData.filter(item => item.value > 0);
   const avgScore = validScores.length > 0 
     ? validScores.reduce((sum, item) => sum + item.value, 0) / validScores.length
     : 0;
     
-  const topPerformers = [...chartData].sort((a, b) => b.value - a.value).slice(0, 3);
-  const improvementAreas = [...chartData].sort((a, b) => a.value - b.value).slice(0, 3);
+  // Sort all KPIs by performance (no limit)
+  const topPerformers = [...chartData].sort((a, b) => b.value - a.value);
+  const improvementAreas = [...chartData].sort((a, b) => a.value - b.value);
 
   // Helper for formatting rating labels
   const getRatingLabel = (value: number): string => {
@@ -360,7 +365,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
       </div>
       
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="h-[400px] overflow-hidden">
+        <div className="h-[500px] overflow-hidden"> {/* Increased height from 400px to 500px */}
           <ChartContainer config={chartConfig}>
             {chartView === 'bar' ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -453,9 +458,9 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
           </ChartContainer>
         </div>
 
-        {/* Performance Summary Panel - Updated with accurate full names */}
+        {/* Performance Summary Panel - Updated with Overall Score and showing all KPIs */}
         <div className="flex flex-col gap-4">
-          <Card>
+          <Card className="h-[500px] overflow-auto"> {/* Increased height and made scrollable */}
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-semibold text-lg">Performance Summary</h3>
@@ -481,62 +486,77 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
               
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Overall Average</p>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="text-sm text-muted-foreground mb-1 flex items-center">
+                          Overall Score <Info size={12} className="ml-1 text-muted-foreground" />
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs max-w-xs">This is the overall project score reported for this period, not calculated as an average of all KPIs.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <div className="flex items-center">
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div 
                         className="bg-primary h-2.5 rounded-full" 
-                        style={{ width: `${(avgScore / 4) * 100}%` }}
+                        style={{ width: `${(overallScore / 4) * 100}%` }}
                       ></div>
                     </div>
-                    <span className="ml-2 font-medium text-sm">{avgScore.toFixed(1)}</span>
+                    <span className="ml-2 font-medium text-sm">{overallScore.toFixed(1)} ({getRatingLabel(overallScore)})</span>
                   </div>
                 </div>
 
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Top Performing Areas</p>
-                  <ul className="space-y-2">
-                    {topPerformers.map((item) => (
-                      <li key={`top-${item.name}`} className="flex justify-between items-center">
-                        <span className="text-sm flex items-center">
-                          <span className="font-medium mr-1">{item.name}</span>
-                          <span className="text-xs text-muted-foreground">({item.fullName})</span>
-                        </span>
-                        <div className="flex items-center">
-                          <div className="w-20 bg-gray-200 rounded-full h-1.5 mr-2">
-                            <div 
-                              className="bg-green-500 h-1.5 rounded-full" 
-                              style={{ width: `${(item.value / 4) * 100}%` }}
-                            ></div>
+                  <div className="max-h-[150px] overflow-y-auto pr-1"> {/* Made scrollable */}
+                    <ul className="space-y-2">
+                      {topPerformers.map((item) => (
+                        <li key={`top-${item.name}`} className="flex justify-between items-center">
+                          <span className="text-sm flex items-center">
+                            <span className="font-medium mr-1">{item.name}</span>
+                            <span className="text-xs text-muted-foreground">({item.fullName})</span>
+                          </span>
+                          <div className="flex items-center">
+                            <div className="w-20 bg-gray-200 rounded-full h-1.5 mr-2">
+                              <div 
+                                className="bg-green-500 h-1.5 rounded-full" 
+                                style={{ width: `${(item.value / 4) * 100}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs font-medium">{item.value}</span>
                           </div>
-                          <span className="text-xs font-medium">{item.value}</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Areas for Improvement</p>
-                  <ul className="space-y-2">
-                    {improvementAreas.map((item) => (
-                      <li key={`imp-${item.name}`} className="flex justify-between items-center">
-                        <span className="text-sm flex items-center">
-                          <span className="font-medium mr-1">{item.name}</span>
-                          <span className="text-xs text-muted-foreground">({item.fullName})</span>
-                        </span>
-                        <div className="flex items-center">
-                          <div className="w-20 bg-gray-200 rounded-full h-1.5 mr-2">
-                            <div 
-                              className="bg-amber-500 h-1.5 rounded-full" 
-                              style={{ width: `${(item.value / 4) * 100}%` }}
-                            ></div>
+                  <div className="max-h-[150px] overflow-y-auto pr-1"> {/* Made scrollable */}
+                    <ul className="space-y-2">
+                      {improvementAreas.map((item) => (
+                        <li key={`imp-${item.name}`} className="flex justify-between items-center">
+                          <span className="text-sm flex items-center">
+                            <span className="font-medium mr-1">{item.name}</span>
+                            <span className="text-xs text-muted-foreground">({item.fullName})</span>
+                          </span>
+                          <div className="flex items-center">
+                            <div className="w-20 bg-gray-200 rounded-full h-1.5 mr-2">
+                              <div 
+                                className="bg-amber-500 h-1.5 rounded-full" 
+                                style={{ width: `${(item.value / 4) * 100}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs font-medium">{item.value}</span>
                           </div>
-                          <span className="text-xs font-medium">{item.value}</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
                 <div>
