@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { X, Edit } from "lucide-react";
+import { Trash, Edit } from "lucide-react";
 import { EditTeamMemberModal } from "./EditTeamMemberModal";
 
 interface TeamMember {
@@ -69,7 +69,7 @@ export const TeamMembersTable = ({ teamMembers, removeTeamMember }: TeamMembersT
                   size="icon"
                   onClick={() => removeTeamMember(member.name)}
                 >
-                  <X className="h-4 w-4" />
+                  <Trash className="h-4 w-4" />
                 </Button>
               </TableCell>
             </TableRow>

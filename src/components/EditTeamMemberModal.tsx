@@ -17,6 +17,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -44,9 +47,12 @@ const formSchema = z.object({
 });
 
 export const EditTeamMemberModal = ({ open, onOpenChange, teamMember }: EditTeamMemberModalProps) => {
-  const { updateTeamMember } = useProjectContext();
+  const { projectNames, updateTeamMember } = useProjectContext();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [assignedProjects, setAssignedProjects] = useState<string[]>([]);
+  const [projectSearch, setProjectSearch] = useState("");
+  const [showProjectDropdown, setShowProjectDropdown] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,14 +63,30 @@ export const EditTeamMemberModal = ({ open, onOpenChange, teamMember }: EditTeam
     },
   });
 
-  // Update form values when team member changes
+  // Update form values and assigned projects when team member changes
   useEffect(() => {
     form.reset({
       name: teamMember.name,
       email: teamMember.email,
       role: teamMember.role,
     });
+    setAssignedProjects(teamMember.assignedProjects || []);
   }, [teamMember, form]);
+
+  const filteredProjects = projectNames?.filter(
+    (project) => 
+      !assignedProjects.includes(project) && 
+      project.toLowerCase().includes(projectSearch.toLowerCase())
+  ) || [];
+
+  const addProject = (project: string) => {
+    setAssignedProjects([...assignedProjects, project]);
+    setProjectSearch("");
+  };
+
+  const removeProject = (project: string) => {
+    setAssignedProjects(assignedProjects.filter((p) => p !== project));
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -130,21 +152,71 @@ export const EditTeamMemberModal = ({ open, onOpenChange, teamMember }: EditTeam
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role</FormLabel>
-                  <FormControl>
-                    <Input {...field} list="roles" />
-                  </FormControl>
-                  <datalist id="roles">
-                    <option value="Admin" />
-                    <option value="Project Manager" />
-                    <option value="Developer" />
-                    <option value="Designer" />
-                    <option value="QA Engineer" />
-                    <option value="Viewer" />
-                  </datalist>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Admin">Admin</SelectItem>
+                      <SelectItem value="Project Manager">Project Manager</SelectItem>
+                      <SelectItem value="Developer">Developer</SelectItem>
+                      <SelectItem value="Designer">Designer</SelectItem>
+                      <SelectItem value="QA Engineer">QA Engineer</SelectItem>
+                      <SelectItem value="Viewer">Viewer</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            <div className="space-y-2">
+              <FormLabel>Assigned Projects</FormLabel>
+              <div className="relative">
+                <Input
+                  placeholder="Search projects"
+                  value={projectSearch}
+                  onChange={(e) => {
+                    setProjectSearch(e.target.value);
+                    setShowProjectDropdown(true);
+                  }}
+                  onFocus={() => setShowProjectDropdown(true)}
+                />
+                {showProjectDropdown && filteredProjects.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-48 overflow-auto">
+                    {filteredProjects.map((project) => (
+                      <div
+                        key={project}
+                        className="px-4 py-2 hover:bg-accent cursor-pointer"
+                        onClick={() => {
+                          addProject(project);
+                          setShowProjectDropdown(false);
+                        }}
+                      >
+                        {project}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mt-2">
+                {assignedProjects.map((project) => (
+                  <Badge key={project} variant="secondary" className="flex items-center gap-1">
+                    {project}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => removeProject(project)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            </div>
 
             <DialogFooter className="pt-4">
               <Button
