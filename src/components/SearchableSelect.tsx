@@ -14,6 +14,7 @@ interface SearchableSelectProps {
   emptyMessage?: string;
   width?: string;
   className?: string;
+  label?: string;
 }
 
 export function SearchableSelect({
@@ -24,6 +25,7 @@ export function SearchableSelect({
   emptyMessage = "No results found.",
   width = "w-[200px]",
   className,
+  label,
 }: SearchableSelectProps) {
   const [open, setOpen] = React.useState(false);
 

@@ -92,8 +92,8 @@ export const fetchProjectReportsByPeriod = async (period: string) => {
     
     console.log(`Reports for period ${period} from API:`, reportsData.length);
     
-    // Map to ProjectReport objects
-    const projectReports = reportsData.map(report => mapToProjectReport(report));
+    // Map the database results to ProjectReport objects
+    const projectReports: ProjectReport[] = reportsData.map(report => mapToProjectReport(report));
     
     return { projectReports, error: null };
   } catch (error) {

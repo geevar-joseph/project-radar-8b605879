@@ -69,8 +69,8 @@ const Dashboard = () => {
                 label: formatPeriod(period),
                 value: period
               }))}
-              value={selectedPeriod}
-              onChange={value => setSelectedPeriod(value as string)}
+              value={selectedPeriod || ''}
+              onValueChange={value => setSelectedPeriod(value as string)}
               placeholder="Select period..."
               label="Reporting Period"
             />
@@ -139,7 +139,7 @@ const Dashboard = () => {
                     <Link to={`/project/${project.id}`} className="text-sm font-medium hover:underline">
                       {project.projectName}
                     </Link>
-                    <StatusBadge value={project.financialHealth} type="financial" />
+                    <StatusBadge value={project.financialHealth} type="health" />
                   </div>
                 ))}
               </div>
@@ -186,18 +186,76 @@ const Dashboard = () => {
       
       {/* Missing Reports */}
       {missingReportsCount > 0 && selectedPeriod && (
-        <MissingReportsBlock 
-          count={missingReportsCount} 
-          period={selectedPeriod} 
-          projectNames={projectNames}
-          filteredProjects={filteredProjects}
-        />
+        <div className="mb-8 p-6 border rounded-md bg-amber-50">
+          <h2 className="text-xl font-bold text-amber-900 mb-4">Missing Reports: {missingReportsCount}</h2>
+          <p className="text-amber-800 mb-4">
+            There are {missingReportsCount} projects that have not submitted reports for the period {selectedPeriod}.
+          </p>
+          
+          <ScrollArea className="h-32">
+            <div className="space-y-1">
+              {projectNames
+                .filter(name => !filteredProjects.some(p => p.projectName === name))
+                .map((name, index) => (
+                  <div key={index} className="text-sm text-amber-800 p-1 border-b border-amber-200">
+                    {name}
+                  </div>
+                ))}
+            </div>
+          </ScrollArea>
+          
+          <div className="mt-4">
+            <Button variant="default" asChild>
+              <Link to="/submit-report">Submit Missing Reports</Link>
+            </Button>
+          </div>
+        </div>
       )}
       
       {/* Compliance Table */}
       <div className="mb-8">
         <h2 className="text-xl font-bold mb-4">Project Compliance</h2>
-        <ComplianceTable projects={filteredProjects} />
+        <div className="border rounded-md overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-muted">
+              <tr>
+                <th className="p-3 text-left font-medium">Project</th>
+                <th className="p-3 text-left font-medium">Last Report</th>
+                <th className="p-3 text-left font-medium">Status</th>
+                <th className="p-3 text-left font-medium">Risk Level</th>
+                <th className="p-3 text-left font-medium">Financial Health</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProjects.map((project) => (
+                <tr key={project.id} className="border-t">
+                  <td className="p-3">
+                    <Link to={`/project/${project.id}`} className="font-medium hover:underline">
+                      {project.projectName}
+                    </Link>
+                  </td>
+                  <td className="p-3 text-sm">{project.reportingPeriod}</td>
+                  <td className="p-3">
+                    <StatusBadge value={project.projectStatus} type="status" />
+                  </td>
+                  <td className="p-3">
+                    <StatusBadge value={project.riskLevel} type="risk" />
+                  </td>
+                  <td className="p-3">
+                    <StatusBadge value={project.financialHealth} type="health" />
+                  </td>
+                </tr>
+              ))}
+              {filteredProjects.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                    No project reports found for this period
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
