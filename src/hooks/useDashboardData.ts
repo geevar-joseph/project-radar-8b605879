@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
-import { fetchDashboardReports, fetchAllReportingPeriods } from "@/api/projectApi";
+import { fetchDashboardReports, fetchAllReportingPeriods, mapToProjectReport } from "@/api/projectApi";
 import { fetchProjects } from "@/api/projectsApi";
 
 /**
