@@ -523,29 +523,6 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                 </HoverCard>
               </div>
               
-              <div className="mb-4">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <p className="text-sm text-muted-foreground mb-1 flex items-center">
-                        Overall Score <Info size={12} className="ml-1 text-muted-foreground" />
-                      </p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs max-w-xs">This is the overall project score reported for this period, not calculated as an average of all KPIs.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <div className="flex items-center">
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className="bg-primary h-2.5 rounded-full" 
-                      style={{ width: `${(overallScore / 4) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="ml-2 font-medium text-sm">{overallScore.toFixed(1)} ({getRatingLabel(overallScore)})</span>
-                </div>
-              </div>
               
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
                 <TabsList className="grid grid-cols-2">
