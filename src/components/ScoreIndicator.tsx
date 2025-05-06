@@ -48,130 +48,55 @@ export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) 
       </div>
     );
   }
-  
-  // First handle cases that depend on both the value AND the type
-  if (type === "risk" && value === "High") {
-    return (
-      <div className={cn("flex items-center gap-1", className)}>
-        <div className="w-2.5 h-2.5 rounded-full bg-orange-400" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-orange-400" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-gray-200" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-gray-200" aria-hidden="true" />
-        <span className="ml-2 text-sm text-gray-600">{value}</span>
-      </div>
-    );
-  }
-  
-  if (type === "morale" && value === "Low") {
-    return (
-      <div className={cn("flex items-center gap-1", className)}>
-        <div className="w-2.5 h-2.5 rounded-full bg-orange-400" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-orange-400" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-gray-200" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-gray-200" aria-hidden="true" />
-        <span className="ml-2 text-sm text-gray-600">{value}</span>
-      </div>
-    );
-  }
-  
-  if (type === "risk" && value === "Low") {
-    return (
-      <div className={cn("flex items-center gap-1", className)}>
-        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
-        <span className="ml-2 text-sm text-gray-600">{value}</span>
-      </div>
-    );
-  }
-  
-  if (type === "morale" && value === "High") {
-    return (
-      <div className={cn("flex items-center gap-1", className)}>
-        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
-        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" aria-hidden="true" />
-        <span className="ml-2 text-sm text-gray-600">{value}</span>
-      </div>
-    );
-  }
-  
-  // Now handle the general cases
+
+  // Now handle the general cases using the 4-dot system for all indicator types
   const getDotsConfig = () => {
     switch (value) {
-      // Excellent ratings
+      // Excellent ratings - 4 dots
       case 'Excellent':
       case 'Healthy':
       case 'All completed':
       case 'Very Satisfied':
+      case 'Low': // For risk level (low risk = high score)
         return {
           count: 4,
           activeCount: 4,
           color: 'bg-emerald-500'
         };
       
-      // Good ratings
+      // Good ratings - 3 dots
       case 'Good':
       case 'Mostly':
       case 'Moderate': // For team morale
       case 'Satisfied':
+      case 'On Watch': // For financial health
         return {
           count: 4,
           activeCount: 3,
           color: 'bg-blue-400'
         };
       
-      // Fair ratings
+      // Fair/Medium ratings - 2 dots
       case 'Fair':
+      case 'Medium': // For risk level 
+      case 'Partially': // For completion
+      case 'Neutral / Unclear': // For satisfaction
+      case 'At Risk': // For financial health
         return {
           count: 4,
           activeCount: 2,
           color: 'bg-amber-400'
         };
 
-      // Medium risk level (3 dots, yellow)
-      case 'Medium': 
-        return {
-          count: 4,
-          activeCount: 3,
-          color: 'bg-amber-400'
-        };
-        
-      // On Watch financial health (3 dots, yellow)
-      case 'On Watch':
-        return {
-          count: 4,
-          activeCount: 3,
-          color: 'bg-amber-400'
-        };
-
-      // Partial completion
-      case 'Partially':
-        return {
-          count: 4,
-          activeCount: 2,
-          color: 'bg-amber-400'
-        };
-
-      // Neutral customer satisfaction
-      case 'Neutral / Unclear':
-        return {
-          count: 4,
-          activeCount: 2,
-          color: 'bg-amber-400'
-        };
-      
-      // At Risk financial health
-      case 'At Risk':
+      // High risk level (less desirable) - 2 dots in orange
+      case 'High': 
         return {
           count: 4,
           activeCount: 2,
           color: 'bg-orange-400'
         };
-
-      // Poor/Critical ratings
+        
+      // Poor/Critical ratings - 1 dot
       case 'Poor':
       case 'Not completed':
       case 'Critical': // For risk level and financial health

@@ -1,3 +1,4 @@
+
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash } from "lucide-react";
@@ -171,23 +172,23 @@ export const ProjectTableRow = ({
       <TableCell>{pm}</TableCell>
       <TableCell>{type}</TableCell>
       <TableCell>
-        <StatusBadge value={status || "Active"} type="rating" />
+        <StatusBadge value={status || "Active"} type="status" />
       </TableCell>
       
       {!isManageView && (
         <>
           <TableCell>{formattedDate}</TableCell>
           <TableCell>
-            <StatusBadge value={displayScore} type="score" />
+            <StatusBadge value={displayScore} type="score" showIcon={true} />
           </TableCell>
           <TableCell>
             {riskLevel ? (
-              <span className={`inline-block w-3 h-3 rounded-full ${riskToColorMap[riskLevel] || "bg-gray-300"}`}></span>
+              <StatusBadge value={riskLevel} type="risk" />
             ) : "—"}
           </TableCell>
           <TableCell>
             {financialHealth ? (
-              <span className={`inline-block w-3 h-3 rounded-full ${healthToColorMap[financialHealth] || "bg-gray-300"}`}></span>
+              <StatusBadge value={financialHealth} type="health" />
             ) : "—"}
           </TableCell>
         </>

@@ -143,7 +143,7 @@ const ProjectDetail = () => {
         </Button>
       </div>
       
-      {/* Compact Header Section */}
+      {/* Compact Header Section - Removed Score Display */}
       <div className="mb-6 bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex-1">
@@ -164,7 +164,7 @@ const ProjectDetail = () => {
               </div>
               <div className="flex gap-1">
                 <span className="text-muted-foreground">Status:</span>
-                <Badge variant="secondary" className="font-normal">{project.projectStatus || 'N/A'}</Badge>
+                <StatusBadge value={project.projectStatus || 'Active'} type="status" />
               </div>
               <div className="flex gap-1">
                 <span className="text-muted-foreground">PM:</span>
