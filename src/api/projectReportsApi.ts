@@ -78,6 +78,46 @@ export const fetchProjectReports = async () => {
 };
 
 /**
+ * Fetches dashboard reports from Supabase
+ * Returns ALL reports for the selected period (no deduplication by project)
+ */
+export const fetchDashboardReports = async (period?: string) => {
+  try {
+    let query = supabase
+      .from('project_reports')
+      .select(`
+        *, 
+        projects (
+          *,
+          team_members (
+            id,
+            name
+          )
+        )
+      `)
+      .order('submission_date', { ascending: false });
+    
+    // If period is specified, filter by reporting period
+    if (period) {
+      query = query.eq('reporting_period', period);
+    }
+    
+    const { data: reportsData, error: reportsError } = await query;
+
+    if (reportsError) {
+      throw reportsError;
+    }
+    
+    console.log(`Dashboard reports for period ${period || 'all'}:`, reportsData?.length);
+    
+    return { reportsData, error: null };
+  } catch (error) {
+    console.error('Error fetching dashboard reports:', error);
+    return { reportsData: [], error };
+  }
+};
+
+/**
  * Adds a project report to Supabase
  */
 export const addProjectReport = async (project: ProjectReport) => {

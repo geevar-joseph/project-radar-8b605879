@@ -1,5 +1,5 @@
+
 import { useEffect } from "react";
-import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectCard } from "@/components/ProjectCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -12,34 +12,28 @@ import { MissingReportsBlock } from "@/components/MissingReportsBlock";
 import { ComplianceTable } from "@/components/ComplianceTable";
 import { formatPeriod } from "@/utils/formatPeriods";
 import { SearchableSelect } from "@/components/SearchableSelect";
+import { useDashboardData } from "@/hooks/useDashboardData";
 
 const Dashboard = () => {
   const { 
-    getFilteredProjectsSync,
-    availablePeriods,
+    reports,
+    projectNames,
     selectedPeriod, 
     setSelectedPeriod,
-    projectNames,
-    loadAllPeriods,
-    loadProjects
-  } = useProjectContext();
-  
-  // Load all available periods and projects when dashboard mounts
-  useEffect(() => {
-    loadAllPeriods();
-    loadProjects(); // Reload projects to ensure we have fresh data
-    
-    // Log the selected period after component mounts
-    console.log("Dashboard mounted with selected period:", selectedPeriod);
-  }, []);
+    availablePeriods,
+    isLoading,
+    getDashboardReports,
+    loadDashboardData
+  } = useDashboardData();
   
   // Log when selected period changes
   useEffect(() => {
-    console.log("Selected period changed to:", selectedPeriod);
+    console.log("Dashboard mounted with selected period:", selectedPeriod);
   }, [selectedPeriod]);
   
-  const projects = getFilteredProjectsSync(selectedPeriod);
-  console.log(`Dashboard rendering with ${projects.length} projects for period:`, selectedPeriod);
+  // Get projects for the current period
+  const currentPeriodProjects = selectedPeriod ? getDashboardReports(selectedPeriod) : reports;
+  console.log(`Dashboard rendering with ${currentPeriodProjects.length} projects for period:`, selectedPeriod);
   
   // Format periods for the searchable select component
   const periodOptions = availablePeriods
@@ -50,21 +44,21 @@ const Dashboard = () => {
     }));
   
   // Calculate project statistics based on risk levels
-  const totalProjects = projects.length;
-  const projectsDoingWell = projects.filter(p => 
+  const totalProjects = projectNames.length; // This shows the total number of projects in the system
+  const projectsDoingWell = currentPeriodProjects.filter(p => 
     p.riskLevel === "Low"
   );
-  const projectsNeedingAttention = projects.filter(p => 
+  const projectsNeedingAttention = currentPeriodProjects.filter(p => 
     p.riskLevel === "Medium"
   );
-  const projectsAtRisk = projects.filter(p => 
+  const projectsAtRisk = currentPeriodProjects.filter(p => 
     p.riskLevel === "High" || p.riskLevel === "Critical"
   );
   
   // Calculate pending projects (projects that don't have reports for the selected period)
   const pendingProjects = selectedPeriod 
     ? projectNames.filter(name => 
-        !projects.some(p => p.projectName === name && p.reportingPeriod === selectedPeriod)
+        !currentPeriodProjects.some(p => p.projectName === name)
       ).length
     : 0;
 
@@ -112,7 +106,7 @@ const Dashboard = () => {
           <div>
             <h3 className="font-semibold text-lg">Total Projects</h3>
             <p className="text-sm text-muted-foreground">
-              {selectedPeriod ? `For ${formatPeriod(selectedPeriod)}` : "All periods"}
+              All projects in system
             </p>
           </div>
         </div>
@@ -277,7 +271,7 @@ const Dashboard = () => {
       </div>
       
       {/* Fallback for no projects */}
-      {projects.length === 0 && (
+      {currentPeriodProjects.length === 0 && !isLoading && (
         <div className="text-center py-10">
           <p className="text-muted-foreground mb-4">No project reports found for this period.</p>
           <Button asChild>

@@ -1,11 +1,12 @@
-import { useProjectContext } from "@/context/ProjectContext";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProjectReport, ratingToValueMap } from "@/types/project";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
+import { useDashboardData } from "@/hooks/useDashboardData";
 
 export function ProjectStats() {
-  const { getFilteredProjects, selectedPeriod } = useProjectContext();
-  const filteredProjects = getFilteredProjects(selectedPeriod);
+  const { selectedPeriod, getDashboardReports } = useDashboardData();
+  const filteredProjects = getDashboardReports(selectedPeriod);
   
   // Calculate stats
   const totalProjects = filteredProjects.length;

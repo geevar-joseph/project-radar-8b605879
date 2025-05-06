@@ -1,32 +1,33 @@
 
 import React from 'react';
-import { useProjectContext } from "@/context/ProjectContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useDashboardData } from "@/hooks/useDashboardData";
 
 interface MissingReportsBlockProps {
   selectedPeriod?: string;
 }
 
 export const MissingReportsBlock = ({ selectedPeriod }: MissingReportsBlockProps) => {
-  const { projects, projectNames, teamMembers } = useProjectContext();
+  const { reports, projectNames, getDashboardReports } = useDashboardData();
   
   // Find all project names that don't have a report for the selected period
   const missingProjects = React.useMemo(() => {
     if (!selectedPeriod) return [];
     
+    const currentPeriodReports = getDashboardReports(selectedPeriod);
+    
     // Get all project names with reports for this period
-    const projectsWithReports = projects
-      .filter(p => p.reportingPeriod === selectedPeriod)
+    const projectsWithReports = currentPeriodReports
       .map(p => p.projectName);
     
     // Filter out projects that already have reports
     return projectNames.filter(name => !projectsWithReports.includes(name))
       .map(name => {
         // Find most recent PM assignment for this project name (if any)
-        const mostRecent = [...projects]
+        const mostRecent = [...reports]
           .filter(p => p.projectName === name)
           .sort((a, b) => 
             new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()
@@ -37,7 +38,7 @@ export const MissingReportsBlock = ({ selectedPeriod }: MissingReportsBlockProps
           assignedPM: mostRecent?.assignedPM || "Unassigned"
         };
       });
-  }, [selectedPeriod, projects, projectNames]);
+  }, [selectedPeriod, reports, projectNames, getDashboardReports]);
 
   // Parse period into readable format
   const formatPeriod = (period?: string) => {
