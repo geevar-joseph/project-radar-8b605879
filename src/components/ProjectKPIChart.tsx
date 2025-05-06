@@ -5,7 +5,7 @@ import {
   XAxis, 
   YAxis, 
   CartesianGrid, 
-  Tooltip, 
+  Tooltip as RechartsTooltip, 
   Legend, 
   ResponsiveContainer,
   LabelList,
@@ -38,7 +38,12 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { formatPeriodForChart } from '@/utils/formatPeriods';
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { formatPeriod } from '@/utils/formatPeriods';
-import { Tooltip as TooltipComponent, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger 
+} from "@/components/ui/tooltip";
 
 interface ProjectKPIChartProps {
   project: ProjectReport;
@@ -373,7 +378,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} />
-                  <Tooltip 
+                  <RechartsTooltip 
                     formatter={(value: number, name: string, props: any) => {
                       const item = chartData.find(d => d.name === name);
                       return [
@@ -427,7 +432,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                     fill="#8884d8" 
                     fillOpacity={0.6} 
                   />
-                  <Tooltip
+                  <RechartsTooltip
                     formatter={(value: number, name: string, props: any) => {
                       const item = chartData.find(d => d.name === name);
                       return [
