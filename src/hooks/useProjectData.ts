@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
@@ -118,6 +117,7 @@ export const useProjectData = () => {
             backEndQuality: 'N.A.',
             testingQuality: 'N.A.',
             designQuality: 'N.A.',
+            overallProjectScore: 'N.A.',
             submissionDate: project.updated_at,
             project_id: project.id  // Include the project ID for relationship
           });

@@ -26,7 +26,7 @@ export function getValidProjectType(type: ProjectType | undefined): ProjectType 
     return 'Service'; // Default if type is an object but invalid
   }
   
-  if (type && (type === 'Service' || type === 'Product')) {
+  if (type && (type === 'Service' || type === 'Product' || type === 'Maintenance' || type === 'Training')) {
     return type;
   }
   

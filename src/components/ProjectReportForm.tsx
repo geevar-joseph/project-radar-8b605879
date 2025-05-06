@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,7 +50,7 @@ const formSchema = z.object({
   reportingPeriod: z.string().min(6, "Reporting period is required"),
   riskLevel: z.enum(["Low", "Medium", "High", "Critical", "N.A."]),
   financialHealth: z.enum(["Healthy", "On Watch", "At Risk", "Critical", "N.A."]),
-  completionOfPlannedWork: z.enum(["All completed", "Mostly", "Partially", "Not completed", "N.A."]),
+  completionOfPlannedWork: z.enum(["Completely", "Mostly", "Partially", "Not completed", "N.A."]),
   teamMorale: z.enum(["High", "Moderate", "Low", "Burnt Out", "N.A."]),
   customerSatisfaction: z.enum(["Very Satisfied", "Satisfied", "Neutral / Unclear", "Dissatisfied", "N.A."]),
   projectManagerEvaluation: z.enum(["Excellent", "Good", "Fair", "Poor", "N.A."]),
@@ -312,16 +313,16 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
       projectName: data.projectName,
       submittedBy: data.submittedBy,
       reportingPeriod: data.reportingPeriod,
-      riskLevel: data.riskLevel,
-      financialHealth: data.financialHealth,
-      completionOfPlannedWork: data.completionOfPlannedWork,
-      teamMorale: data.teamMorale,
-      customerSatisfaction: data.customerSatisfaction,
-      projectManagerEvaluation: data.projectManagerEvaluation,
-      frontEndQuality: data.frontEndQuality,
-      backEndQuality: data.backEndQuality,
-      testingQuality: data.testingQuality,
-      designQuality: data.designQuality,
+      riskLevel: data.riskLevel as RiskLevel,
+      financialHealth: data.financialHealth as FinancialHealth,
+      completionOfPlannedWork: data.completionOfPlannedWork as CompletionStatus,
+      teamMorale: data.teamMorale as TeamMorale,
+      customerSatisfaction: data.customerSatisfaction as CustomerSatisfaction,
+      projectManagerEvaluation: data.projectManagerEvaluation as RatingValue,
+      frontEndQuality: data.frontEndQuality as RatingValue,
+      backEndQuality: data.backEndQuality as RatingValue,
+      testingQuality: data.testingQuality as RatingValue,
+      designQuality: data.designQuality as RatingValue,
       // Add the calculated overall score
       overallProjectScore: scoreRating,
       // Add the new fields
@@ -643,9 +644,9 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="All completed">
+              <SelectItem value="Completely">
                 <div className="flex flex-col">
-                  <ScoreIndicator value="All completed" type="completion" />
+                  <ScoreIndicator value="Completely" type="completion" />
                   <span className="text-xs text-gray-500 ml-6 mt-0.5">100% of planned deliverables completed</span>
                 </div>
               </SelectItem>

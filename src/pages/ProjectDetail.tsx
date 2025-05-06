@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useProjectContext } from "@/context/ProjectContext";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -100,7 +99,7 @@ const ProjectDetail = () => {
         backEndQuality: (report.back_end_quality as RatingValue) || 'N.A.',
         testingQuality: (report.testing_quality as RatingValue) || 'N.A.',
         designQuality: (report.design_quality as RatingValue) || 'N.A.',
-        overallProjectScore: report.overall_project_score,
+        overallProjectScore: (report.overall_project_score as RatingValue) || 'N.A.',
         submissionDate: report.submission_date,
         keyAchievements: report.key_achievements || '',
         primaryChallenges: report.primary_challenges || '',
