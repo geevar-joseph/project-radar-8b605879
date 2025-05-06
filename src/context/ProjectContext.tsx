@@ -14,6 +14,7 @@ interface ProjectContextType {
   getFilteredProjects: (period?: string) => ProjectReport[];
   selectedPeriod: string | undefined;
   setSelectedPeriod: (period: string | undefined) => void;
+  availablePeriods: string[];
   addProjectName: (
     name: string, 
     clientName?: string,
@@ -37,6 +38,7 @@ interface ProjectContextType {
   isLoading: boolean;
   isError: boolean;
   loadProjects: () => Promise<void>;
+  loadAllPeriods: () => Promise<void>;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -47,6 +49,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     projectNames,
     selectedPeriod,
     setSelectedPeriod,
+    availablePeriods,
     isLoading,
     isError,
     addProject,
@@ -56,7 +59,8 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     addProjectName,
     removeProjectName,
     updateProjectDetails,
-    loadProjects
+    loadProjects,
+    loadAllPeriods
   } = useProjects();
 
   const {
@@ -77,6 +81,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       getFilteredProjects,
       selectedPeriod,
       setSelectedPeriod,
+      availablePeriods,
       addProjectName,
       removeProjectName,
       addTeamMember,
@@ -85,7 +90,8 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       updateTeamMember,
       isLoading,
       isError,
-      loadProjects
+      loadProjects,
+      loadAllPeriods
     }}>
       {children}
     </ProjectContext.Provider>
