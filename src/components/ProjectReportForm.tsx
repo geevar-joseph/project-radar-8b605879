@@ -812,7 +812,7 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
               )}
             />
 
-            {/* Reporting Period Field */}
+            {/* Reporting Period Field - Modified to remove ScoreIndicator since "period" is not a valid type */}
             <FormField
               control={form.control}
               name="reportingPeriod"
@@ -822,16 +822,12 @@ export function ProjectReportForm({ onDraftSaved }: ProjectReportFormProps) {
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select reporting period">
-                          {field.value && field.value !== "N.A." && <ScoreIndicator value={field.value as string} type="period" />}
-                          {(!field.value || field.value === "N.A.") && "Select reporting period"}
-                        </SelectValue>
+                        <SelectValue placeholder="Select reporting period" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="N.A.">
-                        <ScoreIndicator value="N.A." type="period" />
-                        <span className="text-xs text-gray-500 ml-6 mt-0.5">No reporting period selected</span>
+                        No reporting period selected
                       </SelectItem>
                       {reportingPeriodOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
