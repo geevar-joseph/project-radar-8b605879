@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectReport } from "@/types/project";
 import { mapToProjectReport } from "./mappers";
@@ -122,5 +121,53 @@ export const addProjectReport = async (project: ProjectReport) => {
   } catch (error) {
     console.error('Error adding project:', error);
     return { success: false, error };
+  }
+};
+
+/**
+ * Fetches all unique reporting periods from Supabase without deduplication
+ * This ensures we get every month that has at least one report
+ */
+export const fetchAllReportingPeriods = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('project_reports')
+      .select('reporting_period')
+      .order('reporting_period', { ascending: false });
+    
+    if (error) {
+      throw error;
+    }
+    
+    // Extract all periods and filter out N/A or empty values
+    const allPeriods = data
+      .map(report => report.reporting_period)
+      .filter(period => period && period !== 'N/A');
+    
+    // Filter out duplicates by creating a Set and convert back to array
+    const uniquePeriods = [...new Set(allPeriods)];
+    
+    // Sort the periods in descending order (newest first)
+    return uniquePeriods.sort((a, b) => {
+      // If either is not in YYYY-MM format, compare strings directly
+      if (!/^\d{4}-\d{2}$/.test(a) || !/^\d{4}-\d{2}$/.test(b)) {
+        return b.localeCompare(a);
+      }
+
+      // Parse years and months for proper date comparison
+      const [yearA, monthA] = a.split('-').map(Number);
+      const [yearB, monthB] = b.split('-').map(Number);
+      
+      // First compare years (in descending order)
+      if (yearA !== yearB) {
+        return yearB - yearA;
+      } 
+      // If years are the same, compare months (in descending order)
+      return monthB - monthA;
+    });
+    
+  } catch (error) {
+    console.error('Error fetching all reporting periods:', error);
+    return [];
   }
 };

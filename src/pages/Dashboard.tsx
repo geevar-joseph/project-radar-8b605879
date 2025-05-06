@@ -16,18 +16,23 @@ import { SearchableSelect } from "@/components/SearchableSelect";
 
 const Dashboard = () => {
   const { 
-    getFilteredProjects, 
-    getUniqueReportingPeriods, 
+    getFilteredProjects,
+    availablePeriods,
     selectedPeriod, 
     setSelectedPeriod,
-    projectNames
+    projectNames,
+    loadAllPeriods
   } = useProjectContext();
   
-  const periods = getUniqueReportingPeriods();
+  // Load all available periods when dashboard mounts
+  useEffect(() => {
+    loadAllPeriods();
+  }, []);
+  
   const projects = getFilteredProjects(selectedPeriod);
   
   // Format periods for the searchable select component
-  const periodOptions = periods
+  const periodOptions = availablePeriods
     .filter(period => period !== "N/A")
     .map(period => ({
       value: period,

@@ -3,7 +3,7 @@
 // This ensures backward compatibility with existing code
 
 import { mapToProjectReport } from './mappers';
-import { fetchProjectReports, addProjectReport } from './projectReportsApi';
+import { fetchProjectReports, addProjectReport, fetchAllReportingPeriods } from './projectReportsApi';
 import { fetchProjects, addProjectName, removeProjectName, updateProjectDetails } from './projectsApi';
 import { fetchTeamMembers, addTeamMember, removeTeamMember, updateTeamMember } from './teamMembersApi';
 
@@ -14,6 +14,7 @@ export {
   // Project Reports
   fetchProjectReports,
   addProjectReport,
+  fetchAllReportingPeriods,
   
   // Projects
   fetchProjects,

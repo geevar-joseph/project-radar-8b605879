@@ -14,9 +14,11 @@ export const useProjects = () => {
     setProjectNames,
     selectedPeriod,
     setSelectedPeriod,
+    availablePeriods,
     isLoading,
     isError,
     loadProjects,
+    loadAllPeriods,
     getProject,
     getUniqueReportingPeriods,
     getFilteredProjects
@@ -41,6 +43,7 @@ export const useProjects = () => {
     projectNames,
     selectedPeriod,
     setSelectedPeriod,
+    availablePeriods,
     isLoading,
     isError,
     
@@ -52,6 +55,7 @@ export const useProjects = () => {
     addProjectName,
     removeProjectName,
     updateProjectDetails,
-    loadProjects
+    loadProjects,
+    loadAllPeriods
   };
 };

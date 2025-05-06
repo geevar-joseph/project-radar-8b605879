@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
 import { sampleProjects } from "@/data/mockData";
-import { fetchProjects, fetchProjectReports, mapToProjectReport } from "@/api/projectApi";
+import { fetchProjects, fetchProjectReports, fetchAllReportingPeriods, mapToProjectReport } from "@/api/projectApi";
 
 /**
  * Hook for fetching and managing project data
@@ -12,6 +12,7 @@ export const useProjectData = () => {
   const [projects, setProjects] = useState<ProjectReport[]>([]);
   const [projectNames, setProjectNames] = useState<string[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<string | undefined>(undefined);
+  const [availablePeriods, setAvailablePeriods] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
   const loadingRef = useRef<boolean>(false);
@@ -20,7 +21,26 @@ export const useProjectData = () => {
 
   useEffect(() => {
     loadProjects();
+    loadAllPeriods();
   }, []);
+
+  const loadAllPeriods = async () => {
+    try {
+      const periods = await fetchAllReportingPeriods();
+      console.log('All available reporting periods:', periods);
+      setAvailablePeriods(periods);
+      
+      // Auto-select the latest period if none is selected
+      if (periods.length > 0 && (!selectedPeriod || selectedPeriod === "N/A")) {
+        setSelectedPeriod(periods[0]); // Since periods are already sorted in descending order
+      }
+    } catch (error) {
+      console.error('Error loading all periods:', error);
+      // Fall back to standard periods if there's an error
+      const periods = getUniqueReportingPeriods();
+      setAvailablePeriods(periods);
+    }
+  };
 
   const loadProjects = async () => {
     // Prevent multiple simultaneous loading attempts
@@ -194,9 +214,11 @@ export const useProjectData = () => {
     setProjectNames,
     selectedPeriod,
     setSelectedPeriod,
+    availablePeriods,
     isLoading,
     isError,
     loadProjects,
+    loadAllPeriods,
     getProject,
     getUniqueReportingPeriods,
     getFilteredProjects
