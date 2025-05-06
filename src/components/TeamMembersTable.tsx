@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Trash, Edit } from "lucide-react";
 import { EditTeamMemberModal } from "./EditTeamMemberModal";
+import { useToast } from "@/components/ui/use-toast";
 
 interface TeamMember {
   id: string;
@@ -22,6 +23,26 @@ interface TeamMembersTableProps {
 
 export const TeamMembersTable = ({ teamMembers, removeTeamMember, refreshTeamMembers }: TeamMembersTableProps) => {
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const { toast } = useToast();
+  
+  const handleDeleteTeamMember = async (member: TeamMember) => {
+    try {
+      setIsDeleting(member.id);
+      await removeTeamMember(member.name);
+      // Refresh the team member list after successful deletion
+      refreshTeamMembers();
+    } catch (error) {
+      console.error("Error deleting team member:", error);
+      toast({
+        title: "Delete Failed",
+        description: "The team member could not be deleted. They may have assigned projects.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(null);
+    }
+  };
   
   return (
     <div className="overflow-x-auto">
@@ -68,7 +89,8 @@ export const TeamMembersTable = ({ teamMembers, removeTeamMember, refreshTeamMem
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  onClick={() => removeTeamMember(member.name)}
+                  onClick={() => handleDeleteTeamMember(member)}
+                  disabled={isDeleting === member.id}
                   className="text-destructive hover:bg-destructive/10"
                 >
                   <Trash className="h-4 w-4" />

@@ -64,14 +64,28 @@ export const removeTeamMember = async (name: string) => {
       .eq('name', name)
       .single();
     
-    if (data) {
-      const { error } = await supabase
-        .from('team_members')
-        .delete()
-        .eq('id', data.id);
-
-      if (error) throw error;
+    if (!data) {
+      throw new Error('Team member not found');
     }
+
+    // First, update all projects to remove this team member as assigned PM
+    const { error: projectUpdateError } = await supabase
+      .from('projects')
+      .update({ assigned_pm: null })
+      .eq('assigned_pm', data.id);
+
+    if (projectUpdateError) {
+      console.error('Error removing project assignments:', projectUpdateError);
+      throw projectUpdateError;
+    }
+    
+    // Now it's safe to delete the team member
+    const { error } = await supabase
+      .from('team_members')
+      .delete()
+      .eq('id', data.id);
+
+    if (error) throw error;
 
     return { success: true, error: null };
   } catch (error) {

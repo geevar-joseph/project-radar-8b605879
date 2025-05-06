@@ -60,7 +60,12 @@ export const useTeamMembers = () => {
     try {
       const { success, error } = await apiRemoveTeamMember(name);
       
-      if (!success) throw error;
+      if (!success) {
+        if (error instanceof Error) {
+          throw new Error(`Failed to remove team member: ${error.message}`);
+        }
+        throw error;
+      }
 
       setTeamMembers(teamMembers.filter(member => member !== name));
       
@@ -72,7 +77,9 @@ export const useTeamMembers = () => {
       console.error('Error removing team member:', error);
       toast({
         title: "Error",
-        description: "There was an error removing the team member. Please try again.",
+        description: error instanceof Error 
+          ? error.message 
+          : "There was an error removing the team member. Please try again.",
         variant: "destructive"
       });
     }
