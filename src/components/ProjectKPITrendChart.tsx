@@ -17,6 +17,7 @@ import { formatPeriodForChart } from '@/utils/formatPeriods';
 
 interface ProjectKPITrendChartProps {
   projectName: string;
+  projectReports?: ProjectReport[]; // New prop to receive project-specific reports
 }
 
 // Helper function to convert rating to numeric value
@@ -210,15 +211,22 @@ const calculateKPIChanges = (currentReport: ProjectReport, previousReport: Proje
     });
 };
 
-export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ projectName }) => {
+export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ 
+  projectName,
+  projectReports = [] // Default to empty array if not provided
+}) => {
   const { projects } = useProjectContext();
   
+  // Prioritize passed project reports, fall back to context filtering if needed
+  const projectSpecificReports = projectReports.length > 0 
+    ? projectReports 
+    : projects.filter(p => p.projectName === projectName);
+  
   // Filter reports for this project and sort by reporting period
-  const projectReports = projects
-    .filter(p => p.projectName === projectName)
+  const projectReportsSorted = projectSpecificReports
     .sort((a, b) => a.reportingPeriod.localeCompare(b.reportingPeriod));
   
-  if (projectReports.length < 2) {
+  if (projectReportsSorted.length < 2) {
     return (
       <div className="flex h-[300px] items-center justify-center">
         <p className="text-muted-foreground">Not enough data for trend analysis</p>
@@ -227,8 +235,8 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
   }
 
   // Get latest two reports for KPI change calculation
-  const latestReport = projectReports[projectReports.length - 1];
-  const previousReport = projectReports[projectReports.length - 2];
+  const latestReport = projectReportsSorted[projectReportsSorted.length - 1];
+  const previousReport = projectReportsSorted[projectReportsSorted.length - 2];
   
   // Calculate KPI changes
   const kpiChanges = calculateKPIChanges(latestReport, previousReport);
@@ -249,7 +257,7 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
   const formatPeriod = formatPeriodForChart;
 
   // Prepare data for the line chart
-  const trendData = projectReports.map(report => ({
+  const trendData = projectReportsSorted.map(report => ({
     period: formatPeriod(report.reportingPeriod),
     risk: statusToNumeric(report.riskLevel, 'risk'),
     financial: statusToNumeric(report.financialHealth, 'financial'),

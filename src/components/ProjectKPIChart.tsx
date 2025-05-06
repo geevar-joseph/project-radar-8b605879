@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart, 
@@ -344,7 +343,10 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
             width="w-[200px]"
           />
         </div>
-        <ProjectKPITrendChart projectName={project.projectName} />
+        <ProjectKPITrendChart 
+          projectName={project.projectName} 
+          projectReports={projectSpecificReports} // Pass all project reports to the trend chart
+        />
       </div>
     );
   }
