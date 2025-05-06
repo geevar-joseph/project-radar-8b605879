@@ -17,9 +17,10 @@ interface TeamMember {
 interface TeamMembersTableProps {
   teamMembers: TeamMember[];
   removeTeamMember: (name: string) => void;
+  refreshTeamMembers: () => void;
 }
 
-export const TeamMembersTable = ({ teamMembers, removeTeamMember }: TeamMembersTableProps) => {
+export const TeamMembersTable = ({ teamMembers, removeTeamMember, refreshTeamMembers }: TeamMembersTableProps) => {
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   
   return (
@@ -84,6 +85,7 @@ export const TeamMembersTable = ({ teamMembers, removeTeamMember }: TeamMembersT
           open={!!editingMember}
           onOpenChange={() => setEditingMember(null)}
           teamMember={editingMember}
+          refreshTeamMembers={refreshTeamMembers}
         />
       )}
     </div>

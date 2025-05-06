@@ -27,10 +27,16 @@ export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: Team
   const [isAddTeamMemberModalOpen, setIsAddTeamMemberModalOpen] = useState(false);
   const [teamMembersData, setTeamMembersData] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Add a function to trigger refresh
+  const refreshTeamMembers = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
   
   useEffect(() => {
     fetchTeamMembersData();
-  }, [teamMembers]);
+  }, [teamMembers, projects, refreshTrigger]);
   
   const fetchTeamMembersData = async () => {
     setIsLoading(true);
@@ -44,18 +50,24 @@ export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: Team
       }
       
       // Map the data to the expected format
-      const mappedData = data.map((member) => ({
-        id: member.id,
-        name: member.name,
-        email: member.email,
-        role: member.role,
-        assignedProjects: Array.from(
-          new Set(
-            projects
-              .filter(p => p.assignedPM === member.name)
-              .map(p => p.projectName)
-          )
-        ),
+      const mappedData = await Promise.all(data.map(async (member) => {
+        // Get all projects assigned to this team member
+        const { data: assignedProjects, error: projectsError } = await supabase
+          .from('projects')
+          .select('project_name')
+          .eq('assigned_pm', member.id);
+        
+        if (projectsError) {
+          console.error('Error fetching assigned projects:', projectsError);
+        }
+        
+        return {
+          id: member.id,
+          name: member.name,
+          email: member.email,
+          role: member.role,
+          assignedProjects: assignedProjects ? assignedProjects.map(p => p.project_name) : [],
+        };
       }));
       
       setTeamMembersData(mappedData);
@@ -100,6 +112,7 @@ export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: Team
           <TeamMembersTable
             teamMembers={teamMembersData}
             removeTeamMember={removeTeamMember}
+            refreshTeamMembers={refreshTeamMembers}
           />
         )}
       </CardContent>

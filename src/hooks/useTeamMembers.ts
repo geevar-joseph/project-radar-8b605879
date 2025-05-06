@@ -6,7 +6,7 @@ import {
   addTeamMember as apiAddTeamMember, 
   removeTeamMember as apiRemoveTeamMember,
   updateTeamMember as apiUpdateTeamMember
-} from "@/api/projectApi";
+} from "@/api/teamMembersApi";
 
 export const useTeamMembers = () => {
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
@@ -80,7 +80,7 @@ export const useTeamMembers = () => {
 
   const updateTeamMember = async (originalName: string, name: string, email: string, role: string, assignedProjects?: string[]) => {
     try {
-      const { success, error } = await apiUpdateTeamMember(originalName, name, email, role);
+      const { success, error } = await apiUpdateTeamMember(originalName, name, email, role, assignedProjects);
       
       if (!success) throw error;
 
@@ -104,7 +104,7 @@ export const useTeamMembers = () => {
         description: "There was an error updating the team member. Please try again.",
         variant: "destructive"
       });
-      throw error;
+      return false;
     }
   };
 

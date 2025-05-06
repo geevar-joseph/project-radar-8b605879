@@ -38,6 +38,7 @@ interface EditTeamMemberModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   teamMember: TeamMember;
+  refreshTeamMembers: () => void;
 }
 
 const formSchema = z.object({
@@ -46,7 +47,7 @@ const formSchema = z.object({
   role: z.string().min(1, "Role is required"),
 });
 
-export const EditTeamMemberModal = ({ open, onOpenChange, teamMember }: EditTeamMemberModalProps) => {
+export const EditTeamMemberModal = ({ open, onOpenChange, teamMember, refreshTeamMembers }: EditTeamMemberModalProps) => {
   const { projectNames, updateTeamMember } = useProjectContext();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -91,11 +92,16 @@ export const EditTeamMemberModal = ({ open, onOpenChange, teamMember }: EditTeam
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
+      console.log("Submitting with assigned projects:", assignedProjects);
       await updateTeamMember(teamMember.name, values.name, values.email, values.role, assignedProjects);
       toast({
         title: "Team Member Updated",
         description: `${values.name} has been updated successfully.`,
       });
+      
+      // Refresh the team members list to show the updated data
+      refreshTeamMembers();
+      
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating team member:', error);
