@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   LineChart,
@@ -69,7 +68,7 @@ const statusToNumeric = (status: string, type: string) => {
   return 0;
 };
 
-// Calculate overall score from a report
+// Calculate overall score from a report - Updated to match MonthlyReportsTable approach
 const calculateOverallScore = (report: ProjectReport): number => {
   // If the report already has an overall score that's not "N.A." or "N/A", convert it to numeric
   if (report.overallProjectScore && 
@@ -79,22 +78,71 @@ const calculateOverallScore = (report: ProjectReport): number => {
     if (!isNaN(numericScore) && numericScore > 0 && numericScore <= 4) {
       return numericScore;
     }
+    
+    // If it's a rating string like "Good", map it to a numeric value
+    if (ratingToValueMap[report.overallProjectScore]) {
+      return ratingToValueMap[report.overallProjectScore] || 0;
+    }
   }
   
-  // Otherwise calculate from individual scores
+  // Otherwise calculate from individual scores using a more comprehensive mapping
+  const scoreMap: Record<string, number> = {
+    // Standard rating values
+    "Excellent": 4,
+    "Good": 3,
+    "Fair": 2,
+    "Poor": 1,
+    // Risk levels
+    "Low": 4,
+    "Medium": 3,
+    "High": 2,
+    "Critical": 1,
+    // Financial health
+    "Healthy": 4,
+    "On Watch": 3,
+    "At Risk": 2,
+    "Critical": 1,
+    // Completion status
+    "Completely": 4,
+    "All completed": 4,
+    "Mostly": 3,
+    "Partially": 2,
+    "Not completed": 1,
+    // Satisfaction levels
+    "Very Satisfied": 4,
+    "Satisfied": 3,
+    "Neutral / Unclear": 2.5,
+    "Somewhat Dissatisfied": 2,
+    "Dissatisfied": 1,
+    "Very Dissatisfied": 0.5,
+    // Team morale
+    "High": 4,
+    "Good": 3.5,
+    "Moderate": 3,
+    "Low": 2,
+    "Burnt Out": 1,
+    // N/A values
+    "N.A.": 0,
+    "N/A": 0,
+    "": 0
+  };
+  
+  // Collect all relevant scores from the report
   const scores = [
-    statusToNumeric(report.completionOfPlannedWork, 'completion'),
-    statusToNumeric(report.teamMorale, 'morale'),
-    statusToNumeric(report.customerSatisfaction, 'satisfaction'),
-    ratingToNumeric(report.projectManagerEvaluation),
-    ratingToNumeric(report.frontEndQuality),
-    ratingToNumeric(report.backEndQuality),
-    ratingToNumeric(report.testingQuality),
-    ratingToNumeric(report.designQuality)
+    report.riskLevel && scoreMap[report.riskLevel] !== undefined ? scoreMap[report.riskLevel] : null,
+    report.financialHealth && scoreMap[report.financialHealth] !== undefined ? scoreMap[report.financialHealth] : null,
+    report.customerSatisfaction && scoreMap[report.customerSatisfaction] !== undefined ? scoreMap[report.customerSatisfaction] : null,
+    report.teamMorale && scoreMap[report.teamMorale] !== undefined ? scoreMap[report.teamMorale] : null,
+    report.completionOfPlannedWork && scoreMap[report.completionOfPlannedWork] !== undefined ? scoreMap[report.completionOfPlannedWork] : null,
+    report.projectManagerEvaluation && scoreMap[report.projectManagerEvaluation] !== undefined ? scoreMap[report.projectManagerEvaluation] : null,
+    report.frontEndQuality && scoreMap[report.frontEndQuality] !== undefined ? scoreMap[report.frontEndQuality] : null,
+    report.backEndQuality && scoreMap[report.backEndQuality] !== undefined ? scoreMap[report.backEndQuality] : null,
+    report.testingQuality && scoreMap[report.testingQuality] !== undefined ? scoreMap[report.testingQuality] : null,
+    report.designQuality && scoreMap[report.designQuality] !== undefined ? scoreMap[report.designQuality] : null
   ];
   
-  // Filter out zero values
-  const validScores = scores.filter(score => score > 0);
+  // Filter out null values
+  const validScores = scores.filter(score => score !== null) as number[];
   
   if (validScores.length === 0) return 0;
   

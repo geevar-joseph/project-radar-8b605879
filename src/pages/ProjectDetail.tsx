@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useProjectContext } from "@/context/ProjectContext";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -148,13 +149,13 @@ const ProjectDetail = () => {
         </Button>
       </div>
       
-      {/* Compact Header Section - Removed Score Display */}
+      {/* Compact Header Section - Removed Risk Level Badge */}
       <div className="mb-6 bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-2xl font-bold">{project.projectName}</h1>
-              <StatusBadge value={project.riskLevel} type="risk" />
+              {/* StatusBadge for risk level removed */}
             </div>
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex gap-1">
