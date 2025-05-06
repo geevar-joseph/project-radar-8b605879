@@ -90,13 +90,13 @@ export function ProjectStats() {
         </CardHeader>
         <CardContent className="flex justify-center">
           <ResponsiveContainer width="100%" height={120}> {/* Increased height from 100 to 120 */}
-            <PieChart>
+            <PieChart margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
               <Pie
                 data={healthData}
                 cx="50%"
                 cy="50%"
-                innerRadius={30} {/* Increased from 25 to 30 */}
-                outerRadius={50} {/* Increased from 40 to 50 */}
+                innerRadius={30} 
+                outerRadius={50} 
                 paddingAngle={5}
                 dataKey="value"
               >
@@ -115,10 +115,10 @@ export function ProjectStats() {
           <CardTitle className="text-sm font-medium">Team Performance</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={120}> {/* Increased height from 100 to 120 */}
+          <ResponsiveContainer width="100%" height={120}> 
             <BarChart 
               data={departmentData}
-              margin={{ top: 5, right: 20, left: 0, bottom: 5 }} {/* Added right margin for better spacing */}
+              margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 10 }} />
@@ -127,7 +127,7 @@ export function ProjectStats() {
               <Bar 
                 dataKey="score" 
                 fill="#60a5fa" 
-                barSize={18} {/* Explicitly set bar size for better proportions */}
+                barSize={18} 
               />
             </BarChart>
           </ResponsiveContainer>
