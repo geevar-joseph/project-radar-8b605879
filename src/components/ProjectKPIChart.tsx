@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart, 
@@ -44,6 +45,7 @@ import {
   TooltipProvider,
   TooltipTrigger 
 } from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ProjectKPIChartProps {
   project: ProjectReport;
@@ -70,6 +72,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
   const { projects, availablePeriods: contextAvailablePeriods } = useProjectContext();
   const [selectedPeriod, setSelectedPeriod] = useState<string>(initialPeriod || project.reportingPeriod);
   const [chartView, setChartView] = useState<ChartViewType>('bar');
+  const [activeTab, setActiveTab] = useState<string>("performance");
   
   const availablePeriods = propAvailablePeriods || contextAvailablePeriods;
   
@@ -289,15 +292,20 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
   // Get the overall score from the report, or calculate it if not available
   const overallScore = ratingToNumeric(selectedReport.overallProjectScore);
   
-  // Calculate key performance stats for the summary panel - show ALL KPIs instead of limiting to 3
+  // Calculate key performance stats for the summary panel
   const validScores = chartData.filter(item => item.value > 0);
   const avgScore = validScores.length > 0 
     ? validScores.reduce((sum, item) => sum + item.value, 0) / validScores.length
     : 0;
     
-  // Sort all KPIs by performance (no limit)
-  const topPerformers = [...chartData].sort((a, b) => b.value - a.value);
-  const improvementAreas = [...chartData].sort((a, b) => a.value - b.value);
+  // Split KPIs into top performers and improvement areas based on score threshold
+  const PERFORMANCE_THRESHOLD = 2.5; // Scores >= 2.5 are top performers, < 2.5 are improvement areas
+  
+  const topPerformers = chartData.filter(item => item.value >= PERFORMANCE_THRESHOLD)
+    .sort((a, b) => b.value - a.value);
+    
+  const improvementAreas = chartData.filter(item => item.value < PERFORMANCE_THRESHOLD)
+    .sort((a, b) => a.value - b.value);
 
   // Helper for formatting rating labels
   const getRatingLabel = (value: number): string => {
@@ -370,7 +378,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
       </div>
       
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="h-[500px] overflow-hidden"> {/* Increased height from 400px to 500px */}
+        <div className="h-[500px] overflow-hidden">
           <ChartContainer config={chartConfig}>
             {chartView === 'bar' ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -463,11 +471,11 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
           </ChartContainer>
         </div>
 
-        {/* Performance Summary Panel - Updated with Overall Score and showing all KPIs */}
-        <div className="flex flex-col gap-4">
-          <Card className="h-[500px] overflow-auto"> {/* Increased height and made scrollable */}
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-2">
+        {/* Performance Summary Panel - Using tabs and without internal scrolling */}
+        <div className="flex flex-col">
+          <Card className="h-[500px]">
+            <CardContent className="pt-6 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-lg">Performance Summary</h3>
                 <HoverCard>
                   <HoverCardTrigger>
@@ -489,35 +497,39 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                 </HoverCard>
               </div>
               
-              <div className="space-y-4">
-                <div>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-sm text-muted-foreground mb-1 flex items-center">
-                          Overall Score <Info size={12} className="ml-1 text-muted-foreground" />
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-xs max-w-xs">This is the overall project score reported for this period, not calculated as an average of all KPIs.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <div className="flex items-center">
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div 
-                        className="bg-primary h-2.5 rounded-full" 
-                        style={{ width: `${(overallScore / 4) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="ml-2 font-medium text-sm">{overallScore.toFixed(1)} ({getRatingLabel(overallScore)})</span>
+              <div className="mb-4">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-sm text-muted-foreground mb-1 flex items-center">
+                        Overall Score <Info size={12} className="ml-1 text-muted-foreground" />
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs max-w-xs">This is the overall project score reported for this period, not calculated as an average of all KPIs.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <div className="flex items-center">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className="bg-primary h-2.5 rounded-full" 
+                      style={{ width: `${(overallScore / 4) * 100}%` }}
+                    ></div>
                   </div>
+                  <span className="ml-2 font-medium text-sm">{overallScore.toFixed(1)} ({getRatingLabel(overallScore)})</span>
                 </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Top Performing Areas</p>
-                  <div className="max-h-[150px] overflow-y-auto pr-1"> {/* Made scrollable */}
-                    <ul className="space-y-2">
+              </div>
+              
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+                <TabsList className="grid grid-cols-2">
+                  <TabsTrigger value="performance">Top Performers</TabsTrigger>
+                  <TabsTrigger value="improvement">Improvement Areas</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="performance" className="flex-1 overflow-auto">
+                  {topPerformers.length > 0 ? (
+                    <ul className="space-y-3 mt-2">
                       {topPerformers.map((item) => (
                         <li key={`top-${item.name}`} className="flex justify-between items-center">
                           <span className="text-sm flex items-center">
@@ -531,18 +543,19 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                                 style={{ width: `${(item.value / 4) * 100}%` }}
                               ></div>
                             </div>
-                            <span className="text-xs font-medium">{item.value}</span>
+                            <span className="text-xs font-medium">{item.value} ({getRatingLabel(item.value)})</span>
                           </div>
                         </li>
                       ))}
                     </ul>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Areas for Improvement</p>
-                  <div className="max-h-[150px] overflow-y-auto pr-1"> {/* Made scrollable */}
-                    <ul className="space-y-2">
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-4">No top performers found.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="improvement" className="flex-1 overflow-auto">
+                  {improvementAreas.length > 0 ? (
+                    <ul className="space-y-3 mt-2">
                       {improvementAreas.map((item) => (
                         <li key={`imp-${item.name}`} className="flex justify-between items-center">
                           <span className="text-sm flex items-center">
@@ -556,18 +569,20 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                                 style={{ width: `${(item.value / 4) * 100}%` }}
                               ></div>
                             </div>
-                            <span className="text-xs font-medium">{item.value}</span>
+                            <span className="text-xs font-medium">{item.value} ({getRatingLabel(item.value)})</span>
                           </div>
                         </li>
                       ))}
                     </ul>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Reporting Period</p>
-                  <p className="text-sm font-medium">{formatPeriodDisplay(selectedPeriod)}</p>
-                </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-4">No improvement areas found.</p>
+                  )}
+                </TabsContent>
+              </Tabs>
+              
+              <div className="mt-4">
+                <p className="text-sm text-muted-foreground mb-1">Reporting Period</p>
+                <p className="text-sm font-medium">{formatPeriodDisplay(selectedPeriod)}</p>
               </div>
             </CardContent>
           </Card>
