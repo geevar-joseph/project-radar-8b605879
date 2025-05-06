@@ -46,7 +46,7 @@ export function ProjectStats() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
@@ -83,19 +83,20 @@ export function ProjectStats() {
         </CardContent>
       </Card>
       
+      {/* Updated chart sizes with better height and margins */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">Risk Distribution</CardTitle>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <ResponsiveContainer width="100%" height={100}>
+          <ResponsiveContainer width="100%" height={120}> {/* Increased height from 100 to 120 */}
             <PieChart>
               <Pie
                 data={healthData}
                 cx="50%"
                 cy="50%"
-                innerRadius={25}
-                outerRadius={40}
+                innerRadius={30} {/* Increased from 25 to 30 */}
+                outerRadius={50} {/* Increased from 40 to 50 */}
                 paddingAngle={5}
                 dataKey="value"
               >
@@ -114,13 +115,20 @@ export function ProjectStats() {
           <CardTitle className="text-sm font-medium">Team Performance</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={100}>
-            <BarChart data={departmentData}>
+          <ResponsiveContainer width="100%" height={120}> {/* Increased height from 100 to 120 */}
+            <BarChart 
+              data={departmentData}
+              margin={{ top: 5, right: 20, left: 0, bottom: 5 }} {/* Added right margin for better spacing */}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 10 }} />
               <YAxis domain={[0, 4]} tick={{ fontSize: 10 }} />
               <Tooltip />
-              <Bar dataKey="score" fill="#60a5fa" />
+              <Bar 
+                dataKey="score" 
+                fill="#60a5fa" 
+                barSize={18} {/* Explicitly set bar size for better proportions */}
+              />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

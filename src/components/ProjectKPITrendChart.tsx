@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   LineChart,
@@ -228,7 +229,7 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({
   
   if (projectReportsSorted.length < 2) {
     return (
-      <div className="flex h-[300px] items-center justify-center">
+      <div className="flex h-[400px] items-center justify-center"> {/* Increased height from 300px to 400px */}
         <p className="text-muted-foreground">Not enough data for trend analysis</p>
       </div>
     );
@@ -272,20 +273,22 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({
 
   // Updated color configuration with the specified color codes
   const chartConfig = {
-    risk: { label: "Risk Level", color: "#D97706" },         // Updated to #D97706
-    financial: { label: "Financial Health", color: "#0E7490" }, // Updated to #0E7490
+    risk: { label: "Risk Level", color: "#D97706" },
+    financial: { label: "Financial Health", color: "#0E7490" },
     completion: { label: "Completion", color: "#10B981" },
     morale: { label: "Team Morale", color: "#EC4899" },
     // Updated New KPIs
-    overall: { label: "Overall Score", color: "#1D4ED8", icon: Star }, // Updated to #1D4ED8
-    customerSatisfaction: { label: "Customer Satisfaction", color: "#047857", icon: Smile }, // Updated to #047857
-    teamKPIs: { label: "Team KPIs", color: "#CA8A04", icon: Users }, // Updated to #CA8A04
-    departmentalScore: { label: "Departmental Score", color: "#7C3AED", icon: Building }, // Updated to #7C3AED
+    overall: { label: "Overall Score", color: "#1D4ED8", icon: Star },
+    customerSatisfaction: { label: "Customer Satisfaction", color: "#047857", icon: Smile },
+    teamKPIs: { label: "Team KPIs", color: "#CA8A04", icon: Users },
+    departmentalScore: { label: "Departmental Score", color: "#7C3AED", icon: Building },
   };
 
   return (
-    <div className="grid md:grid-cols-2 gap-6">
-      <div className="h-[400px] overflow-hidden">
+    // Updated grid to grid-cols-3 with chart taking 2 columns
+    <div className="grid md:grid-cols-3 gap-6">
+      {/* Chart now spans 2 columns for more width */}
+      <div className="md:col-span-2 h-[400px] overflow-hidden"> {/* Increased height from 300px to 400px */}
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart 
@@ -297,14 +300,19 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({
                 dataKey="period" 
                 tick={{ fontSize: 12 }}
                 tickMargin={10}
+                height={40} // Increased height for better label visibility
               />
               <YAxis 
                 domain={[0, 4]} 
                 ticks={[0, 1, 2, 3, 4]} 
                 tick={{ fontSize: 12 }}
                 tickMargin={10}
+                width={30} // Set explicit width for more chart space
               />
-              <Tooltip content={<ChartTooltipContent />} />
+              <Tooltip 
+                content={<ChartTooltipContent />} 
+                wrapperStyle={{ zIndex: 1000 }} // Ensure tooltip is visible
+              />
               <Legend 
                 layout="horizontal" 
                 verticalAlign="top"
@@ -347,7 +355,7 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({
         </ChartContainer>
       </div>
 
-      {/* Trend Analysis Summary with KPI Movement */}
+      {/* Trend Analysis Summary with KPI Movement - now takes 1/3 of the width */}
       <div className="flex flex-col">
         <div className="border rounded-md p-6 h-full">
           <h3 className="font-semibold text-lg mb-4">Trend Analysis</h3>
@@ -360,7 +368,7 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({
               </p>
             </div>
             
-            {/* KPI Movement Summary Section - Updated with specified colors and fixed Risk Level logic */}
+            {/* KPI Movement Summary Section */}
             <div>
               <h4 className="text-sm font-medium mb-3">KPI Movement Summary</h4>
               <div className="space-y-4">

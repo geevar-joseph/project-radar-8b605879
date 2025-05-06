@@ -379,15 +379,24 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
         />
       </div>
       
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="h-[500px] overflow-hidden">
+      {/* Modified grid layout to give charts more space - changed from grid-cols-2 to grid-cols-3 with span */}
+      <div className="grid md:grid-cols-3 gap-6">
+        {/* Chart column now spans 2 columns to give it more width */}
+        <div className="md:col-span-2 h-[500px] overflow-hidden">
           <ChartContainer config={chartConfig}>
             {chartView === 'bar' ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <BarChart 
+                  data={chartData} 
+                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }} // Increased bottom margin
+                >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis domain={[0, 4]} ticks={[0, 1, 2, 3, 4]} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} /> {/* Adjusted font size */}
+                  <YAxis 
+                    domain={[0, 4]} 
+                    ticks={[0, 1, 2, 3, 4]} 
+                    tick={{ fontSize: 12 }} // Adjusted font size
+                  />
                   <RechartsTooltip 
                     formatter={(value: number, name: string, props: any) => {
                       const item = chartData.find(d => d.name === name);
@@ -396,6 +405,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                         item?.fullName || name
                       ];
                     }}
+                    wrapperStyle={{ zIndex: 1000 }} // Ensure tooltip is visible
                   />
                   <Legend 
                     formatter={(value, entry, index) => {
@@ -411,17 +421,29 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                         </HoverCard>
                       );
                     }}
+                    wrapperStyle={{ paddingTop: "10px" }} // Added padding to the legend
                   />
-                  <Bar dataKey="value" fill="#8884d8">
+                  <Bar 
+                    dataKey="value" 
+                    fill="#8884d8"
+                    barSize={28} // Slightly increased bar size for better visibility
+                  >
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
+                    <LabelList dataKey="value" position="top" /> {/* Added value labels on top */}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+                <RadarChart 
+                  cx="50%" 
+                  cy="50%" 
+                  outerRadius="90%" // Increased from 80% to 90%
+                  data={chartData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }} // Added margins
+                >
                   <PolarGrid gridType="polygon" />
                   <PolarAngleAxis 
                     dataKey="name" 
@@ -432,7 +454,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                     angle={30} 
                     domain={[0, 4]} 
                     tickCount={5} 
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 11 }} // Increased font size slightly
                     axisLine={false}
                   />
                   <Radar 
@@ -440,7 +462,8 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                     dataKey="value" 
                     stroke="#8884d8" 
                     fill="#8884d8" 
-                    fillOpacity={0.6} 
+                    fillOpacity={0.6}
+                    strokeWidth={2} // Increased stroke width for better visibility
                   />
                   <RechartsTooltip
                     formatter={(value: number, name: string, props: any) => {
@@ -450,6 +473,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
                         item?.fullName || name
                       ];
                     }}
+                    wrapperStyle={{ zIndex: 1000 }} // Ensure tooltip is visible
                   />
                   <Legend 
                     wrapperStyle={{ paddingTop: 20 }}
@@ -473,7 +497,7 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
           </ChartContainer>
         </div>
 
-        {/* Performance Summary Panel - Using tabs and without internal scrolling */}
+        {/* Performance Summary Panel now takes only 1/3 of the width */}
         <div className="flex flex-col">
           <Card className="h-[500px]">
             <CardContent className="pt-6 h-full flex flex-col">
