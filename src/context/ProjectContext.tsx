@@ -2,12 +2,12 @@
 import { createContext, useContext, ReactNode } from "react";
 import { ProjectReport } from "../types/project";
 import { useProjects } from "@/hooks/useProjects";
-import { useTeamMembers } from "@/hooks/useTeamMembers";
+import { useTeamMembers, TeamMember } from "@/hooks/useTeamMembers";
 
 interface ProjectContextType {
   projects: ProjectReport[];
   projectNames: string[];
-  teamMembers: string[];
+  teamMembers: TeamMember[]; // Changed from string[] to TeamMember[]
   addProject: (project: ProjectReport) => void;
   getProject: (id: string) => ProjectReport | undefined;
   getUniqueReportingPeriods: () => string[];

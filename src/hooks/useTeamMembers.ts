@@ -16,6 +16,7 @@ export interface TeamMember {
   role: string;
   force_password_change?: boolean;
   auth_user_id?: string | null;
+  assignedProjects?: string[]; // Added this property
 }
 
 export const useTeamMembers = () => {

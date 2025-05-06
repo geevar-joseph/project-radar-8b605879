@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -70,7 +71,7 @@ export function Navigation() {
                   </Button>
                 </div>
               ) : (
-                <Link to="/login" passHref>
+                <Link to="/login">
                   <Button variant="outline" size="sm">
                     Login
                   </Button>

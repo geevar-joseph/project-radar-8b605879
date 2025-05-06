@@ -10,7 +10,7 @@ import { useTeamMembers, TeamMember } from "@/hooks/useTeamMembers";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TeamMembersTabProps {
-  teamMembers: string[];
+  teamMembers: TeamMember[]; // Updated type
   projects: ProjectReport[];
   removeTeamMember: (name: string) => void;
 }
@@ -70,17 +70,13 @@ export const TeamMembersTab = ({ teamMembers, projects, removeTeamMember }: Team
       console.error('Error fetching team members data:', error);
       
       // Fallback to creating mock data from the teamMembers prop
-      const fallbackData = teamMembers.map((name, index) => ({
-        id: `U${1000 + index}`,
-        name: name,
-        email: `${name.toLowerCase().replace(/\s/g, '.')}@example.com`,
-        role: index % 3 === 0 ? "Admin" : index % 3 === 1 ? "Project Manager" : "Viewer",
-        force_password_change: true,
-        auth_user_id: null,
-        assignedProjects: Array.from(
+      const fallbackData = teamMembers.map((member, index) => ({
+        ...member,
+        id: member.id || `U${1000 + index}`,
+        assignedProjects: member.assignedProjects || Array.from(
           new Set(
             projects
-              .filter(p => p.assignedPM === name)
+              .filter(p => p.assignedPM === member.name)
               .map(p => p.projectName)
           )
         ),
