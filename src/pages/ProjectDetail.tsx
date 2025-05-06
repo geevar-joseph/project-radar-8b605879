@@ -12,23 +12,35 @@ import { useEffect, useState } from "react";
 import { ProjectReport, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale, CustomerSatisfaction, ProjectType, ProjectStatus, RatingValue } from "@/types/project";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPeriod } from "@/utils/formatPeriods";
+import { SearchableSelect } from "@/components/SearchableSelect";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { getProject, projects } = useProjectContext();
+  const { getProject, projects, availablePeriods, selectedPeriod, setSelectedPeriod, loadAllPeriods } = useProjectContext();
   const navigate = useNavigate();
   const [projectReports, setProjectReports] = useState<ProjectReport[]>([]);
+  const [localPeriod, setLocalPeriod] = useState<string | undefined>(selectedPeriod);
   
   const project = getProject(id || "");
 
+  // Load all available periods
+  useEffect(() => {
+    loadAllPeriods();
+  }, []);
+
+  // Update local period when global period changes
+  useEffect(() => {
+    setLocalPeriod(selectedPeriod);
+  }, [selectedPeriod]);
+
+  // When project or localPeriod changes, fetch reports
   useEffect(() => {
     if (project) {
-      // We need to check database directly to get all reports, not just filter by name
-      fetchAllProjectReports(project.projectName);
+      fetchAllProjectReports(project.projectName, localPeriod);
     }
-  }, [project]);
+  }, [project, localPeriod]);
   
-  const fetchAllProjectReports = async (projectName: string) => {
+  const fetchAllProjectReports = async (projectName: string, period?: string) => {
     try {
       // First find the project in the database by name
       const { data: projectData, error: projectError } = await supabase
@@ -41,14 +53,15 @@ const ProjectDetail = () => {
         console.error('Error fetching project:', projectError);
         // Fallback to filtering from local state if database fetch fails
         const reportsFromState = projects.filter(p => 
-          p.projectName === projectName
+          p.projectName === projectName && 
+          (!period || p.reportingPeriod === period)
         );
         setProjectReports(reportsFromState);
         return;
       }
       
-      // Then fetch all reports for this project
-      const { data: reportsData, error: reportsError } = await supabase
+      // Then fetch all reports for this project, with optional period filter
+      let query = supabase
         .from('project_reports')
         .select(`
           *,
@@ -62,11 +75,19 @@ const ProjectDetail = () => {
         .eq('project_id', projectData.id)
         .order('submission_date', { ascending: false });
       
+      // Add period filter if specified
+      if (period && period !== "N/A") {
+        query = query.eq('reporting_period', period);
+      }
+      
+      const { data: reportsData, error: reportsError } = await query;
+      
       if (reportsError) {
         console.error('Error fetching project reports:', reportsError);
         // Fallback to filtering from local state if database fetch fails
         const reportsFromState = projects.filter(p => 
-          p.projectName === projectName
+          p.projectName === projectName && 
+          (!period || p.reportingPeriod === period)
         );
         setProjectReports(reportsFromState);
         return;
@@ -105,7 +126,8 @@ const ProjectDetail = () => {
       if (mappedReports.length === 0) {
         // If no reports found in the database, fallback to local state
         const reportsFromState = projects.filter(p => 
-          p.projectName === projectName
+          p.projectName === projectName && 
+          (!period || p.reportingPeriod === period)
         );
         setProjectReports(reportsFromState);
       } else {
@@ -115,11 +137,27 @@ const ProjectDetail = () => {
       console.error('Error fetching project reports:', error);
       // Fallback to filtering from local state if database fetch fails
       const reportsFromState = projects.filter(p => 
-        p.projectName === projectName
+        p.projectName === projectName && 
+        (!period || p.reportingPeriod === period)
       );
       setProjectReports(reportsFromState);
     }
   };
+
+  // Handle period selection change
+  const handlePeriodChange = (newPeriod: string) => {
+    setLocalPeriod(newPeriod);
+    // We only update the global period when explicitly requested
+    // This allows the project detail page to have its own period selection
+  };
+  
+  // Format periods for the searchable select component
+  const periodOptions = availablePeriods
+    .filter(period => period !== "N/A")
+    .map(period => ({
+      value: period,
+      label: formatPeriod(period)
+    }));
   
   if (!project) {
     return (
@@ -138,10 +176,22 @@ const ProjectDetail = () => {
   
   return (
     <div className="container mx-auto py-10">
-      <div className="mb-6">
+      <div className="mb-6 flex justify-between items-center">
         <Button variant="outline" onClick={() => navigate('/projects')}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
         </Button>
+        
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Reporting Period:</span>
+          <SearchableSelect
+            value={localPeriod || ""}
+            onValueChange={handlePeriodChange}
+            placeholder="Select Period"
+            options={periodOptions}
+            emptyMessage="No periods found"
+            width="w-[200px]"
+          />
+        </div>
       </div>
       
       {/* Compact Header Section - Removed Score Display */}
@@ -197,7 +247,11 @@ const ProjectDetail = () => {
           </CardHeader>
           <CardContent>
             <div className="flex h-[300px] items-center justify-center">
-              <p className="text-muted-foreground">No performance data available for this project.</p>
+              <p className="text-muted-foreground">
+                {localPeriod 
+                  ? `No performance data available for this project in ${formatPeriod(localPeriod)}.`
+                  : "No performance data available for this project."}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -205,12 +259,20 @@ const ProjectDetail = () => {
       
       {/* Monthly Reports Table Section */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Monthly Reports History</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          {localPeriod 
+            ? `Monthly Reports for ${formatPeriod(localPeriod)}` 
+            : "Monthly Reports History"}
+        </h2>
         {projectReports.length > 0 ? (
           <MonthlyReportsTable reports={projectReports} />
         ) : (
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6 text-center">
-            <p className="text-muted-foreground">No monthly reports found for this project.</p>
+            <p className="text-muted-foreground">
+              {localPeriod 
+                ? `No monthly reports found for this project in ${formatPeriod(localPeriod)}.`
+                : "No monthly reports found for this project."}
+            </p>
           </div>
         )}
       </div>

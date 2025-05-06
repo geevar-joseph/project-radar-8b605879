@@ -16,7 +16,7 @@ import { SearchableSelect } from "@/components/SearchableSelect";
 
 const Dashboard = () => {
   const { 
-    getFilteredProjects,
+    getFilteredProjectsSync,
     availablePeriods,
     selectedPeriod, 
     setSelectedPeriod,
@@ -29,7 +29,7 @@ const Dashboard = () => {
     loadAllPeriods();
   }, []);
   
-  const projects = getFilteredProjects(selectedPeriod);
+  const projects = getFilteredProjectsSync(selectedPeriod);
   
   // Format periods for the searchable select component
   const periodOptions = availablePeriods

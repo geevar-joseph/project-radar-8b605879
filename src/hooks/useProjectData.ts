@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
@@ -202,7 +201,20 @@ export const useProjectData = () => {
     });
   };
 
+  /**
+   * Filter projects by reporting period asynchronously
+   * This is the original method that returns all projects if no period is specified
+   */
   const getFilteredProjects = (period?: string) => {
+    if (!period) return projects;
+    return projects.filter(project => project.reportingPeriod === period);
+  };
+
+  /**
+   * Filter projects by reporting period synchronously
+   * This is used for real-time filtering in components
+   */
+  const getFilteredProjectsSync = (period?: string) => {
     if (!period) return projects;
     return projects.filter(project => project.reportingPeriod === period);
   };
@@ -221,6 +233,7 @@ export const useProjectData = () => {
     loadAllPeriods,
     getProject,
     getUniqueReportingPeriods,
-    getFilteredProjects
+    getFilteredProjects,
+    getFilteredProjectsSync
   };
 };

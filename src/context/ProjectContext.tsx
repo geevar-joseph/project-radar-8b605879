@@ -12,6 +12,7 @@ interface ProjectContextType {
   getProject: (id: string) => ProjectReport | undefined;
   getUniqueReportingPeriods: () => string[];
   getFilteredProjects: (period?: string) => ProjectReport[];
+  getFilteredProjectsSync: (period?: string) => ProjectReport[];
   selectedPeriod: string | undefined;
   setSelectedPeriod: (period: string | undefined) => void;
   availablePeriods: string[];
@@ -56,6 +57,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
     getProject,
     getUniqueReportingPeriods,
     getFilteredProjects,
+    getFilteredProjectsSync,
     addProjectName,
     removeProjectName,
     updateProjectDetails,
@@ -79,6 +81,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
       getProject, 
       getUniqueReportingPeriods,
       getFilteredProjects,
+      getFilteredProjectsSync,
       selectedPeriod,
       setSelectedPeriod,
       availablePeriods,

@@ -21,7 +21,8 @@ export const useProjects = () => {
     loadAllPeriods,
     getProject,
     getUniqueReportingPeriods,
-    getFilteredProjects
+    getFilteredProjects,
+    getFilteredProjectsSync
   } = useProjectData();
 
   const {
@@ -52,6 +53,7 @@ export const useProjects = () => {
     getProject,
     getUniqueReportingPeriods,
     getFilteredProjects,
+    getFilteredProjectsSync,
     addProjectName,
     removeProjectName,
     updateProjectDetails,
