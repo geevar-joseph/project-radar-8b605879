@@ -1,3 +1,4 @@
+
 export type RatingValue = 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'N.A.';
 export type RiskLevel = 'Low' | 'Medium' | 'High' | 'Critical' | 'N.A.';
 export type FinancialHealth = 'Healthy' | 'On Watch' | 'At Risk' | 'Critical' | 'N.A.';
@@ -126,7 +127,7 @@ export const ratingToColorMap: Record<RatingValue, string> = {
 export const moraleToColorMap: Record<TeamMorale, string> = {
   'High': 'bg-emerald-500',
   'Moderate': 'bg-blue-400',
-  'Low': 'bg-amber-400',
+  'Low': 'bg-orange-400',
   'Burnt Out': 'bg-red-500',
   'N.A.': 'bg-gray-300'
 };

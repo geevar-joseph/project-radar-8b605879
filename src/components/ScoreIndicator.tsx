@@ -71,6 +71,7 @@ export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) 
       case 'Moderate': // For team morale
       case 'Satisfied':
       case 'On Watch': // For financial health
+      case 'Medium': // For risk level
         return {
           count: 4,
           activeCount: 3,
@@ -79,15 +80,15 @@ export function ScoreIndicator({ value, type, className }: ScoreIndicatorProps) 
       
       // Fair/Medium ratings - 2 dots
       case 'Fair':
-      case 'Medium': // For risk level 
       case 'Partially': // For completion
       case 'Neutral / Unclear': // For satisfaction
       case 'At Risk': // For financial health
+      case 'High': // For risk level
       case 'Low': // For team morale (when it means low morale)
         return {
           count: 4,
           activeCount: 2,
-          color: 'bg-amber-400'
+          color: value === 'Low' ? 'bg-orange-400' : 'bg-amber-400'
         };
         
       // Poor/Critical ratings - 1 dot
