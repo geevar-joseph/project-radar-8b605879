@@ -85,62 +85,76 @@ const calculateOverallScore = (report: ProjectReport): number => {
     }
   }
   
-  // Otherwise calculate from individual scores using a more comprehensive mapping
-  const scoreMap: Record<string, number> = {
-    // Standard rating values
-    "Excellent": 4,
-    "Good": 3,
-    "Fair": 2,
-    "Poor": 1,
-    // Risk levels
+  // Restructured approach using category-specific scoring to avoid duplicate key issues
+  // Create separate mappings for each category
+  const riskScores: Record<string, number> = {
     "Low": 4,
     "Medium": 3,
     "High": 2,
     "Critical": 1,
-    // Financial health
+    "N.A.": 0
+  };
+  
+  const healthScores: Record<string, number> = {
     "Healthy": 4,
     "On Watch": 3,
     "At Risk": 2,
-    // Completion status
+    "Critical": 1,
+    "N.A.": 0
+  };
+  
+  const completionScores: Record<string, number> = {
     "Completely": 4,
     "All completed": 4,
     "Mostly": 3,
     "Partially": 2,
     "Not completed": 1,
-    // Satisfaction levels
+    "N.A.": 0
+  };
+  
+  const satisfactionScores: Record<string, number> = {
     "Very Satisfied": 4,
     "Satisfied": 3,
     "Neutral / Unclear": 2.5,
     "Somewhat Dissatisfied": 2,
     "Dissatisfied": 1,
     "Very Dissatisfied": 0.5,
-    // Team morale
+    "N.A.": 0
+  };
+  
+  const moraleScores: Record<string, number> = {
     "High": 4,
+    "Good": 3.5,
     "Moderate": 3,
     "Low": 2,
     "Burnt Out": 1,
-    // N/A values
-    "N.A.": 0,
-    "N/A": 0,
-    "": 0
+    "N.A.": 0
   };
   
-  // Collect all relevant scores from the report
+  const qualityScores: Record<string, number> = {
+    "Excellent": 4,
+    "Good": 3,
+    "Fair": 2,
+    "Poor": 1,
+    "N.A.": 0
+  };
+  
+  // Collect all relevant scores from the report using category-specific maps
   const scores = [
-    report.riskLevel && scoreMap[report.riskLevel] !== undefined ? scoreMap[report.riskLevel] : null,
-    report.financialHealth && scoreMap[report.financialHealth] !== undefined ? scoreMap[report.financialHealth] : null,
-    report.customerSatisfaction && scoreMap[report.customerSatisfaction] !== undefined ? scoreMap[report.customerSatisfaction] : null,
-    report.teamMorale && scoreMap[report.teamMorale] !== undefined ? scoreMap[report.teamMorale] : null,
-    report.completionOfPlannedWork && scoreMap[report.completionOfPlannedWork] !== undefined ? scoreMap[report.completionOfPlannedWork] : null,
-    report.projectManagerEvaluation && scoreMap[report.projectManagerEvaluation] !== undefined ? scoreMap[report.projectManagerEvaluation] : null,
-    report.frontEndQuality && scoreMap[report.frontEndQuality] !== undefined ? scoreMap[report.frontEndQuality] : null,
-    report.backEndQuality && scoreMap[report.backEndQuality] !== undefined ? scoreMap[report.backEndQuality] : null,
-    report.testingQuality && scoreMap[report.testingQuality] !== undefined ? scoreMap[report.testingQuality] : null,
-    report.designQuality && scoreMap[report.designQuality] !== undefined ? scoreMap[report.designQuality] : null
+    report.riskLevel ? riskScores[report.riskLevel] || 0 : 0,
+    report.financialHealth ? healthScores[report.financialHealth] || 0 : 0,
+    report.customerSatisfaction ? satisfactionScores[report.customerSatisfaction] || 0 : 0,
+    report.teamMorale ? moraleScores[report.teamMorale] || 0 : 0,
+    report.completionOfPlannedWork ? completionScores[report.completionOfPlannedWork] || 0 : 0,
+    report.projectManagerEvaluation ? qualityScores[report.projectManagerEvaluation] || 0 : 0,
+    report.frontEndQuality ? qualityScores[report.frontEndQuality] || 0 : 0,
+    report.backEndQuality ? qualityScores[report.backEndQuality] || 0 : 0,
+    report.testingQuality ? qualityScores[report.testingQuality] || 0 : 0,
+    report.designQuality ? qualityScores[report.designQuality] || 0 : 0
   ];
   
-  // Filter out null values
-  const validScores = scores.filter(score => score !== null) as number[];
+  // Filter out zero values
+  const validScores = scores.filter(score => score > 0);
   
   if (validScores.length === 0) return 0;
   
