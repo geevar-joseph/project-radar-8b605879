@@ -1,68 +1,46 @@
 
 /**
- * Format a period string (YYYY-MM) into a more readable format (Month YYYY)
- * @param period The period string in YYYY-MM format
- * @returns Formatted period string (Month YYYY)
+ * Formats a reporting period string for display (e.g., "2025-03" to "March 2025")
  */
-export const formatPeriod = (period?: string): string => {
-  if (!period) return "All Periods";
+export function formatPeriod(period: string): string {
+  if (!period || period === "N/A") return "N/A";
   
-  // Check if the period is in the expected format (YYYY-MM)
-  if (!/^\d{4}-\d{2}$/.test(period)) {
-    return period; // Return the original string if it's not in YYYY-MM format
-  }
+  // Check if period is in YYYY-MM format
+  const match = period.match(/^(\d{4})-(\d{2})$/);
+  if (!match) return period; // Return original if not in expected format
   
-  try {
-    const [year, month] = period.split('-').map(Number);
-    
-    // Validate the month and year values
-    if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
-      return period; // Return the original string if values are invalid
-    }
-    
-    const date = new Date(year, month - 1);
-    
-    return date.toLocaleString('default', { 
-      month: 'short',
-      year: 'numeric'
-    });
-  } catch (error) {
-    console.error('Error formatting period:', error, period);
-    return period; // Return the original string in case of errors
-  }
-};
+  const [_, year, month] = match;
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  
+  // Convert to numeric month (1-12) and use to get month name
+  const monthIndex = parseInt(month, 10) - 1;
+  if (monthIndex < 0 || monthIndex > 11) return period; // Invalid month
+  
+  return `${monthNames[monthIndex]} ${year}`;
+}
 
 /**
- * Format period for chart display (MMM YY format)
- * @param periodString The period string in YYYY-MM format
- * @returns Formatted period string (MMM YY)
+ * Formats a reporting period for chart display (shorter version)
  */
-export const formatPeriodForChart = (periodString: string): string => {
-  if (!periodString || !/^\d{4}-\d{2}$/.test(periodString)) {
-    return periodString || 'N/A';
-  }
+export function formatPeriodForChart(period: string): string {
+  if (!period || period === "N/A") return "N/A";
   
-  try {
-    const [year, month] = periodString.split('-');
-    const numYear = parseInt(year, 10);
-    const numMonth = parseInt(month, 10) - 1;
-    
-    // Validate year and month
-    if (isNaN(numYear) || isNaN(numMonth) || numMonth < 0 || numMonth > 11) {
-      return periodString;
-    }
-    
-    const date = new Date(numYear, numMonth, 1);
-    if (isNaN(date.getTime())) {
-      return periodString;
-    }
-    
-    return new Intl.DateTimeFormat('en-US', { 
-      month: 'short', 
-      year: '2-digit'
-    }).format(date);
-  } catch (error) {
-    console.error('Error formatting period for chart:', error, periodString);
-    return periodString;
-  }
-};
+  // Check if period is in YYYY-MM format
+  const match = period.match(/^(\d{4})-(\d{2})$/);
+  if (!match) return period; // Return original if not in expected format
+  
+  const [_, year, month] = match;
+  const shortMonthNames = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
+  
+  // Convert to numeric month (1-12) and use to get month name
+  const monthIndex = parseInt(month, 10) - 1;
+  if (monthIndex < 0 || monthIndex > 11) return period; // Invalid month
+  
+  return `${shortMonthNames[monthIndex]} ${year.slice(2)}`;
+}

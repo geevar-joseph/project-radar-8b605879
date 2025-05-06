@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { ProjectCard } from "@/components/ProjectCard";
@@ -21,15 +20,26 @@ const Dashboard = () => {
     selectedPeriod, 
     setSelectedPeriod,
     projectNames,
-    loadAllPeriods
+    loadAllPeriods,
+    loadProjects
   } = useProjectContext();
   
-  // Load all available periods when dashboard mounts
+  // Load all available periods and projects when dashboard mounts
   useEffect(() => {
     loadAllPeriods();
+    loadProjects(); // Reload projects to ensure we have fresh data
+    
+    // Log the selected period after component mounts
+    console.log("Dashboard mounted with selected period:", selectedPeriod);
   }, []);
   
+  // Log when selected period changes
+  useEffect(() => {
+    console.log("Selected period changed to:", selectedPeriod);
+  }, [selectedPeriod]);
+  
   const projects = getFilteredProjectsSync(selectedPeriod);
+  console.log(`Dashboard rendering with ${projects.length} projects for period:`, selectedPeriod);
   
   // Format periods for the searchable select component
   const periodOptions = availablePeriods

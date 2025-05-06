@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectReport } from "@/types/project";
 import { mapToProjectReport } from "./mappers";
@@ -26,6 +27,23 @@ export const fetchProjectReports = async () => {
       throw reportsError;
     }
     
+    console.log('Raw project reports from API:', reportsData);
+    
+    // Log any March 2025 reports in the raw data
+    const marchReports = reportsData?.filter(r => r.reporting_period === "2025-03");
+    if (marchReports && marchReports.length > 0) {
+      console.log(`Found ${marchReports.length} March 2025 reports in the raw data:`, 
+        marchReports.map(r => ({
+          id: r.id, 
+          project_id: r.project_id,
+          reporting_period: r.reporting_period,
+          project_name: r.projects?.project_name
+        }))
+      );
+    } else {
+      console.log('No March 2025 reports found in raw data');
+    }
+    
     // Create a map to store the latest report for each project
     const latestReportsByProject = new Map<string, any>();
       
@@ -47,6 +65,10 @@ export const fetchProjectReports = async () => {
     // Convert map back to array of latest reports only
     const dedupedReports = Array.from(latestReportsByProject.values());
     console.log('Deduplicated reports from API:', dedupedReports.length);
+    
+    // Double-check March 2025 reports after deduplication
+    const dedupedMarchReports = dedupedReports.filter(r => r.reporting_period === "2025-03");
+    console.log(`Found ${dedupedMarchReports.length} March 2025 reports after deduplication`);
     
     return { reportsData: dedupedReports, error: null };
   } catch (error) {

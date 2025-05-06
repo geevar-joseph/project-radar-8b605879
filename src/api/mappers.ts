@@ -21,11 +21,15 @@ export const mapToProjectReport = (dbReport: any): ProjectReport => {
     ? overallScore as RatingValue 
     : "N.A." as RatingValue;
 
+  // Ensure reporting_period is preserved exactly as it is in the database
+  const reportingPeriod = dbReport.reporting_period || "";
+  console.log(`Mapping report with period: ${reportingPeriod}`);
+
   return {
     id: dbReport.id,
     projectName: dbReport.project_name || dbReport.projects?.project_name || "",
     submittedBy: dbReport.submitted_by || "",
-    reportingPeriod: dbReport.reporting_period || "",
+    reportingPeriod: reportingPeriod, // Use the exact reporting period value
     riskLevel: dbReport.risk_level || "N.A.",
     financialHealth: dbReport.financial_health || "N.A.",
     completionOfPlannedWork: dbReport.completion_of_planned_work || "N.A.",

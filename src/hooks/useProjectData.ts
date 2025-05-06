@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { ProjectReport } from "@/types/project";
 import { useToast } from "@/components/ui/use-toast";
@@ -119,7 +120,13 @@ export const useProjectData = () => {
             designQuality: 'N.A.',
             overallProjectScore: 'N.A.',
             submissionDate: project.updated_at,
-            project_id: project.id  // Include the project ID for relationship
+            project_id: project.id,  // Include the project ID for relationship
+            // Add missing fields
+            notes: '',
+            keyAchievements: '',
+            primaryChallenges: '',
+            nextSteps: '',
+            followUpActions: ''
           });
         }
       });
@@ -210,6 +217,25 @@ export const useProjectData = () => {
     
     const filtered = projects.filter(project => project.reportingPeriod === period);
     console.log(`Filtering for period ${period}: Found ${filtered.length} projects`);
+    
+    // Add detailed logging to understand what's in the data
+    if (period === "2025-03") {
+      console.log("All reporting periods in projects:", projects.map(p => p.reportingPeriod));
+      console.log("Exact match check:", 
+        projects.filter(p => p.reportingPeriod === "2025-03").length,
+        "projects with exact '2025-03' match"
+      );
+      
+      // Check for any close matches or formatting issues
+      const possibleMatches = projects.filter(p => 
+        p.reportingPeriod?.includes("2025") && 
+        p.reportingPeriod?.includes("03") || 
+        p.reportingPeriod?.includes("3")
+      );
+      console.log("Possible March 2025 matches:", possibleMatches.length);
+      console.log("Sample of possible matches:", possibleMatches.slice(0, 3));
+    }
+    
     return filtered;
   };
 
@@ -220,7 +246,18 @@ export const useProjectData = () => {
   const getFilteredProjectsSync = (period?: string) => {
     if (!period) return projects;
     
-    const filtered = projects.filter(project => project.reportingPeriod === period);
+    // Enhanced logging for debugging the March 2025 issue
+    console.log(`Filtering synchronously for period ${period}`);
+    console.log(`Total projects before filtering: ${projects.length}`);
+    
+    const filtered = projects.filter(project => {
+      const isMatch = project.reportingPeriod === period;
+      if (period === "2025-03" && project.reportingPeriod?.includes("2025")) {
+        console.log(`Project ${project.projectName} has period '${project.reportingPeriod}', match: ${isMatch}`);
+      }
+      return isMatch;
+    });
+    
     console.log(`Filtering sync for period ${period}: Found ${filtered.length} projects`);
     return filtered;
   };
