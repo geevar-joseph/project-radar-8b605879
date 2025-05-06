@@ -42,6 +42,8 @@ export const mapToProjectReport = (dbReport: any): ProjectReport => {
     keyAchievements: dbReport.key_achievements || "",
     primaryChallenges: dbReport.primary_challenges || "",
     nextSteps: dbReport.next_steps || "",
-    followUpActions: dbReport.follow_up_actions || ""
+    followUpActions: dbReport.follow_up_actions || "",
+    // Important: Add the project_id field to maintain relationship
+    project_id: dbReport.project_id || undefined
   };
 };

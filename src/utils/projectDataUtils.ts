@@ -13,6 +13,7 @@ export type ProjectData = {
   jiraId?: string;
   overallScore?: string;
   submissionDate?: string; // Added submission date for better deduplication
+  project_id?: string;     // Add project_id to maintain relationship
 };
 
 /**
@@ -152,6 +153,16 @@ export function normalizeProjectData(projectName: string, latestProjectsData: Ma
   } else if (latestProjectData.projects?.updated_at) {
     submissionDate = latestProjectData.projects.updated_at;
   }
+
+  // Get project_id to maintain relationship
+  let projectId;
+  if ('project_id' in latestProjectData) {
+    projectId = latestProjectData.project_id;
+  } else if ('id' in latestProjectData) {
+    projectId = latestProjectData.id;
+  } else if (latestProjectData.projects?.id) {
+    projectId = latestProjectData.projects.id;
+  }
   
   // Safely access properties using optional chaining
   return {
@@ -172,6 +183,7 @@ export function normalizeProjectData(projectName: string, latestProjectsData: Ma
     overallScore: 'overallProjectScore' in latestProjectData ? latestProjectData.overallProjectScore : 
                   'overall_project_score' in latestProjectData ? latestProjectData.overall_project_score : 
                   latestProjectData.projects?.overall_project_score || undefined,
-    submissionDate: submissionDate
+    submissionDate: submissionDate,
+    project_id: projectId
   };
 }
