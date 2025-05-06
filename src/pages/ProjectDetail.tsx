@@ -9,7 +9,7 @@ import { ArrowLeft, Tag } from "lucide-react";
 import { ProjectKPIChart } from "@/components/ProjectKPIChart";
 import { MonthlyReportsTable } from "@/components/MonthlyReportsTable";
 import { useEffect, useState } from "react";
-import { ProjectReport, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale, CustomerSatisfaction, ProjectType, ProjectStatus } from "@/types/project";
+import { ProjectReport, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale, CustomerSatisfaction, ProjectType, ProjectStatus, RatingValue } from "@/types/project";
 import { supabase } from "@/integrations/supabase/client";
 
 const ProjectDetail = () => {
@@ -85,11 +85,11 @@ const ProjectDetail = () => {
         completionOfPlannedWork: (report.completion_of_planned_work as CompletionStatus) || 'N.A.',
         teamMorale: (report.team_morale as TeamMorale) || 'N.A.',
         customerSatisfaction: (report.customer_satisfaction as CustomerSatisfaction) || 'N.A.',
-        projectManagerEvaluation: report.project_manager_evaluation,
-        frontEndQuality: report.front_end_quality,
-        backEndQuality: report.back_end_quality,
-        testingQuality: report.testing_quality,
-        designQuality: report.design_quality,
+        projectManagerEvaluation: (report.project_manager_evaluation as RatingValue) || 'N.A.',
+        frontEndQuality: (report.front_end_quality as RatingValue) || 'N.A.',
+        backEndQuality: (report.back_end_quality as RatingValue) || 'N.A.',
+        testingQuality: (report.testing_quality as RatingValue) || 'N.A.',
+        designQuality: (report.design_quality as RatingValue) || 'N.A.',
         overallProjectScore: report.overall_project_score,
         submissionDate: report.submission_date,
         keyAchievements: report.key_achievements || '',
