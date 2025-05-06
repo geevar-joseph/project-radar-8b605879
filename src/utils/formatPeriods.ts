@@ -31,3 +31,38 @@ export const formatPeriod = (period?: string): string => {
     return period; // Return the original string in case of errors
   }
 };
+
+/**
+ * Format period for chart display (MMM YY format)
+ * @param periodString The period string in YYYY-MM format
+ * @returns Formatted period string (MMM YY)
+ */
+export const formatPeriodForChart = (periodString: string): string => {
+  if (!periodString || !/^\d{4}-\d{2}$/.test(periodString)) {
+    return periodString || 'N/A';
+  }
+  
+  try {
+    const [year, month] = periodString.split('-');
+    const numYear = parseInt(year, 10);
+    const numMonth = parseInt(month, 10) - 1;
+    
+    // Validate year and month
+    if (isNaN(numYear) || isNaN(numMonth) || numMonth < 0 || numMonth > 11) {
+      return periodString;
+    }
+    
+    const date = new Date(numYear, numMonth, 1);
+    if (isNaN(date.getTime())) {
+      return periodString;
+    }
+    
+    return new Intl.DateTimeFormat('en-US', { 
+      month: 'short', 
+      year: '2-digit'
+    }).format(date);
+  } catch (error) {
+    console.error('Error formatting period for chart:', error, periodString);
+    return periodString;
+  }
+};

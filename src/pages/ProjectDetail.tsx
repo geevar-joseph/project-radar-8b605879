@@ -11,6 +11,7 @@ import { MonthlyReportsTable } from "@/components/MonthlyReportsTable";
 import { useEffect, useState } from "react";
 import { ProjectReport, RiskLevel, FinancialHealth, CompletionStatus, TeamMorale, CustomerSatisfaction, ProjectType, ProjectStatus, RatingValue } from "@/types/project";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPeriod } from "@/utils/formatPeriods";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -180,19 +181,38 @@ const ProjectDetail = () => {
       </div>
       
       {/* KPI Chart Section */}
-      <Card className="mb-8">
-        <CardHeader className="pb-2">
-          <CardTitle>Project KPI Performance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProjectKPIChart project={project} />
-        </CardContent>
-      </Card>
+      {projectReports.length > 0 ? (
+        <Card className="mb-8">
+          <CardHeader className="pb-2">
+            <CardTitle>Project KPI Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProjectKPIChart project={projectReports[0]} />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="mb-8">
+          <CardHeader className="pb-2">
+            <CardTitle>Project KPI Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex h-[300px] items-center justify-center">
+              <p className="text-muted-foreground">No performance data available for this project.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       {/* Monthly Reports Table Section */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-4">Monthly Reports History</h2>
-        <MonthlyReportsTable reports={projectReports} />
+        {projectReports.length > 0 ? (
+          <MonthlyReportsTable reports={projectReports} />
+        ) : (
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6 text-center">
+            <p className="text-muted-foreground">No monthly reports found for this project.</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -204,13 +224,16 @@ const formatDate = (dateString: string) => {
   
   try {
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return "N/A";
+    }
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
   } catch (error) {
-    return "Invalid Date";
+    return "N/A";
   }
 };
 
