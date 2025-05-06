@@ -41,6 +41,8 @@ const ProjectDetail = () => {
   
   const fetchAllProjectReports = async (projectName: string) => {
     try {
+      console.log('Fetching all project reports for:', projectName);
+      
       // First find the project in the database by name
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
@@ -183,7 +185,7 @@ const ProjectDetail = () => {
         </div>
       </div>
       
-      {/* KPI Chart Section - Pass localPeriod to the component */}
+      {/* KPI Chart Section - Pass localPeriod and projectReports to the component */}
       {projectReports.length > 0 ? (
         <Card className="mb-8">
           <CardHeader className="pb-2">
@@ -195,6 +197,7 @@ const ProjectDetail = () => {
               initialPeriod={localPeriod}
               setParentPeriod={setLocalPeriod}
               availablePeriods={availablePeriods}
+              projectReports={projectReports} // Pass all project reports
             />
           </CardContent>
         </Card>

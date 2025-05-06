@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart, 
@@ -45,6 +44,7 @@ interface ProjectKPIChartProps {
   initialPeriod?: string;
   setParentPeriod?: (period: string) => void;
   availablePeriods?: string[];
+  projectReports?: ProjectReport[]; // New prop to receive project-specific reports
 }
 
 // Helper function to convert rating to numeric value
@@ -58,7 +58,8 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
   project, 
   initialPeriod,
   setParentPeriod,
-  availablePeriods: propAvailablePeriods
+  availablePeriods: propAvailablePeriods,
+  projectReports = [] // Default to empty array if not provided
 }) => {
   const { projects, availablePeriods: contextAvailablePeriods } = useProjectContext();
   const [selectedPeriod, setSelectedPeriod] = useState<string>(initialPeriod || project.reportingPeriod);
@@ -66,14 +67,16 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
   
   const availablePeriods = propAvailablePeriods || contextAvailablePeriods;
   
-  // Get all reports for the current project
-  const projectReports = projects.filter(p => p.projectName === project.projectName);
+  // Use project-specific reports passed as prop if available, otherwise fall back to context filtering
+  const projectSpecificReports = projectReports.length > 0 
+    ? projectReports 
+    : projects.filter(p => p.projectName === project.projectName);
   
-  // Get unique reporting periods for this project
-  const reportingPeriods = [...new Set(projectReports.map(p => p.reportingPeriod))];
+  // Get unique reporting periods for this project from the project-specific reports
+  const reportingPeriods = [...new Set(projectSpecificReports.map(p => p.reportingPeriod))];
   
-  // Get the selected report
-  const selectedReport = projectReports.find(p => p.reportingPeriod === selectedPeriod) || project;
+  // Get the selected report using the passed project reports
+  const selectedReport = projectSpecificReports.find(p => p.reportingPeriod === selectedPeriod) || project;
   
   // Update local period when prop changes
   useEffect(() => {
@@ -82,11 +85,20 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({
     }
   }, [initialPeriod]);
 
-  // Handle period selection change
+  // Handle period selection change with additional console logging
   const handlePeriodChange = (newPeriod: string) => {
+    console.log('Period changed in KPI chart:', newPeriod);
+    console.log('Available project reports:', projectSpecificReports);
+    
     setSelectedPeriod(newPeriod);
+    
+    // Find the report for the selected period
+    const newSelectedReport = projectSpecificReports.find(p => p.reportingPeriod === newPeriod);
+    console.log('New selected report:', newSelectedReport);
+    
     // Update parent component's period if callback provided
     if (setParentPeriod) {
+      console.log('Updating parent period');
       setParentPeriod(newPeriod);
     }
   };
