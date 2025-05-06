@@ -13,6 +13,7 @@ import { ProjectReport, ratingToValueMap, RatingValue } from '@/types/project';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useProjectContext } from '@/context/ProjectContext';
 import { Star, Smile, Users, Building } from 'lucide-react';
+import { formatPeriodForChart } from '@/utils/formatPeriods';
 
 interface ProjectKPITrendChartProps {
   projectName: string;
@@ -244,12 +245,8 @@ export const ProjectKPITrendChart: React.FC<ProjectKPITrendChartProps> = ({ proj
   const unchangedKPIs = kpiChanges
     .filter(kpi => kpi.status === 'no-change');
 
-  // Format reporting period for better display
-  const formatPeriod = (periodString: string) => {
-    const [year, month] = periodString.split('-');
-    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-    return new Intl.DateTimeFormat('en-US', { month: 'short', year: '2-digit' }).format(date);
-  };
+  // Use the utility function instead of inline formatting
+  const formatPeriod = formatPeriodForChart;
 
   // Prepare data for the line chart
   const trendData = projectReports.map(report => ({

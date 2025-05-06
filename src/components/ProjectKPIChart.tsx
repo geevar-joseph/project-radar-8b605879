@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   BarChart, 
@@ -36,6 +35,7 @@ import { ChartBar, ChartLine, Radar as RadarIcon, Info } from "lucide-react";
 import { ProjectKPITrendChart } from './ProjectKPITrendChart';
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { formatPeriodForChart } from '@/utils/formatPeriods';
 
 interface ProjectKPIChartProps {
   project: ProjectReport;
@@ -62,14 +62,33 @@ export const ProjectKPIChart: React.FC<ProjectKPIChartProps> = ({ project }) => 
   // Get the selected report
   const selectedReport = projectReports.find(p => p.reportingPeriod === selectedPeriod) || project;
   
-  // Format the period for display
+  // Use the utility function from formatPeriods.ts
   const formatPeriod = (periodString: string) => {
-    const [year, month] = periodString.split('-');
-    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-    }).format(date);
+    if (!periodString || periodString === 'N/A') {
+      return 'N/A';
+    }
+    
+    // Check if the period is in the expected format (YYYY-MM)
+    if (!/^\d{4}-\d{2}$/.test(periodString)) {
+      return periodString;
+    }
+    
+    try {
+      const [year, month] = periodString.split('-');
+      const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+      
+      if (isNaN(date.getTime())) {
+        return periodString;
+      }
+      
+      return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+      }).format(date);
+    } catch (error) {
+      console.error('Error formatting period:', error, periodString);
+      return periodString;
+    }
   };
   
   const chartConfig = {
